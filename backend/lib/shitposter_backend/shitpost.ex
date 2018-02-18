@@ -6,6 +6,8 @@ defmodule ShitposterBackend.Shitpost do
   alias ExAws.S3
   require Logger
 
+  import IEx
+
   schema "shitposts" do
     field :url, :string
     field :permalink, :string
@@ -89,40 +91,19 @@ defmodule ShitposterBackend.Shitpost do
   end
 
   defp host_permalink(%Shitpost{url: url} = shitpost) do
-    case HTTPoison.get(url) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        name = "#{Base.encode16(:crypto.hash(:md5, url))}"
-        path = "/tmp/#{name}"
-        File.write!(path, body)
-        %{^path => fileInfo} = FileInfo.get_info(path)
-
-        # IEx.pry
-        %{status_code: 200} = S3.put_object(
-          "shitposter-content",
-          "content/#{name}",
-          body,
-          content_type: "#{fileInfo.type}/#{fileInfo.subtype}"
-        )
-        |> ExAws.request!
-
-        set_permalink(
-          shitpost,
-          "https://s3.eu-central-1.amazonaws.com/shitposter-content/content/#{name}"
-        )
-      {:ok, %HTTPoison.Response{status_code: status_code}} ->
-        {:error, [url: "server responded with #{status_code}"]}
-      {:error, %HTTPoison.Error{reason: reason}} ->
-        {:error, :we_have_no_idea_what_went_wrong}
-    end
+    {:ok, updatedShitpost} = {:host_permalink, [shitpost]}
+    |> Honeydew.async(:uploader, reply: true)
+    |> Honeydew.yield
+    updatedShitpost
   end
 
-  defp set_permalink(%Shitpost{permalink: p} = shitpost, permalink) when is_nil(p) do
+  def set_permalink(%Shitpost{permalink: p} = shitpost, permalink) when is_nil(p) do
     shitpost
     |> changeset(%{permalink: permalink})
     |> Repo.update
   end
 
-  defp set_permalink(%Shitpost{id: id} = permalinked_shitpost, _) do
+  def set_permalink(%Shitpost{id: id} = permalinked_shitpost, _) do
     Logger.warn {"why are we permalinking multiple times?", [id: id]}
     {:ok, permalinked_shitpost}
   end
