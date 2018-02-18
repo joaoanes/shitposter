@@ -1,0 +1,108 @@
+import React, {Component} from 'react'
+import {compose, branch, renderComponent} from 'recompose'
+import { graphql } from 'react-apollo'
+import gql from 'graphql-tag'
+import { CircularProgress } from 'material-ui/Progress';
+import { paginated } from '../apollo/client';
+import ShitpostCard from '../components/ShitpostCard'
+import NewShitpostCard from '../components/NewShitpostCard'
+import InfiniteScroll from 'react-infinite-scroll-component'
+
+class ShitpostList extends Component {
+  addQuery = (url, name) => {
+    this.props.addQuery(url, name)
+  }
+  render() {
+    const {
+      data: {shitposts: { pageInfo: { hasNextPage, nextPage } }, loading },
+    } = this.props
+    console.log(this.props)
+    const shitposts = this.props.data.shitposts.edges.map( e => e.node)
+
+    return (
+      <InfiniteScroll scrollThreshold={0.5} throttle={32} next={nextPage} hasMore={hasNextPage} endMessage={
+        <p style={{textAlign: 'center', display: 'flex', flexDirection: 'column', marginBottom: 40, marginTop: 40}}>
+          <b>Yay! You have seen it all! 💖</b>
+          <b>Now go submit some more shit(post)!</b>
+        </p>
+      }>
+        <div style={styles.container}>
+          <NewShitpostCard newPost={this.addQuery} />
+          {
+            shitposts.map((shitpost) => (
+              <ShitpostCard key={shitpost.id} shitpost={shitpost} />
+            ))
+          }
+          {
+            loading && <div style={{margin: 40}}><CircularProgress /></div>
+          }
+
+        </div>
+      </InfiniteScroll>
+    )
+  }
+}
+
+const styles = {
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: "center"
+  }
+}
+
+export default compose(
+  graphql(gql`
+  query getAfterShitposts($after: String) {
+    shitposts(first: 20, after: $after)
+    {
+      pageInfo{
+        startCursor
+        endCursor
+        hasNextPage
+        hasPreviousPage
+      }
+      edges {
+        cursor
+        node {
+          id
+          permalink
+          url
+          type
+          name
+          rating
+          source {
+            name
+          }
+        }
+      }
+    }
+  }
+  `, {
+    props: paginated('shitposts'),
+    options: {
+      fetchPolicy: 'cache-and-network'
+    }
+  }),
+
+  graphql(gql`
+  mutation addPost($url: String!, $name: String) {
+    addShitpost(url: $url, name: $name) {
+      id
+      url
+      type
+      name
+    }
+  }
+  `, {
+    name: "addQuery",
+    options: {
+      refetchQueries: ['getAfterShitposts'],
+    }
+  }),
+  branch(
+    ({data: {networkStatus}}) => networkStatus < 3, // ? console.log(`starting at ${(new Date()).getTime()}`) || true : console.log(`ending at ${(new Date()).getTime()}`) && false,
+    renderComponent(() => <div style={{margin: 40, display: 'flex', justifyContent: 'center'}}><CircularProgress /></div>)
+  ),
+
+)(ShitpostList)

@@ -1,0 +1,22 @@
+defmodule ShitposterBackend.Guardian do
+  use Guardian, otp_app: :my_app
+
+  alias ShitposterBackend.Repo
+  alias ShitposterBackend.User
+
+  def subject_for_token(%User{id: id}, _claims) do
+    {:ok, to_string(id)}
+  end
+
+  def subject_for_token(_, _) do
+    {:error, :unknown_resource}
+  end
+
+  def resource_from_claims(claims) do
+    {:ok, Repo.get(User, claims["sub"])}
+  end
+
+  def resource_from_claims(_claims) do
+    {:error, :unknown_resource}
+  end
+end
