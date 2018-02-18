@@ -1,6 +1,7 @@
 frontend/node_modules
 backend/lib/shitposter_backend/workers/scraper/node_modules/
 
+backend/priv/static/**
 
 backend/_build/
 /cover
