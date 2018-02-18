@@ -20,6 +20,7 @@
         "react"
     ],
     "rules": {
+        "no-console": "warn",
         "react/jsx-uses-vars": [
             "error"
         ],
