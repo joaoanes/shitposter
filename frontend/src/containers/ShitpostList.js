@@ -2,13 +2,26 @@ import React, {Component} from 'react'
 import {compose, branch, renderComponent} from 'recompose'
 import { graphql } from 'react-apollo'
 import gql from 'graphql-tag'
-import { CircularProgress } from 'material-ui/Progress';
-import { paginated } from '../apollo/client';
+import { CircularProgress } from 'material-ui/Progress'
+import { paginated } from '../apollo/client'
 import ShitpostCard from '../components/ShitpostCard'
 import NewShitpostCard from '../components/NewShitpostCard'
 import InfiniteScroll from 'react-infinite-scroll-component'
 
 class ShitpostList extends Component {
+  props: {
+    addQuery: (url : String, name : String) => void,
+    data: {
+      loading: boolean,
+      shitposts: {
+        edges: Object[],
+        pageInfo: {
+          hasNextPage: boolean,
+          nextPage: () => void,
+        }
+      }
+    }
+  }
   addQuery = (url, name) => {
     this.props.addQuery(url, name)
   }
@@ -16,7 +29,7 @@ class ShitpostList extends Component {
     const {
       data: {shitposts: { pageInfo: { hasNextPage, nextPage } }, loading },
     } = this.props
-    console.log(this.props)
+
     const shitposts = this.props.data.shitposts.edges.map( e => e.node)
 
     return (
@@ -47,7 +60,7 @@ const styles = {
   container: {
     display: 'flex',
     flexDirection: 'column',
-    alignItems: "center"
+    alignItems: 'center'
   }
 }
 
@@ -95,7 +108,7 @@ export default compose(
     }
   }
   `, {
-    name: "addQuery",
+    name: 'addQuery',
     options: {
       refetchQueries: ['getAfterShitposts'],
     }

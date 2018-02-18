@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import { BrowserRouter, Route } from 'react-router-dom'
-import { ApolloProvider } from 'react-apollo';
+import { ApolloProvider } from 'react-apollo'
 
 import ShitpostList from './ShitpostList'
 import ShitpostGQL from './ShitpostGQL'
@@ -11,9 +11,9 @@ export default class Root extends Component {
     return (
       <ApolloProvider client={apolloClient}>
         <BrowserRouter>
-        <div>
-          <Route exact path="/" component={ShitpostList} />
-          <Route path="/:id" component={ShitpostGQL} />
+          <div>
+            <Route exact path="/" component={ShitpostList} />
+            <Route path="/:id" component={ShitpostGQL} />
           </div>
         </BrowserRouter>
       </ApolloProvider>

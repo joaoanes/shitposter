@@ -4,13 +4,13 @@ import Giphy from '../components/Giphy'
 export default class Root extends Component {
   render () {
     return (
-        <div style={styles.header}>
-          <Giphy />
-          <div style={styles.titleContainer}>
-            <span style={styles.title}>SHITPOSTER</span>
-            <span style={styles.subTitle}>v0.1</span>
-          </div>
+      <div style={styles.header}>
+        <Giphy />
+        <div style={styles.titleContainer}>
+          <span style={styles.title}>SHITPOSTER</span>
+          <span style={styles.subTitle}>v0.1</span>
         </div>
+      </div>
     )
   }
 }
@@ -20,7 +20,7 @@ const styles = {
     paddingTop: 15,
     zIndex: 100,
     height: 90,
-    width: "100%",
+    width: '100%',
     position: 'relative'
   },
   titleContainer: {
@@ -29,7 +29,7 @@ const styles = {
     top: 0,
     bottom: 0,
     position: 'absolute',
-    display: "flex",
+    display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
@@ -56,7 +56,7 @@ const styles = {
   subTitle: {
     color: 'white', //aha
     fontSize: 20,
-    textShadow: "1px 1px black",
+    textShadow: '1px 1px black',
     position: 'absolute',
     bottom: 0,
   }

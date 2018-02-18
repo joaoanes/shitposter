@@ -2,13 +2,15 @@ import React, {Component} from 'react'
 import {compose, branch, renderComponent} from 'recompose'
 import { graphql } from 'react-apollo'
 import gql from 'graphql-tag'
-import { CircularProgress } from 'material-ui/Progress';
-import { paginated } from '../apollo/client';
+import { CircularProgress } from 'material-ui/Progress'
 import ShitpostCard from '../components/ShitpostCard'
-import NewShitpostCard from '../components/NewShitpostCard'
-import InfiniteScroll from 'react-infinite-scroll-component'
 
 class ShitpostGQL extends Component {
+  props: {
+    data: {
+      shitpost: Object
+    }
+  }
 
   render() {
     const {
@@ -27,7 +29,7 @@ const styles = {
   container: {
     display: 'flex',
     flexDirection: 'column',
-    alignItems: "center"
+    alignItems: 'center'
   }
 }
 

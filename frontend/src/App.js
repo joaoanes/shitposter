@@ -1,6 +1,5 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from 'react'
+import './App.css'
 import Root from './containers/Root'
 import Header from './containers/Header'
 import { StickyContainer, Sticky } from 'react-sticky'
@@ -11,21 +10,20 @@ class App extends Component {
       <div className="App">
         <StickyContainer>
           <Sticky>
-            {
-              ({
-                style,
-              }) =>
+            {({
+              style,
+            }) =>
               <div style={{...style, zIndex: 100}} >
                 <Header />
-                </div>
+              </div>
             }
           </Sticky>
 
           <Root />
         </StickyContainer>
       </div>
-    );
+    )
   }
 }
 
-export default App;
+export default App
