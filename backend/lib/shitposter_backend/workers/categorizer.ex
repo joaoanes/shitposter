@@ -41,6 +41,20 @@ defmodule ShitposterBackend.Workers.Categorizer do
 
   end
 
+  def is_video(url) do
+    matches = ~r/\.([0-9a-z]+)(?:[\?#]|$)/
+    |> Regex.run(url) || []
+
+    case List.last(matches) do
+      "gif" -> {:ok, "video"}
+      "webm" -> {:ok, "video"}
+      "mp4" -> {:ok, "video"}
+      "avi" -> {:ok, "video"}
+      "mov" -> {:ok, "video"}
+      _ -> nil
+    end
+  end
+
 
   def is_tweet(url) do
     case Regex.match?(~r/https*:\/\/[mobile.]*twitter.com\/.+\/status\/.+/, url) do
