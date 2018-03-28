@@ -6,7 +6,7 @@ import fp from 'lodash/fp'
 import { memoize } from 'lodash'
 
 export default new ApolloClient({
-  link: new HttpLink({ uri: 'https://shitpost.network/api/graphiql' }),
+  link: new HttpLink({ uri: 'http://localhost:4000/api/graphiql' }),
   cache: new InMemoryCache()
 })
 

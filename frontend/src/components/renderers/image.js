@@ -11,13 +11,13 @@ export default class ImageRenderer extends React.Component {
     render() {
       const {url} = this.props.shitpost
       const {fullscreen} = this.props
-      return <div style={{backgroundImage: `url(${url})`, ...styles.image, ...(fullscreen ? styles.imageFullscreen : styles.imageNormal)}} />
+      return <img src={url} style={{...styles.image, ...(fullscreen ? styles.imageFullscreen : styles.imageNormal)}} />
     }
 }
 
 const styles = {
   image: {
-    width: '100%', height: '-webkit-fill-available',
+    width: '100%', height: 'auto',
   },
   imageFullscreen: {
     backgroundRepeat: 'no-repeat',

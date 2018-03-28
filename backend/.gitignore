@@ -1,0 +1,12 @@
+
+backend/_build/
+/cover
+/deps
+/doc
+/.fetch
+erl_crash.dump
+*.ez
+*.beam
+
+frontend/node_modules
+backend/lib/shitposter_backend/workers/scraper/node_modules/

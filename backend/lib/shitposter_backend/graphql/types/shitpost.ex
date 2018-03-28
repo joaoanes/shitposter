@@ -6,6 +6,7 @@ defmodule ShitposterBackend.GraphQL.Types.Shitpost do
   @desc "Possible shitpost types"
   enum :shitpost_type do
     value :image, description: "Static image file (.png, .jpg, .tiff)", as: "image"
+    value :animated_image, description: "Dynamic image file. (.gif (hard g), .apng)"
     value :mute_video, description: "Mute video file (.gif, .webm, .mp4)", as: "mute_video"
     value :video, description: "Video file with sound (.webm, .mp4)", as: "video"
     value :youtube, description: "Youtube link", as: "youtube"

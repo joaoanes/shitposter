@@ -40,7 +40,7 @@ class ShitpostList extends Component {
         </p>
       }>
         <div style={styles.container}>
-          <NewShitpostCard newPost={this.addQuery} />
+          <NewShitpostCard />
           {
             shitposts.map((shitpost) => (
               <ShitpostCard key={shitpost.id} shitpost={shitpost} />
@@ -95,22 +95,6 @@ export default compose(
     props: paginated('shitposts'),
     options: {
       fetchPolicy: 'cache-and-network'
-    }
-  }),
-
-  graphql(gql`
-  mutation addPost($url: String!, $name: String) {
-    addShitpost(url: $url, name: $name) {
-      id
-      url
-      type
-      name
-    }
-  }
-  `, {
-    name: 'addQuery',
-    options: {
-      refetchQueries: ['getAfterShitposts'],
     }
   }),
   branch(

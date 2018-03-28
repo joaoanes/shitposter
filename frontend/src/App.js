@@ -3,6 +3,7 @@ import './App.css'
 import Root from './containers/Root'
 import Header from './containers/Header'
 import { StickyContainer, Sticky } from 'react-sticky'
+import { ToastContainer } from 'react-toastify'
 
 class App extends Component {
   render() {
@@ -21,6 +22,7 @@ class App extends Component {
 
           <Root />
         </StickyContainer>
+        <ToastContainer autoClose={false} />
       </div>
     )
   }

@@ -4,12 +4,13 @@ defmodule ShitposterBackend.Workers.Categorizer do
     You'll need to add the erlang riak driver to your mix.exs:
     `{:riakc, ">= 2.4.1}`
   """
+  require Logger
 
   defmodule Scraper do
 
     def takeScreenshot(url) do
       {_res, 0} = System.cmd("node", ["./lib/shitposter_backend/workers/scraper/webScraper.js", url])
-      IO.puts "Woop, url added"
+      Logger.log(:info, "Added screenshot for url #{url}")
     end
   end
 
@@ -46,7 +47,6 @@ defmodule ShitposterBackend.Workers.Categorizer do
     |> Regex.run(url) || []
 
     case List.last(matches) do
-      "gif" -> {:ok, "video"}
       "webm" -> {:ok, "video"}
       "mp4" -> {:ok, "video"}
       "avi" -> {:ok, "video"}
@@ -68,6 +68,7 @@ defmodule ShitposterBackend.Workers.Categorizer do
     |> Regex.run(url) || []
 
     case List.last(matches) do
+      "gif" -> {:ok, "animated_image"}
       "png" -> {:ok, "image"}
       "jpg" -> {:ok, "image"}
       "jpeg" -> {:ok, "image"}

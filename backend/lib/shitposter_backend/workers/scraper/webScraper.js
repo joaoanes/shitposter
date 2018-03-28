@@ -11,23 +11,31 @@ AWS.config.update({ accessKeyId: 'AKIAJNL2HLP2JBN456ZQ', secretAccessKey: '8t6vJ
 
 
 (async () => {
-  const browser = await puppeteer.launch()
-  const page = await browser.newPage()
-  const url = process.argv[2]
-  await page.goto(url)
-  const image = await page.screenshot({path: md5(url) + '.png', fullPage: true})
-  console.log(image)
-  var s3 = new AWS.S3({params: {Bucket: 'shitposter-content'}});
-  const what = s3.putObject({
-    Key: 'previews/' + md5(url) + '.png',
-    Body: image
-  }, (err, data) => {
-    if (err) {
-      console.log(err)
-    } else {
-      console.log("hey, worked")
-    }
-  })
+  try {
+    const browser = await puppeteer.launch()
+    const page = await browser.newPage()
+    const url = process.argv[2]
+    await page.goto(url)
+    const image = await page.screenshot({path: md5(url) + '.png', fullPage: true})
 
-  await browser.close()
+    var s3 = new AWS.S3({params: {Bucket: 'shitposter-content'}});
+    const uploadName = md5(url) + '.png'
+    s3.putObject({
+      Key: 'previews/' + uploadName,
+      Body: image,
+      ContentType: "image/png"
+    }, (err, data) => {
+      if (err) {
+        console.log(err)
+      } else {
+        console.log(`uploaded https://s3.eu-central-1.amazonaws.com/shitposter-content/previews/${uploadName}`)
+      }
+    })
+
+    await browser.close()
+  }
+  catch (err) {
+    console.error("error!", err)
+    process.exit(-1)
+  }
 })()

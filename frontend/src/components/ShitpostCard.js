@@ -16,6 +16,7 @@ import AnimateHeight from 'react-animate-height'
 const styles = theme => ({
   card: {
     minWidth: 600,
+
     overflow: 'visible',
     marginTop: 20,
     transition: 'height 0.5s ease',
@@ -29,7 +30,7 @@ const styles = theme => ({
     fontSize: '20px',
   },
   media: {
-    height: 300,
+    maxHeight: 300,
   },
   actions: {
     display: 'flex',
@@ -87,9 +88,10 @@ class ShitpostCard extends React.Component {
       <AnimateHeight
         duration={500}
         height="auto"
+        style={fullscreen ? {} : {maxWidth: '80%'}}
       >
         <div id={shitpost.id} style={fullscreen ? {zIndex: 1000, position: 'relative'} : {}}>
-          <Card key={shitpost.id} className={classes.card}>
+          <Card raised={fullscreen} key={shitpost.id} className={classes.card}>
             <div style={{position: 'relative'}}>
               <div style={{position: 'absolute', left: 0, top: 20}}>
                 {
@@ -99,7 +101,7 @@ class ShitpostCard extends React.Component {
               </Paper>
                 }
               </div>
-              <div style={fullscreen ? {width: '100vw', height: 'auto', minHeight: 500, maxWidth: 1200} : {height: 300, overflow: 'hidden'}} >
+              <div style={fullscreen ? {width: '100%', height: 'auto', maxWidth: 1200} : {height: 300, overflow: 'hidden'}} >
                 <TypeRenderer fullscreen={fullscreen} shitpost={shitpost} />
               </div>
               <Divider style={{height: 2, backgroundColor: colorTypes[this.props.shitpost.type]}}/>
