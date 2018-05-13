@@ -32,14 +32,11 @@ config :ex_aws,
   debug_requests: true
 
 
-config :guardian, Guardian,
-  allowed_algos: ["HS512"],
-  verify_module: Guardian.JWT,
+config :shitposter_backend, ShitposterBackend.Guardian,
   issuer: "ShitposterBackend",
   ttl: { 360, :days },
   verify_issuer: true,
-  secret_key: "Q/rwhg80j43qw8hf8i0wehi0thqwipahgtuesiphg90wrgt",
-  serializer: ShitposterBackend.GuardianSerializer
+  secret_key: "Q/rwhg80j43qw8hf8i0wehi0thqwipahgtuesiphg90wrgt"
 
 config :hound, driver: "chrome_driver", browser: "chrome_headless"
 

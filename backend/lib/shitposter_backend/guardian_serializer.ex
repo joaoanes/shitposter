@@ -1,5 +1,5 @@
 defmodule ShitposterBackend.Guardian do
-  use Guardian, otp_app: :my_app
+  use Guardian, otp_app: :shitposter_backend
 
   alias ShitposterBackend.Repo
   alias ShitposterBackend.User

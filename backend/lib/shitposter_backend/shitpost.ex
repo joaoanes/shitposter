@@ -1,11 +1,10 @@
 defmodule ShitposterBackend.Shitpost do
   use Ecto.Schema
   import Ecto.Changeset
-  alias ShitposterBackend.Shitpost
+  alias ShitposterBackend.{Shitpost, User}
   alias ShitposterBackend.Repo
   alias ExAws.S3
   require Logger
-
   import IEx
 
   schema "shitposts" do
@@ -25,20 +24,36 @@ defmodule ShitposterBackend.Shitpost do
   @doc false
   def changeset(%Shitpost{} = shitpost, attrs) do
     shitpost
-    |> cast(attrs, [:url, :type, :name, :submitter_id, :rating, :permalink])
+    |> cast(attrs, [:url, :type, :name, :source_id, :submitter_id, :rating, :permalink])
     |> validate_required([:url, :type])
   end
 
   def create(url, name) do
+    create(url, name, 0, nil, nil)
+  end
+
+  def create(url, name, initial_rating, %User{id: submitter_id} = submitter, source_id) do
+    create(url, name, initial_rating, submitter_id, source_id)
+  end
+
+  def create(url, name, initial_rating, submitter_id, source_id) do
     categorizerOutput = {:categorize, [url]}
     |> Honeydew.async(:categorizer, reply: true)
-    |> Honeydew.yield
+    |> Honeydew.yield(15000)
 
     case categorizerOutput do
-      {:ok, type} -> Repo.insert(Shitpost.changeset(%Shitpost{}, %{url: url, type: type, name: name}))
+      {:ok, [type, fixed_url]} -> Repo.insert(Shitpost.changeset(
+        %Shitpost{}, %{
+          url: fixed_url,
+          type: type,
+          name: name,
+          source_id: source_id,
+          submitter_id: submitter_id,
+          rating: initial_rating
+        }
+      ))
       {:error, _} -> {:error, ["oops"]}
     end
-
   end
 
   def rate(id) do

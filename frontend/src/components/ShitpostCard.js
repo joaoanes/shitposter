@@ -101,7 +101,7 @@ class ShitpostCard extends React.Component {
               </Paper>
                 }
               </div>
-              <div style={fullscreen ? {width: '100%', height: 'auto', maxWidth: 1200} : {height: 300, overflow: 'hidden'}} >
+              <div style={fullscreen ? {width: '100%', height: 'auto', maxWidth: 1200} : {maxHeight: 300, overflow: 'hidden'}} >
                 <TypeRenderer fullscreen={fullscreen} shitpost={shitpost} />
               </div>
               <Divider style={{height: 2, backgroundColor: colorTypes[this.props.shitpost.type]}}/>

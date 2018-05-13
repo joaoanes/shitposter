@@ -7,7 +7,7 @@ export default class Root extends Component {
       <div style={styles.header}>
         <Giphy />
         <div style={styles.titleContainer}>
-          <span style={styles.title}>SHITPOSTER</span>
+          <span style={styles.title}>Shitposter</span>
           <span style={styles.subTitle}>v0.1</span>
         </div>
       </div>
@@ -38,20 +38,19 @@ const styles = {
   title: {
     color: 'white',
     fontWeight: 800,
-    fontSize: 30,
     backgroundColor: 'rgba(100,100,100,0.5)',
     paddingLeft: 25,
     paddingRight: 25,
     paddingTop: 15,
+    marginTop: 20,
     paddingBottom: 15,
     boxSizing: 'content-box',
-    padding: 20,
     border: 'none',
-    font: 'normal 60px/1 "Monoton", Helvetica, sans-serif',
+    font: 'normal 90px/1 "Monoton", Helvetica, sans-serif',
     textAlign: 'center',
     textOverflow: 'ellipsis',
     textShadow: '0 0 10px rgb(255,255,255), 0 0 20px rgb(255,255,255), 0 0 30px rgb(255,255,255), 0 0 40px darkorange, 0 0 70px darkorange, 0 0 80px darkorange, 0 0 100px darkorange, 0 0 150px darkorange',
-    transition: 'all 200ms cubic-bezier(0.42, 0, 0.58, 1) 10ms',
+    fontFamily: 'Cedarville Cursive, sans-serif',
   },
   subTitle: {
     color: 'white', //aha

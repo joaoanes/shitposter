@@ -41,6 +41,10 @@ defmodule ShitposterBackend.Web.Endpoint do
 
   plug Corsica, [origins: "*", allow_headers: ["accept", "content-type"]]
 
+  plug Guardian.Plug.Pipeline,
+    module: ShitposterBackend.Guardian,
+    error_handler: ShitposterBackend.AuthErrorHandler
+
   plug ShitposterBackend.Web.Router
 
   @doc """

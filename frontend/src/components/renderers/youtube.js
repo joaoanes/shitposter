@@ -1,18 +1,20 @@
 import React from 'react'
-import URL from 'url-parse'
 
 export default class YoutubeRenderer extends React.Component {
   props: {
     shitpost: {
       url: String
-    }
+    },
+    fullscreen: boolean
   }
   render() {
-    const {url} = this.props.shitpost
-    const ytId = new URL(url).query.slice(3)
+    const {fullscreen, shitpost} = this.props
+    const {url} = shitpost
+
+    const [_matchedUrl, _protocol, _subdomain, _domain, _path, ytId, _query] = url.match(/^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w-]+\?v=|embed\/|v\/)?)([\w-]+)(\S+)?$/) //eslint-disable-line no-unused-vars
 
     return (
-      <div style={{width: '100%', height: '-webkit-fill-available'}}>
+      <div style={{width: fullscreen ? '1200px' : '100%', height: '-webkit-fill-available'}}>
         <iframe
           title="ytplayer"
           src={`https://www.youtube.com/embed/${ytId}`}

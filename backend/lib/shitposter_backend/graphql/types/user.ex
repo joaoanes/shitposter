@@ -9,4 +9,9 @@ defmodule ShitposterBackend.GraphQL.Types.User do
     field :name, :string
   end
 
+  @desc "User token"
+  object :token do
+    field :token, :string
+  end
+
 end

@@ -6,6 +6,7 @@ defmodule ShitposterBackend.Repo.Migrations.CreateUsers do
       add :email, :string
       add :password_hash, :string
       add :name, :string
+      add :is_bot, :boolean
 
       timestamps()
     end

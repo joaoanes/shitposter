@@ -23,7 +23,6 @@ defmodule ShitposterBackend.Workers.Uploader do
         File.write!(path, body)
         %{^path => fileInfo} = FileInfo.get_info(path)
 
-        # IEx.pry
         %{status_code: 200} = S3.put_object(
           "shitposter-content",
           "content/#{name}",

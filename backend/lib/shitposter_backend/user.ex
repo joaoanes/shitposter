@@ -1,23 +1,42 @@
 defmodule ShitposterBackend.User do
   use Ecto.Schema
   import Ecto.Changeset
-  alias ShitposterBackend.User
+  alias ShitposterBackend.{User, Repo}
 
 
   schema "users" do
     field :email, :string
     field :name, :string
+    field :password, :string, virtual: true
     field :password_hash, :string
+    field :is_bot, :boolean
 
     timestamps()
   end
 
   @doc false
-  def changeset(%User{} = user, attrs) do
+  def create_changeset(%User{} = user, attrs) do
     user
-    |> cast(attrs, [:email, :password_hash, :name])
-    |> validate_required([:email, :password_hash])
+    |> cast(attrs, [:email, :password, :name])
+    |> validate_required([:email, :password])
     |> put_pass_hash
+  end
+
+  def bot_changeset(%User{} = user, attrs) do
+    user
+    |> cast(attrs, [:is_bot])
+    |> validate_required([:is_bot])
+    |> put_change(:is_bot, true)
+  end
+
+  def create(email, password, name) do
+    create_changeset(%User{}, %{email: email, password: password, name: name})
+    |> Repo.insert
+  end
+
+  def set_bot(%User{} = user) do
+    bot_changeset(user, %{is_bot: true})
+    |> Repo.update
   end
 
   defp put_pass_hash(changeset) do

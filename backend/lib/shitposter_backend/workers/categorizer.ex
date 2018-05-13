@@ -11,6 +11,7 @@ defmodule ShitposterBackend.Workers.Categorizer do
     def takeScreenshot(url) do
       {_res, 0} = System.cmd("node", ["./lib/shitposter_backend/workers/scraper/webScraper.js", url])
       Logger.log(:info, "Added screenshot for url #{url}")
+      url
     end
   end
 
@@ -32,14 +33,28 @@ defmodule ShitposterBackend.Workers.Categorizer do
     |> Enum.filter(fn x -> x end)
     |> List.first
 
+
+
     case type do
-      {:ok, type} -> type
+      {:ok, [url, type]} -> [url, type]
       nil -> (
         Scraper.takeScreenshot(url)
-        "webpage"
+        ["webpage", url]
       )
     end
 
+  end
+
+  def is_youtube(url) do
+    matches = ~r/(?:youtube\.com\/\S*(?:(?:\/e(?:mbed))?\/|watch\/?\?(?:\S*?&?v\=))|youtu\.be\/)([a-zA-Z0-9_-]{6,11})/ |> Regex.run(url) || []
+
+    case length(matches) do
+      0 -> nil
+      _ -> (
+        [_, vidCode] = matches
+        {:ok, ["youtube", "https://www.youtube.com/watch?v=#{vidCode}"]}
+      )
+    end
   end
 
   def is_video(url) do
@@ -47,19 +62,24 @@ defmodule ShitposterBackend.Workers.Categorizer do
     |> Regex.run(url) || []
 
     case List.last(matches) do
-      "webm" -> {:ok, "video"}
-      "mp4" -> {:ok, "video"}
-      "avi" -> {:ok, "video"}
-      "mov" -> {:ok, "video"}
+      "webm" -> {:ok, ["video", url]}
+      "mp4" -> {:ok, ["video", url]}
+      "avi" -> {:ok, ["video", url]}
+      "mov" -> {:ok, ["video", url]}
       _ -> nil
     end
   end
 
 
   def is_tweet(url) do
-    case Regex.match?(~r/https*:\/\/[mobile.]*twitter.com\/.+\/status\/.+/, url) do
-      false -> nil
-      _ -> {:ok, "tweet"}
+    matches = ~r/(?:http(?:s*):\/\/)?(?:www\.)?(?:mobile\.)?twitter\.com\/(.*)\/status\/*([\w\-]*)/ |> Regex.run(url) || []
+
+    case length(matches) do
+      3 -> (
+        [_, username, tweet_id] = matches
+        {:ok, ["tweet", "https://twitter.com/#{username}/status/#{tweet_id}"]}
+      )
+      _ -> nil
     end
   end
 
@@ -68,10 +88,10 @@ defmodule ShitposterBackend.Workers.Categorizer do
     |> Regex.run(url) || []
 
     case List.last(matches) do
-      "gif" -> {:ok, "animated_image"}
-      "png" -> {:ok, "image"}
-      "jpg" -> {:ok, "image"}
-      "jpeg" -> {:ok, "image"}
+      "gif" -> {:ok, ["animated_image", url]}
+      "png" -> {:ok, ["image", url]}
+      "jpg" -> {:ok, ["image", url]}
+      "jpeg" -> {:ok, ["image", url]}
       _ -> nil
     end
   end

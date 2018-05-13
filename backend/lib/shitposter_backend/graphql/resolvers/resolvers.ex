@@ -14,7 +14,7 @@ defmodule ShitposterBackend.GraphQL.Resolvers do
   end
 
   defp collect_args(arg_keys, source, args, info) do
-    ctx = %{source: source, args: args, info: info}
+    ctx = %{source: source, args: args, info: Map.from_struct(info)}
 
     Enum.map(arg_keys, &get_in(ctx, &1))
   end

@@ -26,7 +26,7 @@ defmodule ShitposterBackend.GraphQL.Types.Shitpost do
     field :type, :shitpost_type
     field :url, :string
     field :rating, :integer
-    field :source, :source, resolve: assoc(:source)
+    field :source, :user, resolve: assoc(:source)
     field :submitter, :user, resolve: assoc(:submitter)
   end
 

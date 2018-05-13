@@ -11,7 +11,10 @@ defmodule ShitposterBackend.Web.Router do
   end
 
   pipeline :api do
-    plug :accepts, ["json"]
+    plug :accepts, ["json", "graphql"]
+    plug Guardian.Plug.VerifyHeader, realm: "Bearer"
+    plug Guardian.Plug.LoadResource, allow_blank: true
+    plug ShitposterBackend.GraphQL.Middlewares.Context
   end
 
   scope "/" do
@@ -22,7 +25,8 @@ defmodule ShitposterBackend.Web.Router do
   end
 
   scope "/api" do
-    post "/graphiql", Absinthe.Plug.GraphiQL, schema: ShitposterBackend.GraphQL.Schema
+    pipe_through :api
+    forward "/graphiql", Absinthe.Plug.GraphiQL, schema: ShitposterBackend.GraphQL.Schema
   end
 
   # Other scopes may use custom stacks.
