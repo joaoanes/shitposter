@@ -3,15 +3,21 @@ import React from 'react'
 export default class ImageRenderer extends React.Component {
     props: {
       shitpost: {
-        url: String
+        url: String,
       },
-      fullscreen: boolean
+      fullscreen: boolean,
     }
 
-    render() {
-      const {url} = this.props.shitpost
-      const {fullscreen} = this.props
-      return <video controls src={url} style={{...styles.video, ...(fullscreen ? styles.videoFullScreen : styles.videoNoFullscreen)}} />
+    render () {
+      const { url } = this.props.shitpost
+      const { fullscreen } = this.props
+      return (
+        <video
+          controls
+          src={url}
+          style={{ ...styles.video, ...(fullscreen ? styles.videoFullScreen : styles.videoNoFullscreen) }}
+        />
+      )
     }
 }
 
@@ -24,5 +30,5 @@ const styles = {
   },
   videoNoFullscreen: {
     maxWidth: 600,
-  }
+  },
 }

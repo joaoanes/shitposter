@@ -1,4 +1,4 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import Giphy from '../components/Giphy'
 
 export default class Root extends Component {
@@ -21,7 +21,7 @@ const styles = {
     zIndex: 100,
     height: 90,
     width: '100%',
-    position: 'relative'
+    position: 'relative',
   },
   titleContainer: {
     left: 0,
@@ -53,10 +53,10 @@ const styles = {
     fontFamily: 'Cedarville Cursive, sans-serif',
   },
   subTitle: {
-    color: 'white', //aha
+    color: 'white', // aha
     fontSize: 20,
     textShadow: '1px 1px black',
     position: 'absolute',
     bottom: 0,
-  }
+  },
 }

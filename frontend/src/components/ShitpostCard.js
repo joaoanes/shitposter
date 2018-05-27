@@ -6,10 +6,10 @@ import { Badge, Paper, Divider, Button, Tooltip } from 'material-ui'
 import IconButton from 'material-ui/IconButton'
 import red from 'material-ui/colors/red'
 import FavoriteIcon from 'material-ui-icons/Favorite'
-import {Fullscreen} from 'material-ui-icons'
+import { Fullscreen } from 'material-ui-icons'
 import Share from 'material-ui-icons/Share'
-import {compose, mapProps, withState} from 'recompose'
-import {graphql} from 'react-apollo'
+import { compose, mapProps, withState } from 'recompose'
+import { graphql } from 'react-apollo'
 import gql from 'graphql-tag'
 import AnimateHeight from 'react-animate-height'
 
@@ -54,7 +54,7 @@ const colorTypes = {
   WEBPAGE: 'grey',
   TWEET: '#00aced',
   IMAGE: 'purple',
-  YOUTUBE: 'red' //ugh
+  YOUTUBE: 'red', // ugh
 }
 
 class ShitpostCard extends React.Component {
@@ -71,14 +71,13 @@ class ShitpostCard extends React.Component {
     this.props.setFullscreen(!this.props.fullscreen)
   }
 
-  render() {
+  render () {
     const { classes, ratePost, shitpost, rated, isRating, fullscreen } = this.props
     let TypeRenderer
 
     try {
       TypeRenderer = require('./renderers/' + shitpost.type.toLowerCase()).default
-    }
-    catch (e) {
+    } catch (e) {
       TypeRenderer = require('./renderers/default.js').default
     }
 
@@ -87,50 +86,90 @@ class ShitpostCard extends React.Component {
     return (
       <AnimateHeight
         duration={500}
-        height="auto"
-        style={fullscreen ? {} : {maxWidth: '80%'}}
+        height='auto'
+        style={fullscreen ? {} : { maxWidth: '80%' }}
       >
-        <div id={shitpost.id} style={fullscreen ? {zIndex: 1000, position: 'relative'} : {}}>
-          <Card raised={fullscreen} key={shitpost.id} className={classes.card}>
-            <div style={{position: 'relative'}}>
-              <div style={{position: 'absolute', left: 0, top: 20}}>
+        <div
+          id={shitpost.id}
+          style={fullscreen ? { zIndex: 1000, position: 'relative' } : {}}
+        >
+          <Card
+            raised={fullscreen}
+            key={shitpost.id}
+            className={classes.card}
+          >
+            <div style={{ position: 'relative' }}>
+              <div style={{ position: 'absolute', left: 0, top: 20 }}>
                 {
-                  shitpost.name &&
-              <Paper className={classes.nameContainer}>
-                {shitpost.name}
-              </Paper>
-                }
+                  shitpost.name && (
+                    <Paper className={classes.nameContainer}>
+                      {shitpost.name}
+                    </Paper>
+                  )}
               </div>
-              <div style={fullscreen ? {width: '100%', height: 'auto', maxWidth: 1200} : {maxHeight: 300, overflow: 'hidden'}} >
-                <TypeRenderer fullscreen={fullscreen} shitpost={shitpost} />
+              <div style={fullscreen ? { width: '100%', height: 'auto', maxWidth: 1200 } : { maxHeight: 300, overflow: 'hidden' }} >
+                <TypeRenderer
+                  fullscreen={fullscreen}
+                  shitpost={shitpost}
+                />
               </div>
-              <Divider style={{height: 2, backgroundColor: colorTypes[this.props.shitpost.type]}}/>
+              <Divider style={{ height: 2, backgroundColor: colorTypes[this.props.shitpost.type] }} />
               {
-                fullscreen && <div style={{paddingTop: 5, paddingBottom: 5, height: 20, backgroundColor: 'black'}}>
-                  <a style={{textAlign: 'center', display: 'block', color: 'white'}} href={shitpost.url}>Source link</a>
-                  <Divider style={{height: 2, marginTop: 5, backgroundColor: colorTypes[this.props.shitpost.type]}}/>
-                </div>
+                fullscreen && (
+                  <div style={{ paddingTop: 5, paddingBottom: 5, height: 20, backgroundColor: 'black' }}>
+                    <a
+                      style={{ textAlign: 'center', display: 'block', color: 'white' }}
+                      href={shitpost.url}
+                    >Source link</a>
+                    <Divider style={{ height: 2, marginTop: 5, backgroundColor: colorTypes[this.props.shitpost.type] }} />
+                  </div>
+                )
               }
-              <Tooltip id="tooltip-fab" className={classes.fab} title={`Make it ${fullscreen ? 'smaller' : 'bigger'}!`}>
-                <Button variant="fab" aria-label="Fullscreen" style={{position: 'absolute', bottom: -25, right: 20}} onClick={this.handleClick}>
+              <Tooltip
+                id='tooltip-fab'
+                className={classes.fab}
+                title={`Make it ${fullscreen ? 'smaller' : 'bigger'}!`}
+              >
+                <Button
+                  variant='fab'
+                  aria-label='Fullscreen'
+                  style={{ position: 'absolute', bottom: -25, right: 20 }}
+                  onClick={this.handleClick}
+                >
                   <Fullscreen />
                 </Button>
               </Tooltip>
             </div>
-            <CardActions className={classes.actions} disableActionSpacing>
-              <Tooltip title="Like shitpost!">
-                <IconButton aria-label="Heart" onClick={ratePost} >
+            <CardActions
+              className={classes.actions}
+              disableActionSpacing
+            >
+              <Tooltip title='Like shitpost!'>
+                <IconButton
+                  aria-label='Heart'
+                  onClick={ratePost}
+                >
                   { fullscreen
-                    ?<Badge style={{margin: 4}} badgeContent={shitpost.rating || 0} color="primary">
-                      <FavoriteIcon style={heartColor ? {color: heartColor} : {}} />
-                    </Badge>
-                    : <FavoriteIcon style={heartColor ? {color: heartColor} : {}} />
+                    ? (
+                      <Badge
+                        style={{ margin: 4 }}
+                        badgeContent={shitpost.rating || 0}
+                        color='primary'
+                      >
+                        <FavoriteIcon style={heartColor ? { color: heartColor } : {}} />
+                      </Badge>
+                    )
+                    : <FavoriteIcon style={heartColor ? { color: heartColor } : {}} />
                   }
                 </IconButton>
               </Tooltip>
-              <Tooltip title="Get share link!">
-                <IconButton aria-label="Share">
-                  <a target="_blank" style={{color: 'rgba(0, 0, 0, 0.54)', height: 24}} href={`/${shitpost.id}`}><Share /></a>
+              <Tooltip title='Get share link!'>
+                <IconButton aria-label='Share'>
+                  <a
+                    target='_blank'
+                    style={{ color: 'rgba(0, 0, 0, 0.54)', height: 24 }}
+                    href={`/${shitpost.id}`}
+                  ><Share /></a>
                 </IconButton>
               </Tooltip>
             </CardActions>
@@ -160,15 +199,15 @@ export default compose(
   }
   `, {
     name: 'ratePost',
-    options: ({shitpost: {id}}) => ({
+    options: ({ shitpost: { id } }) => ({
       variables: {
-        id
+        id,
       },
-    })
+    }),
   }),
   withState('isRating', 'setIsRating', false),
   withState('rated', 'setRated', false),
-  withState('fullscreen', 'setFullscreen', ({fullscreen}) => fullscreen || false),
+  withState('fullscreen', 'setFullscreen', ({ fullscreen }) => fullscreen || false),
   mapProps((props) => {
     const ratesString = localStorage.getItem('rates')
     const rates = new Set(
@@ -195,8 +234,8 @@ export default compose(
       rated: rates.has(props.shitpost.id),
       shitpost: {
         ...props.shitpost,
-        url: props.shitpost.permalink || props.shitpost.url
-      }
+        url: props.shitpost.permalink || props.shitpost.url,
+      },
     }
   }),
 )(ShitpostCard)

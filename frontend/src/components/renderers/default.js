@@ -7,14 +7,21 @@ export default class DefaultRenderer extends React.Component {
     props: {
       fullscreen: boolean,
       shitpost: {
-        url: String
-      }
+        url: String,
+      },
     }
-    render() {
-      const {fullscreen, shitpost: {url}} = this.props
+    render () {
+      const { fullscreen, shitpost: { url } } = this.props
       if (fullscreen) {
-        return <iframe style={{width: '1200px', height: '-webkit-fill-available'}} frameBorder={0} title="google" src={url} />
+        return (
+          <iframe
+            style={{ width: '1200px', height: '-webkit-fill-available' }}
+            frameBorder={0}
+            title='google'
+            src={url}
+          />
+        )
       }
-      return <div style={{width: '100%', height: '-webkit-fill-available', backgroundImage: `url(${bucketUrl}/previews/${md5(url)}.png)`, backgroundSize: 'cover'}} />
+      return <div style={{ width: '100%', height: '-webkit-fill-available', backgroundImage: `url(${bucketUrl}/previews/${md5(url)}.png)`, backgroundSize: 'cover' }} />
     }
 }

@@ -1,5 +1,5 @@
-import React, {Component} from 'react'
-import {compose, branch, renderComponent} from 'recompose'
+import React, { Component } from 'react'
+import { compose, branch, renderComponent } from 'recompose'
 import { graphql } from 'react-apollo'
 import gql from 'graphql-tag'
 import { CircularProgress } from 'material-ui/Progress'
@@ -18,36 +18,45 @@ class ShitpostList extends Component {
         pageInfo: {
           hasNextPage: boolean,
           nextPage: () => void,
-        }
-      }
-    }
+        },
+      },
+    },
   }
   addQuery = (url, name) => {
     this.props.addQuery(url, name)
   }
-  render() {
+  render () {
     const {
-      data: {shitposts: { pageInfo: { hasNextPage, nextPage } }, loading },
+      data: { shitposts: { pageInfo: { hasNextPage, nextPage } }, loading },
     } = this.props
 
-    const shitposts = this.props.data.shitposts.edges.map( e => e.node)
+    const shitposts = this.props.data.shitposts.edges.map(e => e.node)
 
     return (
-      <InfiniteScroll scrollThreshold={0.5} throttle={32} next={nextPage} hasMore={hasNextPage} endMessage={
-        <p style={{textAlign: 'center', display: 'flex', flexDirection: 'column', marginBottom: 40, marginTop: 40}}>
-          <b>Yay! You have seen it all! 💖</b>
-          <b>Now go submit some more shit(post)!</b>
-        </p>
-      }>
+      <InfiniteScroll
+        scrollThreshold={0.5}
+        throttle={32}
+        next={nextPage}
+        hasMore={hasNextPage}
+        endMessage={(
+          <p style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', marginBottom: 40, marginTop: 40 }}>
+            <b>Yay! You have seen it all! 💖</b>
+            <b>Now go submit some more shit(post)!</b>
+          </p>
+        )}
+      >
         <div style={styles.container}>
           <NewShitpostCard />
           {
             shitposts.map((shitpost) => (
-              <ShitpostCard key={shitpost.id} shitpost={shitpost} />
+              <ShitpostCard
+                key={shitpost.id}
+                shitpost={shitpost}
+              />
             ))
           }
           {
-            loading && <div style={{margin: 40}}><CircularProgress /></div>
+            loading && <div style={{ margin: 40 }}><CircularProgress /></div>
           }
 
         </div>
@@ -60,8 +69,8 @@ const styles = {
   container: {
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center'
-  }
+    alignItems: 'center',
+  },
 }
 
 export default compose(
@@ -94,12 +103,12 @@ export default compose(
   `, {
     props: paginated('shitposts'),
     options: {
-      fetchPolicy: 'cache-and-network'
-    }
+      fetchPolicy: 'cache-and-network',
+    },
   }),
   branch(
-    ({data: {networkStatus}}) => networkStatus < 3, // ? console.log(`starting at ${(new Date()).getTime()}`) || true : console.log(`ending at ${(new Date()).getTime()}`) && false,
-    renderComponent(() => <div style={{margin: 40, display: 'flex', justifyContent: 'center'}}><CircularProgress /></div>)
+    ({ data: { networkStatus } }) => networkStatus < 3, // ? console.log(`starting at ${(new Date()).getTime()}`) || true : console.log(`ending at ${(new Date()).getTime()}`) && false,
+    renderComponent(() => <div style={{ margin: 40, display: 'flex', justifyContent: 'center' }}><CircularProgress /></div>)
   ),
 
 )(ShitpostList)
