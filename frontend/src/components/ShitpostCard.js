@@ -98,8 +98,8 @@ class ShitpostCard extends React.Component {
             key={shitpost.id}
             className={classes.card}
           >
-            <div style={{ position: 'relative' }}>
-              <div style={{ position: 'absolute', left: 0, top: 20 }}>
+            <div style={{ position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', left: -5, top: 20 }}>
                 {
                   shitpost.name && (
                     <Paper className={classes.nameContainer}>
@@ -209,7 +209,7 @@ export default compose(
   withState('rated', 'setRated', false),
   withState('fullscreen', 'setFullscreen', ({ fullscreen }) => fullscreen || false),
   mapProps((props) => {
-    const ratesString = localStorage.getItem('rates')
+    const ratesString = window.localStorage.getItem('rates')
     const rates = new Set(
       ratesString
         ? JSON.parse(ratesString)
@@ -224,7 +224,7 @@ export default compose(
         props.setIsRating(true)
         return props.ratePost().then(() => {
           rates.add(props.shitpost.id)
-          localStorage.setItem(
+          window.localStorage.setItem(
             'rates',
             JSON.stringify(Array.from(rates))
           )
