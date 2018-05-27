@@ -7,7 +7,7 @@ import { memoize } from 'lodash'
 
 export default new ApolloClient({
   link: new HttpLink({ uri: 'http://shitpost.network/api/graphiql' }),
-  cache: new InMemoryCache()
+  cache: new InMemoryCache(),
 })
 
 const addProps = f => initialProps => ({
