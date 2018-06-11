@@ -1,0 +1,5 @@
+<h2>Edit Scraper</h2>
+
+<%= render "form.html", Map.put(assigns, :action, scraper_path(@conn, :update, @scraper)) %>
+
+<span><%= link "Back", to: scraper_path(@conn, :index) %></span>

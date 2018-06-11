@@ -98,7 +98,7 @@ class ShitpostCard extends React.Component {
             key={shitpost.id}
             className={classes.card}
           >
-            <div style={{ position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'relative' }}>
               <div style={{ position: 'absolute', left: -5, top: 20 }}>
                 {
                   shitpost.name && (
@@ -198,13 +198,13 @@ export default compose(
     }
   }
   `, {
-    name: 'ratePost',
-    options: ({ shitpost: { id } }) => ({
-      variables: {
-        id,
-      },
+      name: 'ratePost',
+      options: ({ shitpost: { id } }) => ({
+        variables: {
+          id,
+        },
+      }),
     }),
-  }),
   withState('isRating', 'setIsRating', false),
   withState('rated', 'setRated', false),
   withState('fullscreen', 'setFullscreen', ({ fullscreen }) => fullscreen || false),
