@@ -1,5 +1,5 @@
 
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 
 export default class SuperGiphy extends Component {
   props: {
@@ -9,27 +9,26 @@ export default class SuperGiphy extends Component {
   }
 
   state = {
-    imageSrc: ''
+    imageSrc: '',
   }
 
   static defaultProps = {
     apiKey: 'VvILX7Y9L9oD7ZOH7yGXy05V7VD2xzIm',
     keyword: 'kitten',
-    style: {}
+    style: {},
   }
 
-  componentDidMount() {
+  componentDidMount () {
     fetch(`https://api.giphy.com/v1/gifs/random?api_key=${this.props.apiKey}&tag=${this.props.keyword}&rating=${'Y'}`)
       .then((res) => res.json())
       .then((res) => {
-
-        this.setState({ imageSrc: res.data.image_url})
+        this.setState({ imageSrc: res.data.image_url })
       })
   }
 
-  render() {
+  render () {
     return (
-      <div style={{...this.props.style, display: 'flex', textAlign: 'center', width: '100%', height: '100%'}}>
+      <div style={{ ...this.props.style, display: 'flex', textAlign: 'center', width: '100%', height: '100%' }}>
         <div
           style={{
             ...styles.image,
@@ -46,5 +45,5 @@ const styles = {
     flexGrow: 1,
     backgroundSize: 'contain',
     backgroundPosition: 'center bottom',
-  }
+  },
 }

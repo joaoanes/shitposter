@@ -1,13 +1,7 @@
 defmodule ShitposterBackend.Workers.Categorizer do
-  @moduledoc """
-    This is an example Worker to interface with Riak.
-    You'll need to add the erlang riak driver to your mix.exs:
-    `{:riakc, ">= 2.4.1}`
-  """
   require Logger
 
   defmodule Scraper do
-
     def takeScreenshot(url) do
       {_res, 0} = System.cmd("node", ["./lib/shitposter_backend/workers/scraper/webScraper.js", url])
       Logger.log(:info, "Added screenshot for url #{url}")
@@ -88,7 +82,7 @@ defmodule ShitposterBackend.Workers.Categorizer do
     |> Regex.run(url) || []
 
     case List.last(matches) do
-      "gif" -> {:ok, ["animated_image", url]}
+      "gif" -> {:ok, ["image", url]}
       "png" -> {:ok, ["image", url]}
       "jpg" -> {:ok, ["image", url]}
       "jpeg" -> {:ok, ["image", url]}

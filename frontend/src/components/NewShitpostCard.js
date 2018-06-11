@@ -4,7 +4,7 @@ import { withStyles } from 'material-ui/styles'
 import Card, { CardActions } from 'material-ui/Card'
 import { Button, Tooltip, Chip, CircularProgress } from 'material-ui'
 import TextField from 'material-ui/TextField'
-import {Add} from 'material-ui-icons'
+import { Add } from 'material-ui-icons'
 import { compose, withState } from 'recompose'
 import { toast } from 'react-toastify'
 import { graphql } from 'react-apollo'
@@ -22,7 +22,6 @@ const materialStyles = theme => ({
     width: 400,
   },
 })
-
 
 class ShitpostCard extends React.Component {
   props: {
@@ -43,24 +42,24 @@ class ShitpostCard extends React.Component {
   }
 
   state = {
-    fullscreen: false
+    fullscreen: false,
   }
 
   handleClick = () => {
-    const {addShitpost, url, name, setLoading} = this.props
+    const { addShitpost, url, name, setLoading } = this.props
     setLoading(true)
-    addShitpost({variables: {
-      url, name
-    }})
+    addShitpost({ variables: {
+      url, name,
+    } })
       .then(() => {
         setLoading(false)
-        toast('Shitpost created ❤️', {type: toast.TYPE.SUCCESS, autoClose: 2000})
-        this.changeAndValidateURL({target: {value: ''}})
+        toast('Shitpost created ❤️', { type: toast.TYPE.SUCCESS, autoClose: 2000 })
+        this.changeAndValidateURL({ target: { value: '' } })
       })
-      .catch((err) => console.log(err) || setLoading(false) || toast('There was an error when submitting your post :(', {type: toast.TYPE.ERROR}))
+      .catch((err) => console.log(err) || setLoading(false) || toast('There was an error when submitting your post :(', { type: toast.TYPE.ERROR }))
   }
 
-  changeAndValidateURL = ({target: {value}} : {target: { value : String}}) => {
+  changeAndValidateURL = ({ target: { value } } : {target: { value : String}}) => {
     if (
       value.match(
         /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/
@@ -79,7 +78,6 @@ class ShitpostCard extends React.Component {
             })
         }, 1500)
       )
-
     } else {
       this.props.setValidInput(false)
       this.props.setCanRender(false)
@@ -92,39 +90,55 @@ class ShitpostCard extends React.Component {
     debugger //eslint-disable-line
   }
 
-  render() {
+  render () {
     const { classes, validInput, url, canRender, focused, loading } = this.props
     console.log(this.props.focused)
     return (
       <div>
         <Card className={classes.card}>
-          <div style={{position: 'relative'}}>
-            <div style={{width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-              <span style={{transition: 'opacity 0.5s ease', marginTop: 10, fontSize: 30, opacity: url ? 0 : 1}}>Add your shitpost!</span>
+          <div style={{ position: 'relative' }}>
+            <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <span style={{ transition: 'opacity 0.5s ease', marginTop: 10, fontSize: 30, opacity: url ? 0 : 1 }}>Add your shitpost!</span>
             </div>
 
-            <div style={{height: canRender ? 200 : 100, transition: 'height 0.75s ease-in', overflow: 'hidden', flexDirection: 'column', display: 'flex', justifyContent: 'center', alignItems: 'center'}} >
+            <div style={{ height: canRender ? 200 : 100, transition: 'height 0.75s ease-in', overflow: 'hidden', flexDirection: 'column', display: 'flex', justifyContent: 'center', alignItems: 'center' }} >
 
-              <div style={{position: 'absolute', left: 0, top: 0, right: 0, bottom: 0}}>
-                { canRender ? <iframe onLoad={this.onLoad} style={{filter: 'grayscale(100)', border: 0, width: '100%', height: '100%'}} src={url} /> : <div /> }
+              <div style={{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 }}>
+                { canRender ? (
+                  <iframe
+                    onLoad={this.onLoad}
+                    style={{ filter: 'grayscale(100)', border: 0, width: '100%', height: '100%' }}
+                    src={url}
+                  />
+                ) : <div /> }
               </div>
-              <div style={{padding: 10, backgroundColor: 'white', zIndex: 1}}>
+              <div style={{ padding: 10, backgroundColor: 'white', zIndex: 1 }}>
                 <TextField
-                  label="Put URL here!"
+                  label='Put URL here!'
                   placeholder="http:// <anything but don't forget the http please!!!>"
                   className={classes.textField}
                   value={url}
                   onChange={this.changeAndValidateURL}
                   onFocus={() => this.props.setFocused(true)}
                   onBlur={() => this.props.setFocused(false)}
-                  margin="normal"
+                  margin='normal'
                   fullWidth
                 />
               </div>
             </div>
-            <Tooltip id="tooltip-fab" title="Add shitpost!">
+            <Tooltip
+              id='tooltip-fab'
+              title='Add shitpost!'
+            >
               <div style={styles.buttonWrapper}>
-                <Button color={validInput ? 'primary' : 'secondary'} disabled={!validInput} variant="fab" aria-label="Add to favorites" style={{position: 'absolute', bottom: -25, right: 20}} onClick={this.handleClick}>
+                <Button
+                  color={validInput ? 'primary' : 'secondary'}
+                  disabled={!validInput}
+                  variant='fab'
+                  aria-label='Add to favorites'
+                  style={{ position: 'absolute', bottom: -25, right: 20 }}
+                  onClick={this.handleClick}
+                >
                   <Add />
                   {loading && <CircularProgress style={styles.buttonProgress} />}
                 </Button>
@@ -132,24 +146,25 @@ class ShitpostCard extends React.Component {
               </div>
             </Tooltip>
           </div>
-          <div style={{...styles.supportedContainer, ...(focused ? {height: 'auto'} : {height: 0})}}>
+          <div style={{ ...styles.supportedContainer, ...(focused ? { height: 'auto' } : { height: 0 }) }}>
             <div style={styles.supportedTitle}>We currently support the following types of content:</div>
             <div style={styles.supportedTypesContainer}>
-              <Chip label=".png links" />
-              <Chip label="jpg/.jpeg links" />
-              <Chip label="gif (hard g) links" />
-              <Chip label="webm links" />
-              <Chip label="mov links" />
-              <Chip label="avi links" />
-              <Chip label="mp4 links" />
-              <Chip label="twitter tweet links" />
-              <Chip label="youtube links" />
-              <Chip label="any webpage" />
+              <Chip label='.png links' />
+              <Chip label='jpg/.jpeg links' />
+              <Chip label='gif (hard g) links' />
+              <Chip label='webm links' />
+              <Chip label='mov links' />
+              <Chip label='avi links' />
+              <Chip label='mp4 links' />
+              <Chip label='twitter tweet links' />
+              <Chip label='youtube links' />
+              <Chip label='any webpage' />
             </div>
           </div>
-          <CardActions className={classes.actions} disableActionSpacing>
-
-          </CardActions>
+          <CardActions
+            className={classes.actions}
+            disableActionSpacing
+          />
         </Card>
       </div>
     )
@@ -174,7 +189,7 @@ const styles = {
   },
   supportedContainer: {
     margin: 15,
-    overflow: 'hidden'
+    overflow: 'hidden',
   },
   supportedTitle: {
     textAlign: 'center',
@@ -191,7 +206,7 @@ const styles = {
     width: '120%',
     height: '120%',
     zIndex: 1,
-  }
+  },
 }
 
 export default compose(
@@ -216,6 +231,6 @@ export default compose(
     name: 'addShitpost',
     options: {
       refetchQueries: ['getAfterShitposts'],
-    }
+    },
   }),
 )(ShitpostCard)
