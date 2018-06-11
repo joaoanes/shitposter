@@ -107,7 +107,7 @@
 
   def parse_thread(scraper, thread_id) do
     final_thread_page = Kernel.trunc(get_thread_size(thread_id))
-    current_thread_page = scraper.last_page_id || 399
+    current_thread_page = scraper.last_page_id || 1
 
     candidates = Enum.map(
       current_thread_page..final_thread_page,
