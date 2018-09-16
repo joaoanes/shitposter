@@ -44,6 +44,8 @@ defmodule ShitposterScrapers.Mixfile do
       {:redix, ">= 0.0.0"},
       {:timex, "~> 3.0"},
       {:httpoison, "~> 1.0"},
+      {:floki, "~> 0.20.0"},
+      {:convertat, "~> 1.0"},
       {:cowboy, "~> 1.0"}
     ]
   end

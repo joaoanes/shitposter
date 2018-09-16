@@ -68,3 +68,6 @@ config :shitposter_scrapers, ShitposterScrapers.Scheduler,
     # # Runs every midnight:
     # {"@daily",         {Backup, :backup, []}}
   ]
+
+  config :shitposter_scrapers, ShitposterScrapers.Submissions,
+    backend_graphql_hostname: "http://localhost:4000"

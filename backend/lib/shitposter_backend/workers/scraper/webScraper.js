@@ -16,7 +16,7 @@ AWS.config.update({ accessKeyId: 'AKIAJNL2HLP2JBN456ZQ', secretAccessKey: '8t6vJ
     const page = await browser.newPage()
     const url = process.argv[2]
     await page.goto(url)
-    const image = await page.screenshot({path: md5(url) + '.png', fullPage: true})
+    const image = await page.screenshot({fullPage: true})
 
     var s3 = new AWS.S3({params: {Bucket: 'shitposter-content'}});
     const uploadName = md5(url) + '.png'

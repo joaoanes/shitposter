@@ -3,9 +3,7 @@ defmodule ShitposterBackend.Shitpost do
   import Ecto.Changeset
   alias ShitposterBackend.{Shitpost, User}
   alias ShitposterBackend.Repo
-  alias ExAws.S3
   require Logger
-  import IEx
 
   schema "shitposts" do
     field :url, :string
@@ -32,7 +30,7 @@ defmodule ShitposterBackend.Shitpost do
     create(url, name, 0, nil, nil)
   end
 
-  def create(url, name, initial_rating, %User{id: submitter_id} = submitter, source_id) do
+  def create(url, name, initial_rating, %User{id: submitter_id}, source_id) do
     create(url, name, initial_rating, submitter_id, source_id)
   end
 

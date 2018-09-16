@@ -5,8 +5,10 @@ import { InMemoryCache } from 'apollo-cache-inmemory'
 import fp from 'lodash/fp'
 import { memoize } from 'lodash'
 
+const HOSTNAME = process.env['REACT_APP_HOSTNAME_GRAPHQL']
+
 export default new ApolloClient({
-  link: new HttpLink({ uri: 'https://shitpost.network/api/graphiql' }),
+  link: new HttpLink({ uri: `${HOSTNAME}/api/graphiql` }),
   cache: new InMemoryCache()
 })
 

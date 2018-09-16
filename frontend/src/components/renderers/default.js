@@ -22,7 +22,6 @@ export default class DefaultRenderer extends React.Component {
           <iframe
             style={{ width: '1200px', height: '-webkit-fill-available' }}
             frameBorder={0}
-            onError={this.handleError}
             title='google'
             src={url}
           />

@@ -1,3 +1,5 @@
+alias Junkyard
+
 defmodule ShitposterScrapers.Submissions do
   @moduledoc """
   The Scrapers context.
@@ -52,9 +54,13 @@ defmodule ShitposterScrapers.Submissions do
 
   """
   def create_submission(attrs \\ %{}) do
+    submission_creation_changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def submission_creation_changeset(attrs \\ %{}) do
     %Submission{}
     |> Submission.changeset(attrs)
-    |> Repo.insert()
   end
 
   @doc """
@@ -122,50 +128,71 @@ defmodule ShitposterScrapers.Submissions do
     Repo.one(query)
   end
 
+  def push_submission(%Submission{submitted_id: submitted_id} = submission) when is_integer(submitted_id) do
+    submission
+  end
+
   def push_submission(%Submission{content_url: content_url} = submission) do
-    res = "localhost:4000/api/graphiql"
+    [backend_graphql_hostname: hostname] = Application.get_env(:shitposter_scrapers, ShitposterScrapers.Submissions)
+    res = "#{hostname}/api/graphiql"
       |> HTTPoison.post(
-        "mutation addShitpost {  addShitpost(url: \"#{content_url}\") {id}}"
+        "mutation addShitpost {  addShitpost(url: \"#{content_url}\") {id}}",
+        [],
+        timeout: 15_000,
+        recv_timeout: 15_000,
       )
 
     case (res) do
       {:ok, %HTTPoison.Response{body: body}} -> (
-        body
-        |> Poison.decode
-        |> ok!
-        |> IO.inspect
+        submitted_id = body
+          |> Poison.decode
+          |> Junkyard.ok!
+          |> Kernel.get_in(["data", "addShitpost", "id"])
+          IO.inspect "Pushing #{content_url} to #{hostname} as #{submitted_id}"
+
+        update_submission(submission, %{submitted_id: submitted_id})
+          |> Junkyard.ok!
+
       )
-      {:error, err} -> err
+      {:error, err} ->
+        IO.inspect "Failed pushing #{content_url} to #{hostname}"
+        submission
     end
   end
 
-  def remove_saved(posts) do
+  def find_or_create(content_url) do
+    query = from s in Submission,
+      where: s.content_url == ^content_url
 
-    posts_with_content = Enum.filter(
-      posts,
-      fn post -> post[:extracted] != nil end
-    )
-    content_urls = Enum.map(posts_with_content, &(Map.get(&1, :extracted, nil)))
-
-    repeated_content = content_urls
-      |> find_by_content
-      |> Enum.filter(&(&1 != nil))
-      |> Enum.map(&(&1.content_url))
-
-    Enum.filter(
-      posts_with_content,
-      fn post -> !Enum.member?(repeated_content, post[:extracted])  end
+    Repo.one(query) || (
+      create_submission(%{ content_url: content_url })
+        |> Junkyard.ok!
     )
   end
 
+  def find_or_create_all(custom_urls) do
+    query = from s in Submission,
+      where: s.content_url in ^custom_urls
 
-  def ok!(conditional) do
-    case conditional do
-      {:ok, res} -> res
-      {:error, err} -> (
-        throw err
-      )
-    end
+    repeats = Repo.all(query, timeout: 50_000)
+    new_content = custom_urls -- Enum.map(repeats, &(&1.content_url))
+    |> Enum.uniq
+    |> Enum.map(&(submission_creation_changeset(%{content_url: &1})))
+    |> Enum.reduce(Ecto.Multi.new, fn changeset, multi ->
+      if (Kernel.length(changeset.errors) != 0) do
+        IEx.pry
+        multi
+      else
+        multi
+        |> Ecto.Multi.insert(changeset.changes.content_url, changeset)
+      end
+    end )
+    |> Repo.transaction(timeout: :infinity)
+    |> Junkyard.ok!
+    |> Map.values
+
+    new_content ++ repeats
+
+
   end
-
 end

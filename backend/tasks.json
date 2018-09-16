@@ -1,0 +1,122 @@
+{
+  "version": "0.1.0",
+  "command": "mix",
+  "isShellCommand": true,
+  "showOutput": "always",
+  "suppressTaskName": true,
+  "options": {
+    "cwd": "${workspaceFolder}/backend"
+  },
+  "tasks": [
+      {
+          "taskName": "dialyzer",
+          "args": ["dialyzer"],
+          "problemMatcher": [
+              {
+                  "owner": "elixir",
+                  "fileLocation": ["relative", "${workspaceRoot}"],
+                  "severity": "warning",
+                  "pattern": [{
+                      "regexp": "^warning: (.*)$",
+                      "message": 1
+                  }, {
+                      "regexp": "^  (.*):(\\d+)$",
+                      "file": 1,
+                      "location": 2
+                  }]
+              }, {
+                  "owner": "elixir",
+                  "fileLocation": ["relative", "${workspaceRoot}"],
+                  "severity": "error",
+                  "pattern": {
+                      "regexp": "^\\*\\* \\((\\w+)\\) (.*):(\\d+): (.*)$",
+                      "file": 2,
+                      "location": 3,
+                      "message": 0
+                  }
+              }, {
+                  "owner": "elixir",
+                  "fileLocation": ["relative", "${workspaceRoot}"],
+                  "severity": "error",
+                  "pattern": {
+                      "regexp": "^([^:]+):(\\d+): (.*)$",
+                      "file": 1,
+                      "location": 2,
+                      "message": 3
+                  }
+              }
+          ]
+      }, {
+          "taskName": "test",
+          "args": ["test"],
+          "problemMatcher": [
+              {
+                  "owner": "elixir",
+                  "fileLocation": ["relative", "${workspaceRoot}"],
+                  "severity": "warning",
+                  "pattern": [{
+                      "regexp": "^warning: (.*)$",
+                      "message": 1
+                  }, {
+                      "regexp": "^  (.*):(\\d+)$",
+                      "file": 1,
+                      "location": 2
+                  }]
+              },
+              {
+                  "owner": "elixir",
+                  "fileLocation": ["relative", "${workspaceRoot}"],
+                  "severity": "error",
+                  "pattern": {
+                      "regexp": "^\\*\\* \\((\\w+)\\) (.*):(\\d+): (.*)$",
+                      "file": 2,
+                      "location": 3,
+                      "message": 0
+                  }
+              },
+              {
+                  "owner": "elixir",
+                  "fileLocation": ["relative", "${workspaceRoot}"],
+                  "severity": "error",
+                  "pattern": [{
+                      "regexp": "^  \\d+\\) (.*)$",
+                      "message": 1
+                  },{
+                      "regexp": "^     (.*):(\\d+)$",
+                      "file": 1,
+                      "location": 2
+                  }]
+              }
+          ]
+      },
+      {
+          "taskName": "build",
+          "args": ["compile"],
+          "problemMatcher": [
+              {
+                  "owner": "elixir",
+                  "fileLocation": ["relative", "${workspaceRoot}"],
+                  "severity": "warning",
+                  "pattern": [{
+                      "regexp": "^warning: (.*)$",
+                      "message": 1
+                  }, {
+                      "regexp": "^  (.*):(\\d+)$",
+                      "file": 1,
+                      "location": 2
+                  }]
+              }, {
+                  "owner": "elixir",
+                  "fileLocation": ["relative", "${workspaceRoot}"],
+                  "severity": "error",
+                  "pattern": {
+                      "regexp": "^\\*\\* \\((\\w+)\\) (.*):(\\d+): (.*)$",
+                      "file": 2,
+                      "location": 3,
+                      "message": 0
+                  }
+              }
+          ]
+      }
+  ]
+}

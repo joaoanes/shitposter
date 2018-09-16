@@ -21,6 +21,8 @@ defmodule ShitposterScrapers.Application do
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: ShitposterScrapers.Supervisor]
+
+    :ok = :hackney_pool.start_pool(:long_con, [timeout: 15000, max_connections: 500])
     Supervisor.start_link(children, opts)
   end
 

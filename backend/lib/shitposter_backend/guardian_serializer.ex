@@ -12,8 +12,8 @@ defmodule ShitposterBackend.Guardian do
     {:error, :unknown_resource}
   end
 
-  def resource_from_claims(claims) do
-    {:ok, Repo.get(User, claims["sub"])}
+  def resource_from_claims(%{"sub" => claimsSub}) do
+    {:ok, Repo.get(User, claimsSub)}
   end
 
   def resource_from_claims(_claims) do

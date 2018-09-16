@@ -3,7 +3,7 @@ defmodule ShitposterScrapers.Repo.Migrations.CreateSubmissions do
 
   def change do
     create table(:submissions) do
-      add :content_url, :string
+      add :content_url, :text
       add :submitted_id, :integer
 
       timestamps()
