@@ -103,7 +103,7 @@ defmodule ShitposterBackend.Shitpost do
     {:ok, shitpost}
   end
 
-  defp host_permalink(%Shitpost{url: url} = shitpost) do
+  defp host_permalink(%Shitpost{url: _} = shitpost) do
     {:ok, updatedShitpost} = {:host_permalink, [shitpost]}
     |> Honeydew.async(:uploader, reply: true)
     |> Honeydew.yield

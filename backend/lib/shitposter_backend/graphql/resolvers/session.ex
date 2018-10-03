@@ -10,11 +10,8 @@ defmodule ShitposterBackend.GraphQL.Session do
     end
   end
 
-  defp authenticate(%User{password_hash: ph} = user, password) do
-    case user do
-      nil -> false
-      _   -> Comeonin.Bcrypt.checkpw(password, ph)
-    end
+  defp authenticate(%User{password_hash: ph}, password) do
+    Comeonin.Bcrypt.checkpw(password, ph)
   end
 
   defp authenticate(_, _) do
@@ -23,7 +20,7 @@ defmodule ShitposterBackend.GraphQL.Session do
 
   defp create_token(user) do
     case Guardian.encode_and_sign(user) do
-      nil -> {:error, "An Error occured creating the token"}
+      {:error, _} -> {:error, "An Error occured creating the token"}
       {:ok, token, _full_claims} -> {:ok, %{token: token}}
     end
   end

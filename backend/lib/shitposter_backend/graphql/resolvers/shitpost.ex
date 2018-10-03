@@ -1,6 +1,5 @@
 defmodule ShitposterBackend.GraphQL.Resolvers.Shitpost do
   alias ShitposterBackend.{Repo, Shitpost}
-  import Ecto.Query
 
   def get(%{id: id}, _) do
     case (Repo.get(Shitpost, id)) do

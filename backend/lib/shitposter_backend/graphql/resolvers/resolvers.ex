@@ -1,5 +1,4 @@
 defmodule ShitposterBackend.GraphQL.Resolvers do
-  import Ecto.Query
 
   alias Absinthe.Relay.Connection
 
@@ -37,10 +36,12 @@ defmodule ShitposterBackend.GraphQL.Resolvers do
 
   def all(fun, arg_keys) when is_function(fun) do
     fn source, args, info ->
-      fun
+      result = fun
       |> apply(collect_args(arg_keys, source, args, info))
       |> Junkyard.orderable(args)
       |> Connection.from_query(&Repo.all/1, args)
+
+      {:ok, result}
     end
   end
 

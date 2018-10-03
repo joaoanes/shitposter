@@ -36,7 +36,7 @@ defmodule ShitposterBackend.GraphQL.Resolvers.Junkyard do
           {
             from(
               [..., l] in query,
-              left_join: a in assoc(l, ^assoc_atom),
+              left_join: a in assoc(l, ^assoc_atom)
             ),
             last_target.__schema__(:association, assoc_atom).related,
           }

@@ -1,6 +1,6 @@
 defmodule ShitposterBackend.GraphQL.Types.Shitpost do
   use Absinthe.Schema.Notation
-  use Absinthe.Relay.Schema.Notation
+  use Absinthe.Relay.Schema.Notation, :classic
   use Absinthe.Ecto, repo: ShitposterBackend.Repo
 
   @desc "Possible shitpost types"

@@ -1,6 +1,6 @@
 defmodule ShitposterBackend.GraphQL.Schema do
   use Absinthe.Schema
-  use Absinthe.Relay.Schema
+  use Absinthe.Relay.Schema, :classic
   alias ShitposterBackend.GraphQL.Types.{Shitpost, User}
   alias ShitposterBackend.GraphQL.{Resolvers, Session}
   alias ShitposterBackend.GraphQL.Middlewares.{RequireAuthn, RequireBotAuthn}
