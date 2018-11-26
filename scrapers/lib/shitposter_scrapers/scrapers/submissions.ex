@@ -1,4 +1,4 @@
-alias Junkyard
+§§§alias Junkyard
 
 defmodule ShitposterScrapers.Submissions do
   @moduledoc """
@@ -180,7 +180,6 @@ defmodule ShitposterScrapers.Submissions do
     |> Enum.map(&(submission_creation_changeset(%{content_url: &1})))
     |> Enum.reduce(Ecto.Multi.new, fn changeset, multi ->
       if (Kernel.length(changeset.errors) != 0) do
-        IEx.pry
         multi
       else
         multi

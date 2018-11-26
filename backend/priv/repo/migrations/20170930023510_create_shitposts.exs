@@ -7,7 +7,6 @@ defmodule ShitposterBackend.Repo.Migrations.CreateShitposts do
       add :permalink, :string
       add :type, :string
       add :name, :string
-      add :rating, :integer
       add :source_id, references(:sources, on_delete: :nothing)
       add :submitter_id, references(:users, on_delete: :nothing)
 

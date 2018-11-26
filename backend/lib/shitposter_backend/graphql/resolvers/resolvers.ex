@@ -13,9 +13,22 @@ defmodule ShitposterBackend.GraphQL.Resolvers do
   end
 
   defp collect_args(arg_keys, source, args, info) do
-    ctx = %{source: source, args: args, info: Map.from_struct(info)}
+    source_struct = case Map.has_key?(source, :__struct__) do
+      true -> Map.from_struct(source)
+      false -> source
+    end
 
-    Enum.map(arg_keys, &get_in(ctx, &1))
+    ctx = %{source: source_struct, args: args, info: Map.from_struct(info)}
+
+    Enum.map(arg_keys, &safe_get_in(ctx, &1))
+  end
+
+  def safe_get_in(map, key) do
+    try do
+      get_in(map, key)
+    rescue
+      BadMapError -> nil
+    end
   end
 
   def assoc(assocs) do
@@ -41,7 +54,7 @@ defmodule ShitposterBackend.GraphQL.Resolvers do
       |> Junkyard.orderable(args)
       |> Connection.from_query(&Repo.all/1, args)
 
-      {:ok, result}
+      result
     end
   end
 

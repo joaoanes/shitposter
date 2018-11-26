@@ -2,16 +2,17 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { withStyles } from 'material-ui/styles'
 import Card, { CardActions } from 'material-ui/Card'
-import { Badge, Paper, Divider, Button, Tooltip } from 'material-ui'
+import { Paper, Divider, Button, Tooltip } from 'material-ui'
 import IconButton from 'material-ui/IconButton'
 import red from 'material-ui/colors/red'
-import FavoriteIcon from 'material-ui-icons/Favorite'
 import { Fullscreen } from 'material-ui-icons'
 import Share from 'material-ui-icons/Share'
 import { compose, mapProps, withState } from 'recompose'
 import { graphql } from 'react-apollo'
 import gql from 'graphql-tag'
 import AnimateHeight from 'react-animate-height'
+
+import RatingButton from './RatingButton'
 
 const styles = theme => ({
   card: {
@@ -81,8 +82,6 @@ class ShitpostCard extends React.Component {
       TypeRenderer = require('./renderers/default.js').default
     }
 
-    const heartColor = rated ? 'red' : (isRating ? 'rgba(200,30,30,0.25)' : null)
-
     return (
       <AnimateHeight
         duration={500}
@@ -144,25 +143,13 @@ class ShitpostCard extends React.Component {
               className={classes.actions}
               disableActionSpacing
             >
-              <Tooltip title='Like shitpost!'>
-                <IconButton
-                  aria-label='Heart'
-                  onClick={ratePost}
-                >
-                  { fullscreen
-                    ? (
-                      <Badge
-                        style={{ margin: 4 }}
-                        badgeContent={shitpost.rating || 0}
-                        color='primary'
-                      >
-                        <FavoriteIcon style={heartColor ? { color: heartColor } : {}} />
-                      </Badge>
-                    )
-                    : <FavoriteIcon style={heartColor ? { color: heartColor } : {}} />
-                  }
-                </IconButton>
-              </Tooltip>
+              <RatingButton
+                ratePost={ratePost}
+                shitpost={shitpost}
+                fullscreen={fullscreen}
+                rated={rated}
+                isRating={isRating}
+              />
               <Tooltip title='Get share link!'>
                 <IconButton aria-label='Share'>
                   <a
@@ -186,56 +173,5 @@ ShitpostCard.propTypes = {
 
 export default compose(
   withStyles(styles),
-  graphql(gql`
-  mutation ratePost($id: ID!) {
-    rateShitpost(id: $id) {
-      id
-      rating
-      name
-      permalink
-      url
-      type
-    }
-  }
-  `, {
-      name: 'ratePost',
-      options: ({ shitpost: { id } }) => ({
-        variables: {
-          id,
-        },
-      }),
-    }),
-  withState('isRating', 'setIsRating', false),
-  withState('rated', 'setRated', false),
   withState('fullscreen', 'setFullscreen', ({ fullscreen }) => fullscreen || false),
-  mapProps((props) => {
-    const ratesString = window.localStorage.getItem('rates')
-    const rates = new Set(
-      ratesString
-        ? JSON.parse(ratesString)
-        : []
-    )
-    return {
-      ...props,
-      ratePost: () => {
-        if (props.rated) {
-          return
-        }
-        props.setIsRating(true)
-        return props.ratePost().then(() => {
-          rates.add(props.shitpost.id)
-          window.localStorage.setItem(
-            'rates',
-            JSON.stringify(Array.from(rates))
-          )
-          props.setRated(true)
-        })
-      },
-      rated: rates.has(props.shitpost.id),
-      shitpost: {
-        ...props.shitpost,
-        url: props.shitpost.permalink || props.shitpost.url,
-      },
-    }
-  }),
 )(ShitpostCard)

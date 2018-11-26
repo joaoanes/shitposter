@@ -9,6 +9,8 @@ defmodule ShitposterBackend.Workers.Uploader do
   alias ShitposterBackend.Shitpost
   alias ExAws.S3
 
+  import IEx
+
   @behaviour Honeydew.Worker
 
   def init(_) do
@@ -16,7 +18,9 @@ defmodule ShitposterBackend.Workers.Uploader do
   end
 
   def host_permalink(%Shitpost{url: url} = shitpost, _state) do
-    case HTTPoison.get(url) do
+    # https://github.com/edgurgel/httpoison/issues/93
+    IEx.pry
+    case HTTPoison.get(url, [], hackney: [:insecure]) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         name = "#{Base.encode16(:crypto.hash(:md5, url))}"
         path = "/tmp/#{name}"

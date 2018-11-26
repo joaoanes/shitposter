@@ -1,7 +1,8 @@
 defmodule ShitposterBackend.Shitpost do
   use Ecto.Schema
   import Ecto.Changeset
-  alias ShitposterBackend.{Shitpost, User}
+  import Ecto.Query
+  alias ShitposterBackend.{Shitpost, User, Rating, Reaction, Source}
   alias ShitposterBackend.Repo
   require Logger
 
@@ -10,9 +11,10 @@ defmodule ShitposterBackend.Shitpost do
     field :permalink, :string
     field :name, :string
     field :type, :string #actually an enum!
-    field :rating, :integer
-    belongs_to :source, ShitposterBackend.Source
-    belongs_to :submitter, ShitposterBackend.User
+    belongs_to :source, Source
+    belongs_to :submitter, User
+    has_many :reactions, Reaction, foreign_key: :shitpost_id
+    many_to_many :ratings, Rating, join_through: "reactions"
 
     timestamps()
   end
@@ -22,55 +24,112 @@ defmodule ShitposterBackend.Shitpost do
   @doc false
   def changeset(%Shitpost{} = shitpost, attrs) do
     shitpost
-    |> cast(attrs, [:url, :type, :name, :source_id, :submitter_id, :rating, :permalink])
+    |> cast(attrs, [:url, :type, :name, :source_id, :submitter_id, :permalink])
+    |> cast_assoc(:reactions)
+    |> foreign_key_constraint(:submitter_id)
     |> validate_required([:url, :type])
   end
 
   def create(url, name) do
-    create(url, name, 0, nil, nil)
+    create(url, name, nil, nil, nil)
   end
 
-  def create(url, name, initial_rating, %User{id: submitter_id}, source_id) do
-    create(url, name, initial_rating, submitter_id, source_id)
+  def create(url, name, %User{id: submitter_id}, source_id, rating_ids) do
+    create(url, name, submitter_id, source_id, rating_ids)
   end
 
-  def create(url, name, initial_rating, submitter_id, source_id) do
+  def create(url, name, submitter_id, source_id, rating_ids) do
     categorizerOutput = {:categorize, [url]}
     |> Honeydew.async(:categorizer, reply: true)
     |> Honeydew.yield(15000)
 
     case categorizerOutput do
-      {:ok, [type, fixed_url]} -> Repo.insert(Shitpost.changeset(
-        %Shitpost{}, %{
-          url: fixed_url,
-          type: type,
-          name: name,
-          source_id: source_id,
-          submitter_id: submitter_id,
-          rating: initial_rating
-        }
-      ))
+      {:ok, [type, fixed_url]} -> Repo.transaction fn -> (
+        changeset = Shitpost.changeset(
+          %Shitpost{},
+          %{
+            url: fixed_url,
+            type: type,
+            name: name,
+            source_id: source_id,
+            submitter_id: submitter_id
+          }
+        )
+
+        shitpost = Repo.insert(
+          changeset
+        )
+        |> ShitposterBackend.Junkyard.ok!
+
+        IEx.pry
+        case rating_ids do
+          nil -> shitpost
+          _ -> (
+            rating_ids
+            |> Enum.map(fn rating_id ->
+              rating_object = Rating.get!(rating_id)
+              Ecto.build_assoc(shitpost, :reactions, %{user_id: submitter_id, rating_id: rating_object.id})
+              |> Repo.insert
+            end)
+          )
+        end
+
+      )
+      end
       {:error, _} -> {:error, ["oops"]}
     end
   end
 
-  def rate(id) do
-    case Repo.get(Shitpost, id) do
-      nil -> {:error, [id: "doesn't exist"]}
-      %Shitpost{} = shitpost -> bump_rating(shitpost)
-    end
+  def count_ratings(id) do
+    ratings = Repo.all(
+      from reaction in Reaction,
+        join: rating in assoc(reaction, :rating),
+        where: rating.id == reaction.rating_id,
+        where: reaction.shitpost_id == ^id,
+        group_by: rating.id,
+        select: {
+          rating.emoji,
+          count(rating.id)
+        }
+    )
+    |> Enum.map(fn {emoji, count} ->
+      %{
+        emoji: emoji,
+        count: count
+      }
+    end)
+
+    {:ok, ratings}
   end
 
-  defp bump_rating(%Shitpost{rating: rating} = shitpost) do
-    rating = rating || 1
-    new_shitpost = shitpost
-    |> changeset(%{rating: rating+1})
-    |> Repo.update
+  def rate(id, %User{id: id}, rating_id) do
+    rate(id, id, rating_id)
+  end
 
-    case new_shitpost do
-      {:ok, %Shitpost{permalink: p, rating: r} = shitpost} when r > @threshold and is_nil(p)-> host_permalink(shitpost)
-      {:ok, %Shitpost{} = shitpost} -> {:ok, shitpost}
-      _ -> {:error, ["oops!"]}
+  def rate(id, rater_id, rating_id) do
+    shitpost = Repo.get!(Shitpost, id) |> Repo.preload(:reactions)
+
+    rating = Repo.get!(Rating, rating_id)
+    Ecto.build_assoc(shitpost, :reactions, %{user_id: rater_id, rating_id: rating.id})
+    |> Repo.insert!
+
+    updated_shitpost = Repo.get!(Shitpost, shitpost.id) |> Repo.preload(:reactions)
+
+    case is_nil(updated_shitpost.permalink) do
+      false -> {:ok, updated_shitpost}
+      true ->
+        [{ratings_count}] = Repo.all(
+          from reaction in Reaction,
+            where: reaction.shitpost_id == ^id,
+            select: {
+              count(reaction.shitpost_id)
+            }
+        )
+
+        case ratings_count >= @threshold do
+          true -> host_permalink(updated_shitpost)
+          false -> {:ok, updated_shitpost}
+        end
     end
   end
 

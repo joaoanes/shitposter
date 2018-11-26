@@ -1,27 +1,46 @@
+
 import React, { Component } from 'react'
 import { compose, branch, renderComponent } from 'recompose'
 import { graphql } from 'react-apollo'
 import gql from 'graphql-tag'
+import { find, get } from 'lodash'
 import { CircularProgress } from 'material-ui/Progress'
-import EnhancedShitpostCard from './EnhancedShitpostCard'
+import FacebookSelector from '../components/StolenFacebookSelector'
 
-class ShitpostGQL extends Component {
+class ShitpostEmojiList extends Component {
   props: {
     data: {
-      shitpost: Object,
+      ratings: Object,
     },
+    reactions: Object,
+    onSelect: (id:Number, ratingId:Number) => void,
   }
 
   render () {
     const {
-      data: { shitpost },
+      data: { ratings },
+      reactions,
+      onSelect,
+      rated,
     } = this.props
+
+    const reactionsWithAllRatings = ratings.map(({ emoji, id }) => {
+      const foundReactions = find(reactions,
+        ({ emoji: reactionEmoji }) => reactionEmoji === emoji
+      )
+      return {
+        emoji,
+        id,
+        count: get(foundReactions, 'count', 0),
+      }
+    })
 
     return (
       <div style={styles.container}>
-        <EnhancedShitpostCard
-          key={shitpost.id}
-          shitpost={shitpost}
+        <FacebookSelector
+          showLabels={rated}
+          reactions={reactionsWithAllRatings}
+          onSelect={onSelect}
         />
       </div>
     )
@@ -38,31 +57,16 @@ const styles = {
 
 export default compose(
   graphql(gql`
-  query getShitpost($id: Int!) {
-    shitpost(id: $id)
-    {
+  query getRatings {
+    ratings {
+      emoji
       id
-      permalink
-      url
-      type
-      name
-      fakeReactions {
-        emoji
-        count
-      }
-      source {
-        name
-      }
     }
   }
-  `, {
-    options: ({ match: { params: { id } } }) => ({
-
-      variables: { id },
-    }),
-  }),
+  `),
   branch(
     ({ data: { networkStatus } }) => networkStatus < 3, // ? console.log(`starting at ${(new Date()).getTime()}`) || true : console.log(`ending at ${(new Date()).getTime()}`) && false,
     renderComponent(() => <div style={{ margin: 40, display: 'flex', justifyContent: 'center' }}><CircularProgress /></div>)
   ),
-)(ShitpostGQL)
+
+)(ShitpostEmojiList)

@@ -1,10 +1,10 @@
 defmodule ShitposterBackend.GraphQL.Schema do
   use Absinthe.Schema
   use Absinthe.Relay.Schema, :classic
+  alias ShitposterBackend.GraphQL.Resolvers
   alias ShitposterBackend.GraphQL.Types.{Shitpost, User}
   alias ShitposterBackend.GraphQL.{Resolvers, Session}
   alias ShitposterBackend.GraphQL.Middlewares.{RequireAuthn, RequireBotAuthn}
-
 
   import_types Shitpost
   import_types User
@@ -13,6 +13,13 @@ defmodule ShitposterBackend.GraphQL.Schema do
     field :shitpost, :shitpost do
       arg :id, type: non_null(:id)
       resolve Resolvers.by_id(ShitposterBackend.Shitpost)
+    end
+
+    field :ratings, list_of(:rating) do
+      resolve Resolvers.run(
+        &ShitposterBackend.Rating.all/0,
+        []
+      )
     end
 
     connection field :shitposts, node_type: :shitpost do
@@ -48,7 +55,7 @@ defmodule ShitposterBackend.GraphQL.Schema do
       middleware RequireBotAuthn
       arg :url, non_null(:string)
       arg :name, :string
-      arg :initial_rating, :integer
+      arg :reactions, list_of(:reaction_input)
       arg :source_id, :integer
 
       resolve Resolvers.run(
@@ -56,9 +63,9 @@ defmodule ShitposterBackend.GraphQL.Schema do
         [
           [:args, :url],
           [:args, :name],
-          [:args, :initial_rating],
           [:info, :context, :current_user],
           [:args, :source_id],
+          [:args, :reactions],
         ]
       )
     end
@@ -66,11 +73,14 @@ defmodule ShitposterBackend.GraphQL.Schema do
     @desc "Rate shitpost"
     field :rate_shitpost, type: :shitpost do
       arg :id, non_null(:id)
+      arg :rating_id, non_null(:id)
 
       resolve Resolvers.run(
-        &ShitposterBackend.Shitpost.rate/1,
+        &ShitposterBackend.Shitpost.rate/3,
         [
           [:args, :id],
+          [:info, :context, :current_user, Access.key(:id)],
+          [:args, :rating_id],
         ]
       )
     end

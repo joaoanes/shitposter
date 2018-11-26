@@ -11,10 +11,6 @@ export default class DefaultRenderer extends React.Component {
       },
     }
 
-    handleError = () => {
-      debugger //eslint-disable-line
-    }
-
     render () {
       const { fullscreen, shitpost: { url } } = this.props
       if (fullscreen) {

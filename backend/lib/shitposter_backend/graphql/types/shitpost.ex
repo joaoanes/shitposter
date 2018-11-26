@@ -2,6 +2,7 @@ defmodule ShitposterBackend.GraphQL.Types.Shitpost do
   use Absinthe.Schema.Notation
   use Absinthe.Relay.Schema.Notation, :classic
   use Absinthe.Ecto, repo: ShitposterBackend.Repo
+  alias ShitposterBackend.GraphQL.Resolvers
 
   @desc "Possible shitpost types"
   enum :shitpost_type do
@@ -25,14 +26,45 @@ defmodule ShitposterBackend.GraphQL.Types.Shitpost do
     field :permalink, :string
     field :type, :shitpost_type
     field :url, :string
-    field :rating, :integer
     field :source, :user, resolve: assoc(:source)
     field :submitter, :user, resolve: assoc(:submitter)
+    field :reactions, list_of(:reaction), resolve: assoc(:reactions)
+    field :fake_reactions, list_of(:fake_reaction), resolve: Resolvers.run(
+      &ShitposterBackend.Shitpost.count_ratings/1,
+      [
+        [:source, :id],
+      ]
+    )
   end
 
   @desc "Source"
   object :source do
     field :name, :string
+  end
+
+  @desc "Rating"
+  object :rating do
+    field :emoji, :string
+    field :id, :integer
+  end
+
+  object :fake_reaction do
+    field :emoji, :string
+    field :count, :integer
+  end
+
+  @desc "Reactions"
+  object :reaction do
+    field :user, :user, resolve: assoc(:user)
+    field :shitpost, :shitpost, resolve: assoc(:shitpost)
+    field :rating, :rating, resolve: assoc(:rating)
+  end
+
+  @desc "Reactions input"
+  input_object :reaction_input do
+    field :user_id, :id
+    field :shitpost_id, :id
+    field :rating_id, :id
   end
 
 end

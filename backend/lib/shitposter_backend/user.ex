@@ -11,6 +11,9 @@ defmodule ShitposterBackend.User do
     field :password_hash, :string
     field :is_bot, :boolean
 
+    has_many :reactions, ShitposterBackend.Reaction
+    has_many :rated_shitposts, through: [:reactions, :shitpost]
+
     timestamps()
   end
 

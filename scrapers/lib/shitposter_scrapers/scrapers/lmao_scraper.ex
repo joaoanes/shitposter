@@ -233,7 +233,6 @@
         |> Submissions.find_or_create_all
     catch
       e ->
-        IEx.pry
         IO.puts "Error #{e}"
         nil
     end

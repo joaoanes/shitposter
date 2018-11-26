@@ -4,9 +4,10 @@ import { graphql } from 'react-apollo'
 import gql from 'graphql-tag'
 import { CircularProgress } from 'material-ui/Progress'
 import { paginated } from '../apollo/client'
-import ShitpostCard from '../components/ShitpostCard'
 import NewShitpostCard from '../components/NewShitpostCard'
 import InfiniteScroll from 'react-infinite-scroll-component'
+import ShitpostCardMutation from '../hocs/ShitpostCardMutation'
+import EnhancedShitpostCard from './EnhancedShitpostCard'
 
 class ShitpostList extends Component {
   props: {
@@ -40,7 +41,14 @@ class ShitpostList extends Component {
         hasMore={hasNextPage}
         endMessage={(
           <p style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', marginBottom: 40, marginTop: 40 }}>
-            <b>Yay! You have seen it all! 💖</b>
+            <b>Yay! You have seen it all!
+              <span
+                role='img'
+                aria-label='lovely'
+              >
+                💖
+              </span>
+            </b>
             <b>Now go submit some more shit(post)!</b>
           </p>
         )}
@@ -49,7 +57,7 @@ class ShitpostList extends Component {
           <NewShitpostCard />
           {
             shitposts.map((shitpost) => (
-              <ShitpostCard
+              <EnhancedShitpostCard
                 key={shitpost.id}
                 shitpost={shitpost}
               />
@@ -92,7 +100,10 @@ export default compose(
           url
           type
           name
-          rating
+          fakeReactions {
+            emoji
+            count
+          }
           source {
             name
           }
@@ -110,5 +121,4 @@ export default compose(
     ({ data: { networkStatus } }) => networkStatus < 3, // ? console.log(`starting at ${(new Date()).getTime()}`) || true : console.log(`ending at ${(new Date()).getTime()}`) && false,
     renderComponent(() => <div style={{ margin: 40, display: 'flex', justifyContent: 'center' }}><CircularProgress /></div>)
   ),
-
 )(ShitpostList)

@@ -85,14 +85,8 @@ class ShitpostCard extends React.Component {
     this.props.setUrl(value)
   }
 
-  handleFocus = (e) => {
-    console.log(e)
-    debugger //eslint-disable-line
-  }
-
   render () {
     const { classes, validInput, url, canRender, focused, loading } = this.props
-    console.log(this.props.focused)
     return (
       <div>
         <Card className={classes.card}>
