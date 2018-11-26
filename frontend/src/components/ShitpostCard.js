@@ -174,4 +174,11 @@ ShitpostCard.propTypes = {
 export default compose(
   withStyles(styles),
   withState('fullscreen', 'setFullscreen', ({ fullscreen }) => fullscreen || false),
+  mapProps((props) => ({
+    ...props,
+    shitpost: {
+      ...props.shitpost,
+      url: props.shitpost.permalink || props.shitpost.url,
+    },
+  }))
 )(ShitpostCard)

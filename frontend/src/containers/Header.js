@@ -7,8 +7,8 @@ export default class Root extends Component {
       <div style={styles.header}>
         <Giphy />
         <div style={styles.titleContainer}>
-          <span style={styles.title}>Shitposter</span>
-          <span style={styles.subTitle}>v0.1</span>
+          <span style={styles.title}>Shitpost.network</span>
+          <span style={styles.subTitle}>v0.2</span>
         </div>
       </div>
     )
@@ -57,6 +57,6 @@ const styles = {
     fontSize: 20,
     textShadow: '1px 1px black',
     position: 'absolute',
-    bottom: 0,
+    bottom: -15,
   },
 }
