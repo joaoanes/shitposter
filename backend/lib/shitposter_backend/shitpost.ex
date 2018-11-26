@@ -61,7 +61,6 @@ defmodule ShitposterBackend.Shitpost do
         )
         |> ShitposterBackend.Junkyard.ok!
 
-        IEx.pry
         case rating_ids do
           nil -> shitpost
           _ -> (
