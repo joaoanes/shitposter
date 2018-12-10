@@ -17,7 +17,11 @@ defmodule ShitposterScrapersWeb.Router do
     pipe_through :browser # Use the default browser stack
 
     get "/", PageController, :index
-    resources "/scrapers", ScraperController
+    resources "/scrapers", ScraperController do
+
+      get "/scrape", ScraperController, :scrape, as: :scrape
+
+    end
   end
 
   # Other scopes may use custom stacks.

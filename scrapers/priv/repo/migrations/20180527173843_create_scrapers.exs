@@ -7,6 +7,7 @@ defmodule ShitposterScrapers.Repo.Migrations.CreateScrapers do
       add :current_thread_id, :string
       add :last_content_id, :integer
       add :last_page_id, :integer
+      add :elixir_class_name, :string
 
       timestamps()
     end

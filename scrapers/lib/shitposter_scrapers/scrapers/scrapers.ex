@@ -111,12 +111,12 @@ defmodule ShitposterScrapers.Scrapers do
     end
   end
 
-  def find_or_create(name) do
+  def find_or_create(name, elixir_class_name) do
     query = from s in Scraper,
-      where: s.name == ^name
+      where: s.name == ^name and s.elixir_class_name == ^elixir_class_name
 
     Repo.one(query) || (
-      Scraper.changeset(%Scraper{}, %{ name: name })
+      Scraper.changeset(%Scraper{}, %{ name: name, elixir_class_name: elixir_class_name })
       |> Repo.insert!
     )
   end

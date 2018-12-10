@@ -36,6 +36,19 @@ defmodule ShitposterScrapersWeb.ScraperController do
     render(conn, "edit.html", scraper: scraper, changeset: changeset)
   end
 
+  def scrape(conn, %{"scraper_id" => id}) do
+    scraper = Scrapers.get_scraper!(id)
+    changeset = Scrapers.change_scraper(scraper)
+
+    Task.Supervisor.async_nolink(ShitposterScrapers.TaskSupervisor, fn ->
+      apply(String.to_existing_atom("Elixir.ShitposterScrapers.Scrapers.#{scraper.elixir_class_name}"), :scrape, [])
+    end)
+
+    conn
+    |> put_flash(:info, "Scraper engaged.")
+    |> redirect(to: scraper_path(conn, :show, scraper))
+  end
+
   def update(conn, %{"id" => id, "scraper" => scraper_params}) do
     scraper = Scrapers.get_scraper!(id)
 

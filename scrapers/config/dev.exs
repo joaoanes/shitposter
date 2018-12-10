@@ -7,7 +7,7 @@ use Mix.Config
 # watchers to your application. For example, we use it
 # with brunch.io to recompile .js and .css sources.
 config :shitposter_scrapers, ShitposterScrapersWeb.Endpoint,
-  http: [port: 4000],
+  load_from_system_env: true,
   debug_errors: true,
   code_reloader: true,
   check_origin: false,
@@ -42,7 +42,7 @@ config :shitposter_scrapers, ShitposterScrapersWeb.Endpoint,
   ]
 
 # Do not include metadata nor timestamps in development logs
-config :logger, :console, format: "[$level] $message\n"
+config :logger, :console, format: "[$level] $message\n", level: :info
 
 # Set a higher stacktrace during development. Avoid configuring such
 # in production as building large stacktraces may be expensive.

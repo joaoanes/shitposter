@@ -12,6 +12,7 @@ defmodule ShitposterScrapers.Application do
       supervisor(ShitposterScrapers.Repo, []),
       # Start the endpoint when the application starts
       supervisor(ShitposterScrapersWeb.Endpoint, []),
+      supervisor(Task.Supervisor, [[name: ShitposterScrapers.TaskSupervisor]]),
       # Start your own worker by calling: ShitposterScrapers.Worker.start_link(arg1, arg2, arg3)
       # worker(ShitposterScrapers.Worker, [arg1, arg2, arg3]),
       worker(ShitposterScrapers.Scheduler, []),

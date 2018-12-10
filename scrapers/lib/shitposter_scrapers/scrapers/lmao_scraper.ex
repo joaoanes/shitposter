@@ -4,29 +4,29 @@
   alias ShitposterScrapers.Scrapers
   alias ShitposterScrapers.Submissions
   alias Junkyard
+  require Logger
   import IEx
 
 
   def scrape do
-    Scrapers.find_or_create("LMAOBOT3000")
+    Scrapers.find_or_create("LMAOBOT3000", "LMAOScraper")
       |> parse_threads
-
   end
 
   def scrape_test do
-    Scrapers.find_or_create("LMAOBOT3000")
+    Scrapers.find_or_create("LMAOBOT3000", "LMAOScraper")
       |> parse_thread("utuy")
   end
 
   def scrape_thread_ids do
-    "https://forum.facepunch.com/search/?q=LMAO+(pictures+%7C%7C+pics)+v&type=Thread&forum=12"
+    "https://forum.facepunch.com/search/?q=LMAO+(pictures+%7C%7C+pics)+v&type=Thread&forum=11"
       |> HTTPoison.get
       |> Junkyard.ok!
       |> Map.get(:body)
       |> Floki.find(".searchheader a")
       |> Floki.attribute("href")
       |> Enum.map(fn url ->
-        Regex.scan(~r/\/f\/fastthread\/([a-z]*)\/.*/, url)
+        Regex.scan(~r/\/f\/general\/([a-z]*)\/.*/, url)
       end)
       |> Enum.map(&(
         List.last(
@@ -135,7 +135,7 @@
 
   def parse_page(page_id, scraper, thread_id, final_page_id) do
     results = parse_page(page_id, scraper, thread_id)
-    IO.inspect "Parsed #{page_id}/#{final_page_id}, #{Kernel.length(
+    Logger.debug "Parsed #{page_id}/#{final_page_id}, #{Kernel.length(
       Enum.map(results, &(Map.get(&1, :extracted)))
       |> Enum.filter(fn x -> Kernel.length(x) != 0 end)
     )}"
@@ -198,7 +198,7 @@
       true ->
         Scrapers.update_scraper(scraper, %{current_thread_id: thread_id})
         |> Junkyard.ok!
-        IO.puts "Updated current thread to #{thread_id}"
+        Logger.info "Updated scraper #{scraper.id} current thread to #{thread_id}"
     end
     submissions
   end
@@ -211,7 +211,7 @@
       _ -> 0
     end
 
-    IO.puts "Fetching thread #{thread_id}"
+    Logger.info "Fetching thread #{thread_id}"
 
     candidate_urls = Task.async_stream(
       current_thread_page..final_thread_page,
@@ -233,7 +233,7 @@
         |> Submissions.find_or_create_all
     catch
       e ->
-        IO.puts "Error #{e}"
+        Logger.error "Error #{e}"
         nil
     end
   end

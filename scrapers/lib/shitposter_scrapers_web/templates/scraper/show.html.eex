@@ -17,6 +17,13 @@
     <%= @scraper.last_page_id %>
   </li>
 
+    <li>
+    <strong>Current page:</strong>
+    <%= @scraper.current_thread_id %>
+  </li>
+
+  <%= link "Scrape", to: scraper_scrape_path(@conn, :scrape, @scraper) %>
+
 </ul>
 
 <span><%= link "Edit", to: scraper_path(@conn, :edit, @scraper) %></span>

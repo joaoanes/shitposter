@@ -1,4 +1,5 @@
-§§§alias Junkyard
+alias Junkyard
+require Logger
 
 defmodule ShitposterScrapers.Submissions do
   @moduledoc """
@@ -143,19 +144,18 @@ defmodule ShitposterScrapers.Submissions do
       )
 
     case (res) do
-      {:ok, %HTTPoison.Response{body: body}} -> (
+      {:ok, res = %HTTPoison.Response{body: body, status_code: 200}} -> (
         submitted_id = body
           |> Poison.decode
           |> Junkyard.ok!
           |> Kernel.get_in(["data", "addShitpost", "id"])
-          IO.inspect "Pushing #{content_url} to #{hostname} as #{submitted_id}"
+          Logger.debug "Pushed #{content_url} to #{hostname} as #{submitted_id}"
 
         update_submission(submission, %{submitted_id: submitted_id})
           |> Junkyard.ok!
-
       )
-      {:error, err} ->
-        IO.inspect "Failed pushing #{content_url} to #{hostname}"
+      _ ->
+        Logger.warn "Failed pushing #{content_url} to #{hostname}"
         submission
     end
   end
