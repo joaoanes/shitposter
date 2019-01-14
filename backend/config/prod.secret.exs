@@ -14,7 +14,5 @@ config :shitposter_backend, ShitposterBackend.Web.Endpoint,
 # Configure your database
 config :shitposter_backend, ShitposterBackend.Repo,
   adapter: Ecto.Adapters.Postgres,
-  username: "postgres",
-  password: "postgres",
-  database: "shitposter_backend_prod",
+  database: "shitposter_production",
   pool_size: 15
