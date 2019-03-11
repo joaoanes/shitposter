@@ -10,6 +10,7 @@ export default (component) => compose(
   mutation rateShitpost($shitpostId: ID!, $ratingId: ID!) {
     rateShitpost(id: $shitpostId, ratingId: $ratingId) {
       id
+      permalink
       fakeReactions {
         emoji
         count
