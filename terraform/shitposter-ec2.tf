@@ -75,4 +75,3 @@ resource "aws_iam_instance_profile" "shitposter" {
 output "ssh string" {
   value = "ssh ubuntu@${aws_instance.shitposter.public_ip}"
 }
-

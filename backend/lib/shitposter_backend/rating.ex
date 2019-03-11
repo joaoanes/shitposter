@@ -4,7 +4,6 @@ defmodule ShitposterBackend.Rating do
   import Ecto.Query, only: [from: 2]
 
   alias ShitposterBackend.Repo
-  import IEx
 
   schema "ratings" do
     field :emoji, :string
@@ -35,7 +34,10 @@ defmodule ShitposterBackend.Rating do
   end
 
   def get!(id) do
-    Repo.one!(Rating, id)
+    query = from r in ShitposterBackend.Rating,
+      where: r.id == ^id
+
+    Repo.one!(query)
   end
 
   def all do

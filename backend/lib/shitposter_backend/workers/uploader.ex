@@ -9,8 +9,6 @@ defmodule ShitposterBackend.Workers.Uploader do
   alias ShitposterBackend.Shitpost
   alias ExAws.S3
 
-  import IEx
-
   @behaviour Honeydew.Worker
 
   def init(_) do

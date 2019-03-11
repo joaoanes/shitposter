@@ -52,4 +52,3 @@ defmodule ShitposterBackend.GraphQL.Middlewares do
   end
 
 end
-

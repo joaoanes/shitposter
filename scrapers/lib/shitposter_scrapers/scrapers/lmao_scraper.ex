@@ -69,7 +69,6 @@
     end
   end
 
-
   def thread_size(thread_id) do
     req = "https://forum.facepunch.com/f/fastthread/#{thread_id}/1/?json=1" |> HTTPoison.get
 
@@ -163,7 +162,6 @@
             _ -> Map.put(post, :extracted, content)
           end
           ) end )
-
 
     catch
       {:invalid, _, _} -> []

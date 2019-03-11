@@ -54,18 +54,20 @@ defmodule ShitposterBackend.GraphQL.Schema do
     field :add_shitpost_adv, type: :shitpost do
       middleware RequireBotAuthn
       arg :url, non_null(:string)
+      arg :url_date, :string
       arg :name, :string
       arg :reactions, list_of(:reaction_input)
       arg :source_id, :integer
 
       resolve Resolvers.run(
-        &ShitposterBackend.Shitpost.create/5,
+        &ShitposterBackend.Shitpost.create/6,
         [
           [:args, :url],
           [:args, :name],
           [:info, :context, :current_user],
           [:args, :source_id],
           [:args, :reactions],
+          [:args, :url_date],
         ]
       )
     end

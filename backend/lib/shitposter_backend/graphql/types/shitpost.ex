@@ -26,6 +26,7 @@ defmodule ShitposterBackend.GraphQL.Types.Shitpost do
     field :permalink, :string
     field :type, :shitpost_type
     field :url, :string
+    field :url_date, :string
     field :source, :user, resolve: assoc(:source)
     field :submitter, :user, resolve: assoc(:submitter)
     field :reactions, list_of(:reaction), resolve: assoc(:reactions)
@@ -62,9 +63,9 @@ defmodule ShitposterBackend.GraphQL.Types.Shitpost do
 
   @desc "Reactions input"
   input_object :reaction_input do
-    field :user_id, :id
-    field :shitpost_id, :id
-    field :rating_id, :id
+    field :user_id, :integer
+    field :shitpost_id, :integer
+    field :rating_id, :integer
   end
 
 end

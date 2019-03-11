@@ -6,11 +6,14 @@ defmodule ShitposterBackend.Shitpost do
   alias ShitposterBackend.Repo
   require Logger
 
+  import IEx
+
   schema "shitposts" do
     field :url, :string
     field :permalink, :string
     field :name, :string
     field :type, :string #actually an enum!
+    field :url_date, :date
     belongs_to :source, Source
     belongs_to :submitter, User
     has_many :reactions, Reaction, foreign_key: :shitpost_id
@@ -24,21 +27,22 @@ defmodule ShitposterBackend.Shitpost do
   @doc false
   def changeset(%Shitpost{} = shitpost, attrs) do
     shitpost
-    |> cast(attrs, [:url, :type, :name, :source_id, :submitter_id, :permalink])
+    |> cast(attrs, [:url, :type, :name, :url_date, :source_id, :submitter_id, :permalink])
     |> cast_assoc(:reactions)
     |> foreign_key_constraint(:submitter_id)
+    |> foreign_key_constraint(:source_id)
     |> validate_required([:url, :type])
   end
 
   def create(url, name) do
-    create(url, name, nil, nil, nil)
+    create(url, name, nil, nil, nil, nil)
   end
 
-  def create(url, name, %User{id: submitter_id}, source_id, rating_ids) do
-    create(url, name, submitter_id, source_id, rating_ids)
+  def create(url, name, %User{id: submitter_id}, source_id, rating_ids, url_date) do
+    create(url, name, submitter_id, source_id, rating_ids, url_date)
   end
 
-  def create(url, name, submitter_id, source_id, rating_ids) do
+  def create(url, name, submitter_id, source_id, rating_ids, url_date) do
     categorizerOutput = {:categorize, [url]}
     |> Honeydew.async(:categorizer, reply: true)
     |> Honeydew.yield(15000)
@@ -52,7 +56,8 @@ defmodule ShitposterBackend.Shitpost do
             type: type,
             name: name,
             source_id: source_id,
-            submitter_id: submitter_id
+            submitter_id: submitter_id,
+            url_date: url_date,
           }
         )
 
@@ -65,17 +70,20 @@ defmodule ShitposterBackend.Shitpost do
           nil -> shitpost
           _ -> (
             rating_ids
-            |> Enum.map(fn rating_id ->
+            |> Enum.map(fn (%{rating_id: rating_id}) ->
+
               rating_object = Rating.get!(rating_id)
-              Ecto.build_assoc(shitpost, :reactions, %{user_id: submitter_id, rating_id: rating_object.id})
+              Ecto.build_assoc(shitpost, :reactions, %{rating_id: rating_object.id})
               |> Repo.insert
             end)
+
+            shitpost
           )
         end
 
       )
       end
-      {:error, _} -> {:error, ["oops"]}
+      _ -> {:error, ["oops"]}
     end
   end
 
@@ -107,8 +115,8 @@ defmodule ShitposterBackend.Shitpost do
 
   def rate(id, rater_id, rating_id) do
     shitpost = Repo.get!(Shitpost, id) |> Repo.preload(:reactions)
-
     rating = Repo.get!(Rating, rating_id)
+
     Ecto.build_assoc(shitpost, :reactions, %{user_id: rater_id, rating_id: rating.id})
     |> Repo.insert!
 

@@ -9,7 +9,7 @@ defmodule ShitposterBackend.Junkyard do
       [{:ok, res}] -> res
       {:ok, res} -> res
       {:error, err} -> (
-        throw err
+        raise err
       )
     end
   end
