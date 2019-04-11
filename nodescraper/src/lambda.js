@@ -1,119 +1,56 @@
-const { flatten, get } = require('lodash')
-const ProgressBar = require('progress')
+const { get } = require('lodash')
 
-const { parse, fetch } = require('./lmaoscraper')
-const { submit } = require('./submitter')
-const { executeInChunks } = require('./junkyard')
+const { list, fetch, IndexReconstructionStopped, ensureIndexUpdated } = require('./nextLmaoScraper')
 const { threadEvent } = require('./log')
-const { uploadThreadPosts, loadFromS3, uploadPosts } = require('./upload')
 
-const apiGatewayResponse = (body) => ({
+const apiGatewayResponse = (body, statusCode = 200) => ({
   'isBase64Encoded': false,
-  'statusCode': 200,
+  statusCode,
   'headers': {},
   'body': JSON.stringify(body),
 })
 
-const submitPosts = async (event, context, callback) => {
-  threadEvent('parsing', 'begin')
-  const posts = await loadFromS3(`${event.id}/urls.json`)
+const newList = async (event) => {
+  threadEvent('list', 'begin', { event })
 
-  const normalizedUrls = flatten(
-    posts.map(([urls, meta]) => urls.map(url => [url, meta]))
-  )
-
-  const bar = new ProgressBar('submitting [:bar] :current/:total :percent :etas', { total: normalizedUrls.length })
-  bar.tick()
-
-  const submitThunks = normalizedUrls.map(([url, { ratingIds, urlDate }]) => () => (
-    submit(url, ratingIds, urlDate)
-      .catch((e) => console.error(e))
-      .then(() => bar.tick())
-  ))
-
-  await executeInChunks(
-    submitThunks,
-    (new Date()).getTime() + 900000,
-    40
-  )
-
-  return apiGatewayResponse({})
+  return apiGatewayResponse({
+    posts: await list(
+      get(event, 'lastPostId', null),
+    ),
+  })
 }
 
-const parseThreads = async (event) => {
-  threadEvent('parsing', 'begin')
-  const threads = get(event, 'multiValueQueryStringParameters.threads', null)
+const newFetch = async (event) => {
+  threadEvent('fetch', 'begin', { event })
 
-  const threadPosts = flatten(
-    await Promise.all(
-      threads.map((threadId) => loadFromS3(`${event.id}/threads/${threadId}.json`))
+  const posts = await fetch(
+    get(event, 'lastPostId', null),
+    get(event, 'posts', undefined)
+  )
+  threadEvent('fetch', 'end', { event })
+
+  return apiGatewayResponse({
+    posts,
+  })
+}
+
+const updateIndex = async (event) => {
+  threadEvent('updateIndex', 'begin', { event })
+  try {
+    await ensureIndexUpdated(
+      get(event, 'lastPostId', null)
     )
-  )
-
-  const results = await parse(
-    threadPosts,
-  )
-
-  await uploadPosts(event)(results)
-
-  threadEvent('parsing', 'end')
-
-  return apiGatewayResponse({ postCount: results.length })
+    threadEvent('updateIndex', 'end', { event })
+    return apiGatewayResponse()
+  } catch (e) {
+    if (e instanceof IndexReconstructionStopped) {
+      return apiGatewayResponse({ lastSeen: e.lastSeenPost }, 503)
+    } else {
+      throw e
+    }
+  }
 }
 
-const fetchThreads = async (event) => {
-  threadEvent('fetching', 'begin')
-  const threads = get(event, 'multiValueQueryStringParameters.threads', null)
-
-  const results = await fetch(
-    threads,
-    uploadThreadPosts(event),
-  )
-
-  threadEvent('fetching', 'end')
-
-  return apiGatewayResponse({ threads: Object.keys(results) })
-}
-
-const all = async (event) => {
-  const threads = get(event, 'multiValueQueryStringParameters.threads', null)
-
-  const threadRawPosts = await fetch(
-    threads,
-    async (e) => e
-  )
-
-  const posts = await parse(
-    flatten(
-      Object.values(
-        threadRawPosts,
-      )
-    )
-  )
-
-  const normalizedUrls = flatten(
-    posts.map(([urls, meta]) => urls.map(url => [url, meta]))
-  )
-
-  const bar = new ProgressBar('submitting [:bar] :current/:total :percent :etas', { total: normalizedUrls.length })
-  bar.tick()
-
-  const submitThunks = normalizedUrls.map(([url, { ratingIds, urlDate }]) => () => (
-    submit(url, ratingIds, urlDate)
-      .catch((e) => console.error(e))
-      .then(() => bar.tick())
-  ))
-
-  await executeInChunks(
-    submitThunks,
-    (new Date()).getTime() + 900000,
-    40
-  )
-
-  return apiGatewayResponse({})
-}
-
-exports.parse = parseThreads
-exports.submit = submitPosts
-exports.fetch = fetchThreads
-exports.all = all
+exports.list = newList
+exports.fetch = newFetch
+exports.updateIndex = updateIndex

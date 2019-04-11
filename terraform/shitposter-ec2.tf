@@ -1,6 +1,6 @@
 resource "aws_instance" "shitposter" {
   ami = "${data.aws_ami.ubuntu-bionic.id}"
-  instance_type = "t2.nano"
+  instance_type = "t2.medium"
   key_name = "${aws_key_pair.mac.key_name}"
 
   security_groups = [
@@ -55,7 +55,7 @@ resource "aws_instance" "shitposter" {
         "MIX_ENV=prod mix deps.get",
         "MIX_ENV=prod mix deps.compile",
 
-        "sudo sh -c \"echo '[Unit]\nDescription=My app daemon\n[Service]\nType=simple\nUser=ubuntu\nRestart=on-failure\nEnvironment=MIX_ENV=prod PORT=4000\nEnvironment=DATABASE_URL=${data.template_file.database_dsn.rendered}\nWorkingDirectory=/home/ubuntu/shitposter/backend\nExecStart=/usr/local/bin/mix phoenix.server\n[Install]\nWantedBy=multi-user.target' > /etc/systemd/system/shitposter.service\"",
+        "sudo sh -c \"echo '[Unit]\nDescription=Shitposter!\n[Service]\nType=simple\nUser=ubuntu\nRestart=on-failure\nEnvironment=MIX_ENV=prod\nEnvironment=PORT=4000\nEnvironment=DATABASE_URL=${data.template_file.database_dsn.rendered}\nWorkingDirectory=/home/ubuntu/shitposter/backend\nExecStart=/usr/bin/mix phx.server\n[Install]\nWantedBy=multi-user.target' > /etc/systemd/system/shitposter.service\"",
         "sudo systemctl enable shitposter",
 
         "MIX_ENV=prod DATABASE_URL=${data.template_file.database_dsn.rendered} mix do ecto.migrate",

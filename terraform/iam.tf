@@ -1,8 +1,9 @@
 resource "aws_iam_policy" "shitposter" {
-    name        = "shitposter-policy"
-    path        = "/"
-    description = ""
-    policy      = <<POLICY
+  name        = "shitposter-policy"
+  path        = "/"
+  description = ""
+
+  policy = <<POLICY
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -17,16 +18,22 @@ resource "aws_iam_policy" "shitposter" {
         "arn:aws:s3:::shitposter-content/previews/*",
         "arn:aws:s3:::shitposter-content/content/*"
       ]
-    }
+    },
+     {
+        "Effect": "Allow",
+        "Action": "lambda:InvokeFunction",
+        "Resource": "arn:aws:lambda:${var.aws_region}:${var.aws_account_id}:function:*"
+      }
   ]
 }
 POLICY
 }
 
 resource "aws_iam_role" "shitposter_ec2" {
-    name               = "shitposter_ec2_role"
-    path               = "/"
-    assume_role_policy = <<POLICY
+  name = "shitposter_ec2_role"
+  path = "/"
+
+  assume_role_policy = <<POLICY
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -42,14 +49,15 @@ resource "aws_iam_role" "shitposter_ec2" {
 }
 POLICY
 }
+
 resource "aws_iam_policy_attachment" "shitposter-attach" {
-    name       = "shitposter-s3-ec2-attachment"
-    policy_arn = "${aws_iam_policy.shitposter.arn}"
-    groups     = []
-    users      = []
-    roles      = ["${aws_iam_role.shitposter_ec2.name}"]
+  name       = "shitposter-s3-ec2-attachment"
+  policy_arn = "${aws_iam_policy.shitposter.arn}"
+  groups     = []
+  users      = []
+  roles      = ["${aws_iam_role.shitposter_ec2.name}"]
 }
 
 resource "aws_iam_user" "shitposter" {
-    name = "shitposter"
+  name = "shitposter"
 }

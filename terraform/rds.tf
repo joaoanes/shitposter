@@ -3,11 +3,12 @@ resource "aws_db_instance" "shitposter-prod" {
   storage_type         = "gp2"
   engine               = "postgres"
   engine_version       = "10"
-  instance_class       = "db.t2.micro"
+  instance_class       = "db.t3.micro"
   name                 = "shitposter_production"
   username             = "shitposter"
   password             = "${random_string.postgres.result}"
   skip_final_snapshot = true
+  snapshot_identifier = "after-scrape"
 }
 
 resource "random_string" "postgres" {
@@ -31,4 +32,3 @@ data "template_file" "database_dsn" {
 output "database_url" {
   value = "${data.template_file.database_dsn.rendered}"
 }
-

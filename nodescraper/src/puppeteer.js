@@ -1,18 +1,111 @@
-const axios = require('axios')
+const { chunk, uniqBy, flatten } = require('lodash')
 
-const { getThreads } = require('./lmaoscraper')
+const { getLastKnownPost, insertPosts, getPostsByStatus, updatePostsStatus } = require('./db')
+const { invokeLambda } = require('./invoke')
+const { executeInChunks } = require('./junkyard')
+const { getPostUrls } = require('./upload')
+const { submit } = require('./submitter')
+const { submitEvent } = require('./log')
 
-const GATEWAY_FETCH_URL = 'https://xyiarkec66.execute-api.eu-central-1.amazonaws.com/production/fetch'
-
-const orchestrate = async () => {
-  const threads = await getThreads()
-  await Promise.all(
-    threads.map(async (thread) => {
-      console.warn('Invoking for ', thread)
-      await axios.get(`${GATEWAY_FETCH_URL}?threads=${thread}`)
-      console.warn('Invoking complete for ', thread)
-    })
+const updateIndex = async (lastPostId) => {
+  let { StatusCode, Payload } = await invokeLambda(
+    'lmaoscraper_updateIndex',
+    {
+      lastPostId,
+    }
   )
+
+  if (StatusCode === 503) {
+    await updateIndex(JSON.parse(Payload).lastPostId)
+    // TODO: add logging
+    return lastPostId
+  }
 }
 
-orchestrate()
+const listPostsSince = async (lastPostId) => {
+  let { StatusCode, Payload } = await invokeLambda(
+    'lmaoscraper_list',
+    {
+      lastPostId,
+    }
+  )
+
+  if (StatusCode !== 200) {
+    // debugger
+    throw new Error('unexpected list status!')
+  }
+  return JSON.parse(JSON.parse(Payload).body)
+}
+
+const uploadSubmissions = async () => {
+  const seenPostIds = (await getPostsByStatus('fetched')).map(({ id }) => id)
+  const urls = await executeInChunks(
+    seenPostIds.map((postId) => () => getPostUrls(postId)),
+    Number.MAX_SAFE_INTEGER,
+    500,
+  )
+
+  const urlsWithContent = urls.filter(([content, meta]) => content.length !== 0)
+  const unfurledUrls = flatten(urlsWithContent.map(([content, meta]) => content.map(url => [url, meta])))
+  const sanitizedUrls = uniqBy(unfurledUrls, ([content, meta]) => content)
+
+  // TODO: Check dupes!
+
+  await executeInChunks(
+    sanitizedUrls.map(([url, { ratingIds, urlDate }]) => async () => {
+      submitEvent('execute', 'start', { url })
+      const res = await submit(url, ratingIds, urlDate)
+      submitEvent('execute', 'finish', { url, res })
+    }),
+    Number.MAX_SAFE_INTEGER,
+    20,
+  )
+
+  return updatePostsStatus(seenPostIds.map(postId => ({ postId })), 'submitted')
+}
+
+const fetchSubmissions = async () => {
+  const seenPostIds = (await getPostsByStatus('seen')).map(({ id }) => id)
+  const chunks = chunk(seenPostIds, 20000)
+  const invocations = await Promise.all(
+    chunks.map(chunk => invokeLambda(
+      'lmaoscraper_fetch',
+      {
+        posts: chunk,
+      }
+    ))
+  )
+
+  const results = invocations.reduce(
+    (acc, { Payload, StatusCode }) => {
+      if (StatusCode !== 200) {
+        throw new Error('Weird status at invoke!')
+      }
+      return [...acc, ...(JSON.parse(JSON.parse(Payload).body).posts)]
+    },
+    []
+  )
+
+  return updatePostsStatus(results, 'fetched')
+}
+
+const loadNewSubmissions = async () => {
+  console.warn('starto')
+  // debugger
+  const lastKnownPostId = await getLastKnownPost()
+  console.warn('last known post', lastKnownPostId)
+  console.warn('updating index')
+  await updateIndex(lastKnownPostId)
+  console.warn('index updated')
+  const { posts } = await listPostsSince(lastKnownPostId)
+  console.warn('got posts')
+  const insertedPosts = await insertPosts(posts)
+  console.warn('uploaded posts')
+
+  debugger
+
+  console.warn(insertedPosts.length)
+  return insertedPosts
+}
+
+uploadSubmissions()

@@ -51,24 +51,22 @@ resource "aws_iam_role_policy_attachment" "iam_for_lambda_s3_policy_attachment" 
   policy_arn = "${aws_iam_policy.lambda_s3_policy.arn}"
 }
 
-resource "aws_s3_bucket" "shitposter_urls_scraper" {
-  bucket = "${var.aws_s3_bucket_name}"
-  acl = "private"
-}
-
-resource "aws_lambda_function" "lmaoscraper_lambda_function" {
+resource "aws_lambda_function" "lambda" {
   filename = "../nodescraper/scrape.zip"
   function_name = "${var.aws_lambda_function_name}"
   role = "${aws_iam_role.iam_role_for_lambda.arn}"
   memory_size = "512"
-  runtime = "nodejs8.10"
-  handler = "lambda.all"
-  source_code_hash = "${base64sha256(file("../nodescraper/scrape.zip"))}"
+  runtime = "provided"
+  handler = "${var.entry_point}"
+  source_code_hash = "${base64sha256(file("${var.source_file}"))}"
   timeout = 900
+  layers = ["arn:aws:lambda:eu-central-1:553035198032:layer:nodejs11:16"]
 
   environment {
     variables = {
-      BUCKET_NAME = "${aws_s3_bucket.shitposter_urls_scraper.bucket}"
+      SHITPOSTER_GRAPHQL_URL = "http://${var.shitposter_api_ip}:4000/"
+      SHITPOSTER_GRAPHQL_TOKEN = "${var.shitposter_token}"
+      BUCKET_NAME = "${var.aws_s3_bucket_name}"
     }
   }
 }

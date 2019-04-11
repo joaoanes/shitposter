@@ -39,3 +39,18 @@ resource "aws_s3_bucket" "shitposter-content" {
 }
 POLICY
 }
+
+resource "aws_s3_bucket" "frontend" {
+  bucket = "shitposter-frontend"
+  acl    = "public-read"
+
+  website {
+    index_document = "index.html"
+    error_document = "error.html"
+  }
+}
+
+resource "aws_s3_bucket" "shitposter-uniquer" {
+  bucket = "shitposter-uniquer"
+  acl    = "private"
+}
