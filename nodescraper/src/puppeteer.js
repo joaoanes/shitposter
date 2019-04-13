@@ -54,7 +54,7 @@ const uploadSubmissions = async () => {
   await executeInChunks(
     sanitizedUrls.map(([url, { ratingIds, urlDate }]) => async () => {
       submitEvent('execute', 'start', { url })
-      const res = await submit(url, ratingIds, urlDate)
+      const res = await submit(url, ratingIds, urlDate).catch(e => e)
       submitEvent('execute', 'finish', { url, res })
     }),
     Number.MAX_SAFE_INTEGER,
