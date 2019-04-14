@@ -6,7 +6,7 @@ const { invokeLambda } = require('./invoke')
 const { executeInChunks } = require('./junkyard')
 const { getPostUrls } = require('./upload')
 const { submit } = require('./submitter')
-const { submitEvent } = require('./log')
+const { submitEvent, puppeteerEvent } = require('./log')
 
 const getStats = async () => ({
   posts: await postsPerStatus(),
@@ -33,8 +33,8 @@ const updateIndex = async (lastPostId) => {
   const { status, posts, lastSeenPostId } = JSON.parse(Payload)
 
   if (status === 503) {
+    puppeteerEvent('relambda', 'requeue', { lastSeenPostId })
     return updateIndex(lastSeenPostId)
-    // TODO: add logging
   }
 
   return posts

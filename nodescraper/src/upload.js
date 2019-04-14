@@ -19,27 +19,6 @@ const loadFromS3 = async (Key) => {
   return JSON.parse(s3Object.Body.toString())
 }
 
-const uploadThreadPosts = (event) => async (resultThreads) => {
-  const threadId = Object.keys(resultThreads)[0]
-  const posts = Object.values(resultThreads)[0]
-
-  if (posts && posts.length === 0) {
-    return resultThreads
-  }
-
-  const Key = `${event.id}/threads/${threadId}.json`
-
-  threadEvent('uploading', 'started', { key: Key })
-  await s3.upload({
-    Key,
-    Body: JSON.stringify(posts),
-  })
-    .promise()
-    .then(() => threadEvent('uploading', 'finished', { key: Key }))
-
-  return resultThreads
-}
-
 const uploadUrls = (event) => async (urls) => {
   if (urls && urls.length === 0) {
     return urls
@@ -73,16 +52,16 @@ const uploadUrls = (event) => async (urls) => {
 
 const getPostUrls = async (postId) => {
   try {
-    threadEvent('getting URL', 'started', { postId })
+    threadEvent('urls-upload', 'started', { postId })
     const result = await s3.getObject({
       Key: `posts/${postId}/urls.json`,
     })
       .promise()
-      .then(res => threadEvent('getting-URL', 'finished', { postId }) || res)
+      .then(res => threadEvent('urls-upload', 'finished', { postId }) || res)
       .then(res => JSON.parse(res.Body))
     return result
   } catch (error) {
-    threadEvent('getting URL', 'fail', { error })
+    threadEvent('urls-upload URL', 'fail', { error })
     return null
   }
 }
@@ -101,29 +80,26 @@ const getPostRaw = async (postId) => {
 }
 
 const uploadPosts = (event) => async (posts) => {
-  threadEvent('uploading', 'started')
+  threadEvent('raw-upload', 'started')
 
   if (posts && posts.length === 0) {
     return posts
   }
 
   const thunks = map(posts, (post, postId) =>
-    () => {
-      threadEvent('uploading', 'started', { postId })
-      return s3.upload({
-        Key: `posts/${postId}/raw.json`,
-        Body: JSON.stringify(post),
-      })
-        .promise()
-        .then((res) => threadEvent('uploading', 'finished', { postId }) || res)
-    }
+    () => s3.upload({
+      Key: `posts/${postId}/raw.json`,
+      Body: JSON.stringify(post),
+    })
+      .promise()
+      .then((res) => threadEvent('raw-upload', 'finished', { postId }) || res)
   )
   const uploadedPosts = await executeWithRescue(
     (new Date()).getTime() + 300000,
     200
   )(thunks)
 
-  threadEvent('uploading', 'finished')
+  threadEvent('raw-upload', 'finished')
 
   return map(
     map(uploadedPosts, 'Key'),
@@ -166,9 +142,9 @@ const addToPhonebook = async (postIds) => {
   if (newPosts.length === 0 || (newPosts.length === 1 && newPosts[0] === undefined)) return
 
   const newAllPosts = uniq([...allPosts, ...newPosts])
-  threadEvent('phonebookUpdate', 'start', { difference: difference.length })
+  threadEvent('phonebook-update', 'start', { difference: difference.length })
   await s3.putObject({ Key: 'posts/list', Body: JSON.stringify(newAllPosts) }).promise()
-  threadEvent('phonebookUpdate', 'end')
+  threadEvent('phonebook-update', 'end')
 }
 
 const listPostsExpensive = async () => {
@@ -198,7 +174,6 @@ const listPostsExpensive = async () => {
 }
 
 module.exports = {
-  uploadThreadPosts,
   loadFromS3,
   uploadPosts,
   listPosts,
