@@ -18,8 +18,6 @@ const initDb = async () => {
       table.string('status')
       table.dateTime('createdAt').defaultTo(db.fn.now())
       table.dateTime('updatedAt').defaultTo(db.fn.now())
-
-      table.unique('id')
     })
 
     await db.schema.createTableIfNotExists('events', (table) => {
@@ -31,8 +29,6 @@ const initDb = async () => {
       table.dateTime('createdAt')
       table.dateTime('createdAt').defaultTo(db.fn.now())
       table.dateTime('updatedAt').defaultTo(db.fn.now())
-
-      table.unique('id')
     })
   } catch (e) {
     console.error(e)
