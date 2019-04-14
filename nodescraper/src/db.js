@@ -49,7 +49,7 @@ const updateEventPosts = async (id, type, posts) => (await assureInited()) && (
 
 const postsPerStatus = async () => (await assureInited()) && flow(
   map(({ status, count }) => ({ [status]: count })),
-  reduce((acc, cur) => ({ ...acc, ...cur })),
+  reduce((acc, cur) => ({ ...acc, ...cur }), {}),
 )(await db('extractedContent')
   .select('status')
   .count('id')
