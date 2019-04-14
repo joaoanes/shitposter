@@ -1,5 +1,5 @@
 const AWS = require('aws-sdk')
-const { map, uniq } = require('lodash')
+const { map, uniq, difference } = require('lodash')
 
 const { threadEvent } = require('./log')
 const { executeWithRescue } = require('./junkyard')
@@ -131,7 +131,37 @@ const uploadPosts = (event) => async (posts) => {
   )
 }
 
-const listPosts = async () => {
+const listPosts = async (force) => {
+  let index
+  try {
+    index = getPhonebook()
+  } catch (e) {
+    index = await listPostsExpensive()
+    await s3.putObject({ Key: '/posts/list', Body: JSON.stringify(index) }).promise()
+  }
+}
+
+const getPhonebook = async () => {
+  const request = await s3.getObject({ Key: '/posts/list' }).promise()
+
+  return JSON.parse(
+    request.Body
+  )
+}
+
+const addToPhonebook = async (postIds) => {
+  const request = await s3.getObject({ Key: '/posts/list' }).promise()
+  const allPosts = JSON.parse(request.Body)
+  const newPosts = difference(allPosts, postIds)
+  if (newPosts.length === 0) return
+
+  const newAllPosts = uniq([...allPosts, ...newPosts])
+  threadEvent('phonebookUpdate', 'start', { difference: difference.length })
+  await s3.putObject({ Key: '/posts/list', Body: JSON.stringify(newAllPosts) }).promise()
+  threadEvent('phonebookUpdate', 'end')
+}
+
+const listPostsExpensive = async () => {
   let isTruncated
   let marker
   let contents = []
@@ -165,4 +195,6 @@ module.exports = {
   getPostUrls,
   getPostRaw,
   uploadUrls,
+  addToPhonebook,
+  getPhonebook,
 }

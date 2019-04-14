@@ -4,7 +4,7 @@ const { flow, uniqBy, reduce, groupBy, first, mapValues, map: mapFP } = require(
 const { parse: parseHTML } = require('node-html-parser')
 
 const { fetchThreads, parsePosts } = require('./scraper')
-const { uploadPosts, listPosts, getPostUrls, getPostRaw, uploadUrls } = require('./upload')
+const { uploadPosts, listPosts, getPostUrls, getPostRaw, uploadUrls, addToPhonebook } = require('./upload')
 const { threadIdToInteger, executeInChunks } = require('./junkyard')
 
 class IndexReconstructionStopped extends Error {
@@ -50,6 +50,27 @@ const extractThreadFromPostId = (postId) => {
   return id
 }
 
+const parsePostsAndUpload = async (fetchedThread) => {
+  const posts = flow(
+    reduce.convert({ cap: false })((a, posts, thread) => (
+      [
+        ...a, ...posts.map(p => ({
+          ...p,
+          threadId: thread,
+          UserId: 'anon',
+          Username: 'anon',
+        })),
+      ]),
+    [],
+    ),
+    uniqBy((e) => e.PostId),
+    groupBy((post) => `${post.threadId}-${post.PostId}`),
+    mapValues(first),
+  )(fetchedThread)
+
+  return uploadPosts()(posts)
+}
+
 const updateIndex = async (lastSeenThreadId) => {
   const allThreads = await getThreads()
 
@@ -60,28 +81,11 @@ const updateIndex = async (lastSeenThreadId) => {
 
   const fetchResults = await fetchThreads(
     newThreads,
-    async (fetchedThread) => {
-      const posts = flow(
-        reduce.convert({ cap: false })((a, posts, thread) => (
-          [
-            ...a, ...posts.map(p => ({
-              ...p,
-              threadId: thread,
-              UserId: 'anon',
-              Username: 'anon',
-            })),
-          ]),
-        [],
-        ),
-        uniqBy((e) => e.PostId),
-        groupBy((post) => `${post.threadId}-${post.PostId}`),
-        mapValues(first),
-      )(fetchedThread)
-
-      return uploadPosts()(posts)
-    },
+    parsePostsAndUpload,
     (new Date()).getTime() + 800000, // 14 mins
   )
+
+  await addToPhonebook(fetchResults)
 
   return fetchResults
 }
@@ -102,7 +106,7 @@ const ensureIndexUpdated = async (lastSeenThreadId) => {
   }
 }
 
-const list = async (lastPostId) => postsNewerThan(lastPostId)
+const list = postsNewerThan
 
 const fetch = async (lastPostId, posts) => {
   const postsToFetch = posts || (await postsNewerThan(lastPostId))
