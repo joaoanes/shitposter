@@ -1,8 +1,14 @@
 const { flow, map, reduce } = require('lodash/fp')
 
+require('dotenv').config()
+
+const {
+  DATABASE_URL,
+} = process.env
+
 const db = require('knex')({
   client: 'pg',
-  connection: 'postgres://puppeteer:4MU7wtzeZVo7gNeenK2hv1eDeeTb8kv9@terraform-20190411215912929500000001.ccfqufjt6onb.eu-central-1.rds.amazonaws.com:5432/scrapers_posts?sslmode=verify-full',
+  connection: DATABASE_URL,
 })
 const { executeInChunks } = require('./junkyard')
 const { postEvent } = require('./log')
