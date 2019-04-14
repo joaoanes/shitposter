@@ -12,7 +12,7 @@ const destroyDb = () => db.schema.dropTableIfExists('extractedContent') && db.sc
 const initDb = async () => {
   console.warn('initting db')
   try {
-    await db.schema.createTable('extractedContent', (table) => {
+    await db.schema.createTableIfNotExists('extractedContent', (table) => {
       table.string('id').primary()
       table.string('data')
       table.string('status')
@@ -22,7 +22,7 @@ const initDb = async () => {
       table.unique('id')
     })
 
-    await db.schema.createTable('events', (table) => {
+    await db.schema.createTableIfNotExists('events', (table) => {
       table.string('id').primary()
       table.json('postsInited')
       table.json('postsFetched')
