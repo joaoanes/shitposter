@@ -8,13 +8,11 @@ const { getPostUrls } = require('./upload')
 const { submit } = require('./submitter')
 const { submitEvent } = require('./log')
 
-const getStats = async () => (
-  {
-    posts: await postsPerStatus(),
-    lastKnownId: await getLastKnownPost(),
-    events: await listEvents(),
-  }
-)
+const getStats = async () => ({
+  posts: await postsPerStatus(),
+  lastKnownId: await getLastKnownPost(),
+  events: await listEvents(),
+})
 
 const performEvent = async (ignoreInit, ignoreFetch, ignoreSubmit) => {
   const eventId = v4()
