@@ -11,28 +11,33 @@ const destroyDb = () => db.schema.dropTableIfExists('extractedContent') && db.sc
 
 const initDb = async () => {
   console.warn('initting db')
-  await db.schema.createTable('extractedContent', (table) => {
-    table.string('id').primary()
-    table.string('data')
-    table.string('status')
-    table.dateTime('createdAt').defaultTo(db.fn.now())
-    table.dateTime('updatedAt').defaultTo(db.fn.now())
+  try {
+    await db.schema.createTable('extractedContent', (table) => {
+      table.string('id').primary()
+      table.string('data')
+      table.string('status')
+      table.dateTime('createdAt').defaultTo(db.fn.now())
+      table.dateTime('updatedAt').defaultTo(db.fn.now())
 
-    table.unique('id')
-  })
+      table.unique('id')
+    })
 
-  await db.schema.createTable('events', (table) => {
-    table.string('id').primary()
-    table.json('postsInited')
-    table.json('postsFetched')
-    table.json('postsSubmitted')
-    table.dateTime('createdAt')
-    table.dateTime('createdAt')
-    table.dateTime('createdAt').defaultTo(db.fn.now())
-    table.dateTime('updatedAt').defaultTo(db.fn.now())
+    await db.schema.createTable('events', (table) => {
+      table.string('id').primary()
+      table.json('postsInited')
+      table.json('postsFetched')
+      table.json('postsSubmitted')
+      table.dateTime('createdAt')
+      table.dateTime('createdAt')
+      table.dateTime('createdAt').defaultTo(db.fn.now())
+      table.dateTime('updatedAt').defaultTo(db.fn.now())
 
-    table.unique('id')
-  })
+      table.unique('id')
+    })
+  } catch (e) {
+    console.error(e)
+    return false
+  }
 
   return true
 }
