@@ -37,9 +37,9 @@ const initDb = async () => {
   return true
 }
 
-const listEvents = () => db('events').all()
+const listEvents = async () => (await assureInited()) && db('events').all()
 
-const createEvent = (id) => db('events').insert({ id })
+const createEvent = async (id) => (await assureInited()) && db('events').insert({ id })
 
 const updateEventPosts = async (id, type, posts) => (await assureInited()) && (
   db('events').update({ [`posts${type}`]: posts, updatedAt: db.fn.now() })
