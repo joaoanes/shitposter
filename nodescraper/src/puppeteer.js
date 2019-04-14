@@ -124,7 +124,6 @@ const loadNewSubmissions = async () => {
   return posts
 }
 
-loadNewSubmissions()
 module.exports = {
   getStats,
   performEvent,
