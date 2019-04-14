@@ -7,7 +7,7 @@ const db = require('knex')({
 const { executeInChunks } = require('./junkyard')
 const { postEvent } = require('./log')
 
-const destroyDb = () => db.schema.dropTableIfExists('extractedContent')
+const destroyDb = () => db.schema.dropTableIfExists('extractedContent') && db.schema.dropTableIfExists('event')
 
 const initDb = async () => {
   console.warn('initting db')
@@ -41,12 +41,12 @@ const listEvents = () => db('events').all()
 
 const createEvent = (id) => db('events').insert({ id })
 
-const updateEventPosts = (id, type, posts) => (
+const updateEventPosts = async (id, type, posts) => (await assureInited()) && (
   db('events').update({ [`posts${type}`]: posts, updatedAt: db.fn.now() })
     .where({ id })
 )
 
-const postsPerStatus = async () => flow(
+const postsPerStatus = async () => (await assureInited()) && flow(
   map(({ status, count }) => ({ [status]: count })),
   reduce((acc, cur) => ({ ...acc, ...cur })),
 )(await db('extractedContent')
