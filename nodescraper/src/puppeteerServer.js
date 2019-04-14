@@ -7,6 +7,11 @@ const port = process.env.PORT || 3000
 
 app.use(express.json)
 
+app.use((req, res, next) => {
+  console.log(req.url)
+  return next()
+})
+
 app.get('/stats', async (req, res) => {
   res.send(await getStats())
 })
