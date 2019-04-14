@@ -14,14 +14,14 @@ app.use((req, res, next) => {
 
 app.get('/stats', async (req, res) => {
   debugger
-  const stats = await getStats()
+  const stats = await getStats().catch(e => e)
   debugger
   res.send(stats)
 })
 
 app.get('/execute', async (req, res) => {
   const { ignoreInit, ignoreFetch, ignoreSubmit } = req.body
-  res.send(await performEvent(ignoreInit, ignoreFetch, ignoreSubmit))
+  res.send(await performEvent(ignoreInit, ignoreFetch, ignoreSubmit).catch(e => e))
 })
 
 app.listen(port, () => {
