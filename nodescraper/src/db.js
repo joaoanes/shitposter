@@ -12,6 +12,7 @@ const destroyDb = () => db.schema.dropTableIfExists('extractedContent') && db.sc
 const initDb = async () => {
   console.warn('initting db')
   try {
+    await db.schema.dropTableIfExists('extractedContent')
     await db.schema.createTableIfNotExists('extractedContent', (table) => {
       table.string('id').primary()
       table.string('data')
@@ -20,6 +21,7 @@ const initDb = async () => {
       table.dateTime('updatedAt').defaultTo(db.fn.now())
     })
 
+    await db.schema.dropTableIfExists('events')
     await db.schema.createTableIfNotExists('events', (table) => {
       table.string('id').primary()
       table.json('postsInited')
