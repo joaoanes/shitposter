@@ -1,11 +1,29 @@
 const { chunk, uniqBy, flatten } = require('lodash')
+const { v4 } = require('uuid')
 
-const { getLastKnownPost, insertPosts, getPostsByStatus, updatePostsStatus } = require('./db')
+const { getLastKnownPost, insertPosts, getPostsByStatus, updatePostsStatus, postsPerStatus, createEvent, updateEventPosts, listEvents } = require('./db')
 const { invokeLambda } = require('./invoke')
 const { executeInChunks } = require('./junkyard')
 const { getPostUrls } = require('./upload')
 const { submit } = require('./submitter')
 const { submitEvent } = require('./log')
+
+const getStats = async () => (
+  {
+    posts: await postsPerStatus(),
+    lastKnownId: await getLastKnownPost(),
+    events: await listEvents(),
+  }
+)
+
+const performEvent = async (ignoreInit, ignoreFetch, ignoreSubmit) => {
+  const eventId = v4()
+  await createEvent(eventId)
+
+  if (!ignoreInit) await updateEventPosts(eventId, 'Inited', await loadNewSubmissions())
+  if (!ignoreFetch) await updateEventPosts(eventId, 'Fetched', await fetchSubmissions())
+  if (!ignoreSubmit) await updateEventPosts(eventId, 'Submitted', await uploadSubmissions())
+}
 
 const updateIndex = async (lastPostId) => {
   let { StatusCode, Payload } = await invokeLambda(
@@ -108,4 +126,7 @@ const loadNewSubmissions = async () => {
   return insertedPosts
 }
 
-uploadSubmissions()
+module.exports = {
+  getStats,
+  performEvent,
+}
