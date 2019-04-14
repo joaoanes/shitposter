@@ -25,8 +25,6 @@ const initDb = async () => {
       table.json('postsInited')
       table.json('postsFetched')
       table.json('postsSubmitted')
-      table.dateTime('createdAt')
-      table.dateTime('createdAt')
       table.dateTime('createdAt').defaultTo(db.fn.now())
       table.dateTime('updatedAt').defaultTo(db.fn.now())
     })
