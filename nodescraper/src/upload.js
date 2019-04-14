@@ -136,9 +136,14 @@ const listPosts = async (force) => {
   try {
     index = getPhonebook()
   } catch (e) {
+    // hope you don't like money.
+    threadEvent('moneyCrusher', 'begin')
     index = await listPostsExpensive()
+    threadEvent('moneyCrusher', 'end')
     await s3.putObject({ Key: 'posts/list', Body: JSON.stringify(index) }).promise()
   }
+
+  return index
 }
 
 const getPhonebook = async () => {
@@ -150,10 +155,15 @@ const getPhonebook = async () => {
 }
 
 const addToPhonebook = async (postIds) => {
-  const request = await s3.getObject({ Key: 'posts/list' }).promise()
-  const allPosts = JSON.parse(request.Body)
-  const newPosts = difference(allPosts, postIds)
-  if (newPosts.length === 0) return
+  var allPosts
+  try {
+    const request = await s3.getObject({ Key: 'posts/list' }).promise()
+    allPosts = JSON.parse(request.Body)
+  } catch (e) {
+    allPosts = []
+  }
+  const newPosts = difference(postIds, allPosts)
+  if (newPosts.length === 0 || (newPosts.length === 1 && newPosts[0] === undefined)) return
 
   const newAllPosts = uniq([...allPosts, ...newPosts])
   threadEvent('phonebookUpdate', 'start', { difference: difference.length })

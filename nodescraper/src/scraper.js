@@ -127,12 +127,11 @@ const extractUrls = (message) => (
 const getThreadHTMLAndUpload = (func = Promise.resolve) => async (id) =>
   getThreadHTML(id).then(func)
 
-// this has to be the most fucking elegant code I ever wrote
 const fetchThreads = async (threads : [string], doInThread : any, limit : Number) => (
   pipeAsync(
     map(thunker(getThreadHTMLAndUpload(doInThread))),
     executeWithRescue(limit),
-    reduceFP.convert({ cap: false })((acc, curr, index, collection) => (() => { debugger; return true })() && ({ ...({ ...acc, stopped: collection.stopped }), ...curr }), {}),
+    reduceFP.convert({ cap: false })((acc, curr, index, collection) => ({ ...({ ...acc, stopped: collection.stopped }), ...curr }), {}),
   )(threads)
 )
 

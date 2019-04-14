@@ -71,23 +71,23 @@ const parsePostsAndUpload = async (fetchedThread) => {
   return uploadPosts()(posts)
 }
 
-const updateIndex = async (lastSeenThreadId) => {
+const updateIndex = async (lastSeenThread) => {
   const allThreads = await getThreads()
 
   const newThreads = filter(
     allThreads.sort((a, b) => a - b),
-    (id) => threadIdToInteger(id) >= lastSeenThreadId,
+    (id) => threadIdToInteger(id) >= lastSeenThread,
   )
 
-  const fetchResults = await fetchThreads(
+  const { stopped, ...fetchResults } = await fetchThreads(
     newThreads,
     parsePostsAndUpload,
     (new Date()).getTime() + 800000, // 14 mins
   )
 
-  await addToPhonebook(fetchResults)
+  await addToPhonebook(Object.values(fetchResults))
 
-  return fetchResults
+  return { posts: fetchResults, outOfTime: stopped }
 }
 
 const postsNewerThan = async (lastPostId) => {
@@ -97,16 +97,16 @@ const postsNewerThan = async (lastPostId) => {
   return filter(allPosts, (postId) => extractPostFromPostId(postId) > lastSeenPostId)
 }
 
-const ensureIndexUpdated = async (lastSeenThreadId) => {
-  const { outOfTime, posts } = await updateIndex(lastSeenThreadId)
+const ensureIndexUpdated = async (lastSeenPostId) => {
+  const { outOfTime, posts } = await updateIndex(extractThreadFromPostId(lastSeenPostId))
   if (outOfTime) {
     throw new IndexReconstructionStopped(
       maxBy(posts, extractPostFromPostId)
     )
   }
-}
 
-const list = postsNewerThan
+  return posts
+}
 
 const fetch = async (lastPostId, posts) => {
   const postsToFetch = posts || (await postsNewerThan(lastPostId))
@@ -149,7 +149,7 @@ const fetch = async (lastPostId, posts) => {
 
 module.exports = {
   fetch,
-  list,
+  list: postsNewerThan,
   getThreads,
   ensureIndexUpdated,
   IndexReconstructionStopped,

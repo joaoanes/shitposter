@@ -24,18 +24,20 @@ const performEvent = async (ignoreInit, ignoreFetch, ignoreSubmit) => {
 }
 
 const updateIndex = async (lastPostId) => {
-  let { StatusCode, Payload } = await invokeLambda(
+  let { Payload } = await invokeLambda(
     'lmaoscraper_updateIndex',
     {
       lastPostId,
     }
   )
+  const { status, posts, lastSeenPostId } = JSON.parse(Payload)
 
-  if (StatusCode === 503) {
-    await updateIndex(JSON.parse(Payload).lastPostId)
+  if (status === 503) {
+    return updateIndex(lastSeenPostId)
     // TODO: add logging
-    return lastPostId
   }
+
+  return posts
 }
 
 const listPostsSince = async (lastPostId) => {
@@ -76,8 +78,8 @@ const uploadSubmissions = async () => {
     Number.MAX_SAFE_INTEGER,
     20,
   )
-
-  return updatePostsStatus(seenPostIds.map(postId => ({ postId })), 'submitted')
+  await updatePostsStatus(seenPostIds.map(postId => ({ postId })), 'submitted')
+  return seenPostIds
 }
 
 const fetchSubmissions = async () => {
@@ -102,7 +104,8 @@ const fetchSubmissions = async () => {
     []
   )
 
-  return updatePostsStatus(results, 'fetched')
+  await updatePostsStatus(results, 'fetched')
+  return results
 }
 
 const loadNewSubmissions = async () => {
@@ -115,15 +118,13 @@ const loadNewSubmissions = async () => {
   console.warn('index updated')
   const { posts } = await listPostsSince(lastKnownPostId)
   console.warn('got posts')
-  const insertedPosts = await insertPosts(posts)
+  await insertPosts(posts)
   console.warn('uploaded posts')
 
-  debugger
-
-  console.warn(insertedPosts.length)
-  return insertedPosts
+  return posts
 }
 
+loadNewSubmissions()
 module.exports = {
   getStats,
   performEvent,

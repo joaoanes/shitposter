@@ -1,5 +1,5 @@
 const { executeInSequence } = require('./junkyard')
-const { list, fetch } = require('./lambda')
+const { list, fetch, updateIndex } = require('./lambda')
 
 function sleep (ms) {
   return new Promise(resolve => setTimeout(() => resolve(Math.random()), ms))
@@ -32,10 +32,19 @@ const testFetch = async () => {
   console.log(lol)
 }
 
+const testUpdate = async () => {
+  const lol = await updateIndex({
+    id: testEventId,
+    lastPostId: 'bvnje-cwvaov',
+  })
+  console.log(lol)
+}
+
 // testParse()
 // testFetch()
 // testSubmit()
 // testSanitize()
-// testAll()
 
-testFetch()
+// testAll()
+testUpdate()
+// testFetch()

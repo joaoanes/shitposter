@@ -37,14 +37,14 @@ const newFetch = async (event) => {
 const updateIndex = async (event) => {
   threadEvent('updateIndex', 'begin', { event })
   try {
-    await ensureIndexUpdated(
+    const posts = await ensureIndexUpdated(
       get(event, 'lastPostId', null)
     )
     threadEvent('updateIndex', 'end', { event })
-    return apiGatewayResponse()
+    return apiGatewayResponse({ posts: posts })
   } catch (e) {
     if (e instanceof IndexReconstructionStopped) {
-      return apiGatewayResponse({ lastSeen: e.lastSeenPost }, 503)
+      return apiGatewayResponse({ lastSeenPostId: e.lastSeenPost }, 503)
     } else {
       throw e
     }
