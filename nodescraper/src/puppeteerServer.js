@@ -13,7 +13,10 @@ app.use((req, res, next) => {
 })
 
 app.get('/stats', async (req, res) => {
-  res.send(await getStats())
+  debugger
+  const stats = await getStats()
+  debugger
+  res.send(stats)
 })
 
 app.get('/execute', async (req, res) => {
