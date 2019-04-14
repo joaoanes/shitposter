@@ -1,9 +1,11 @@
 const express = require('express')
+const cors = require('cors')
 require('dotenv').config()
 
 const { getStats, performEvent } = require('./puppeteer')
 
 const app = express()
+app.use(cors({ optionsSuccessStatus: 200 }))
 const port = process.env.PORT || 3000
 
 app.use(express.json())
