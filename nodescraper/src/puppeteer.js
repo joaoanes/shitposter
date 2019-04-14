@@ -30,8 +30,8 @@ const updateIndex = async (lastPostId) => {
       lastPostId,
     }
   )
-  const { status, posts, lastSeenPostId } = JSON.parse(Payload)
-
+  const { status, posts, lastSeenPostId } = JSON.parse(JSON.parse(Payload).body)
+  debugger
   if (status === 503) {
     puppeteerEvent('relambda', 'requeue', { lastSeenPostId })
     return updateIndex(lastSeenPostId)
@@ -47,6 +47,8 @@ const listPostsSince = async (lastPostId) => {
       lastPostId,
     }
   )
+
+  debugger
 
   if (StatusCode !== 200) {
     // debugger
@@ -104,6 +106,8 @@ const fetchSubmissions = async () => {
     []
   )
 
+  debugger
+
   await updatePostsStatus(results, 'fetched')
   return results
 }
@@ -114,8 +118,9 @@ const loadNewSubmissions = async () => {
   const lastKnownPostId = await getLastKnownPost()
   console.warn('last known post', lastKnownPostId)
   console.warn('updating index')
-  await updateIndex(lastKnownPostId)
+  // await updateIndex(lastKnownPostId)
   console.warn('index updated')
+  debugger
   const { posts } = await listPostsSince(lastKnownPostId)
   console.warn('got posts')
   await insertPosts(posts)

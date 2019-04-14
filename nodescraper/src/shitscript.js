@@ -17,10 +17,7 @@ const testSequence = async () => {
 const testEventId = 'ballz'
 
 const testList = async () => {
-  const lol = await list({
-    id: testEventId,
-    multiValueQueryStringParameters: { lastPostId: 'bvnje-cwvaov' },
-  })
+  const lol = await list()
   console.log(lol)
 }
 
@@ -46,5 +43,6 @@ const testUpdate = async () => {
 // testSanitize()
 
 // testAll()
-testUpdate()
+// testUpdate()
+testList()
 // testFetch()
