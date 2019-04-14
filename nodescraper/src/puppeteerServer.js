@@ -9,22 +9,21 @@ const port = process.env.PORT || 3000
 app.use(express.json())
 
 app.use((req, res, next) => {
-  console.log(req.url)
+  console.warn(req.url, req.query, new Date().getTime())
   return next()
 })
 
 app.get('/stats', async (req, res) => {
-  debugger
   const stats = await getStats().catch(e => e)
-  debugger
+
   res.send(stats)
 })
 
 app.get('/execute', async (req, res) => {
-  const { ignoreInit, ignoreFetch, ignoreSubmit } = req.body
+  const { ignoreInit, ignoreFetch, ignoreSubmit } = req.query
   res.send(await performEvent(ignoreInit, ignoreFetch, ignoreSubmit).catch(e => e))
 })
 
 app.listen(port, () => {
-  console.log(`listening on port ${port}`)
+  console.warn(`listening on port ${port}`)
 })
