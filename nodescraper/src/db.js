@@ -38,7 +38,7 @@ const initDb = async () => {
   return true
 }
 
-const listEvents = async () => (await assureInited()) && db('events').all()
+const listEvents = async () => (await assureInited()) && db('events')
 
 const createEvent = async (id) => (await assureInited()) && db('events').insert({ id })
 
