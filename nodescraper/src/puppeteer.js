@@ -1,7 +1,6 @@
 const { chunk, uniqBy, flatten } = require('lodash')
-const { v4 } = require('uuid')
 
-const { getLastKnownPost, insertPosts, getPostsByStatus, updatePostsStatus, postsPerStatus, createEvent, updateEventPosts, listEvents } = require('./db')
+const { getLastKnownPost, insertPosts, getPostsByStatus, updatePostsStatus, postsPerStatus, updateEventPosts, listEvents } = require('./db')
 const { invokeLambda } = require('./invoke')
 const { executeInChunks } = require('./junkyard')
 const { getPostUrls } = require('./upload')
@@ -11,7 +10,14 @@ const { submitEvent, puppeteerEvent } = require('./log')
 const getStats = async () => ({
   posts: await postsPerStatus(),
   lastKnownId: await getLastKnownPost(),
-  events: await listEvents(),
+  events: (await listEvents()).map(({ id, postsInited, postsSubmitted, postsFetched, createdAt, updatedAt }) => ({
+    id,
+    postsInited: postsInited.length,
+    postsFetched: postsFetched.length,
+    postsSubmitted: postsSubmitted.length,
+    createdAt,
+    updatedAt,
+  })),
 })
 
 const performEvent = async (eventId, ignoreInit, ignoreFetch, ignoreSubmit) => {
