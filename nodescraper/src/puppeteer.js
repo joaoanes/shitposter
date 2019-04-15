@@ -76,6 +76,8 @@ const uploadSubmissions = async () => {
   const unfurledUrls = flatten(urlsWithContent.map(([content, meta]) => content.map(url => [url, meta])))
   const sanitizedUrls = uniqBy(unfurledUrls, ([content, meta]) => content)
 
+  debugger
+
   // TODO: Check dupes!
 
   await executeInChunks(

@@ -52,16 +52,16 @@ const uploadUrls = (event) => async (urls) => {
 
 const getPostUrls = async (postId) => {
   try {
-    threadEvent('urls-upload', 'started', { postId })
+    threadEvent('urls-fetch', 'started', { postId })
     const result = await s3.getObject({
       Key: `posts/${postId}/urls.json`,
     })
       .promise()
-      .then(res => threadEvent('urls-upload', 'finished', { postId }) || res)
+      .then(res => threadEvent('urls-fetch', 'finished', { postId }) || res)
       .then(res => JSON.parse(res.Body))
     return result
   } catch (error) {
-    threadEvent('urls-upload URL', 'fail', { error })
+    threadEvent('urls-fetch URL', 'fail', { error })
     return null
   }
 }
