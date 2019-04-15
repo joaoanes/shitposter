@@ -1,8 +1,10 @@
 const express = require('express')
 const cors = require('cors')
+const { v4 } = require('uuid')
 require('dotenv').config()
 
 const { getStats, performEvent } = require('./puppeteer')
+const { createEvent } = require('./db')
 
 const app = express()
 app.use(cors({ optionsSuccessStatus: 200 }))
@@ -23,7 +25,10 @@ app.get('/stats', async (req, res) => {
 
 app.get('/execute', async (req, res) => {
   const { ignoreInit, ignoreFetch, ignoreSubmit } = req.query
-  res.send(await performEvent(ignoreInit, ignoreFetch, ignoreSubmit).catch(e => e))
+  const eventId = v4()
+  await createEvent(eventId)
+  res.send(eventId)
+  await performEvent(eventId, ignoreInit, ignoreFetch, ignoreSubmit).catch(e => e)
 })
 
 app.listen(port, () => {

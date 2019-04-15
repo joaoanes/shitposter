@@ -14,10 +14,7 @@ const getStats = async () => ({
   events: await listEvents(),
 })
 
-const performEvent = async (ignoreInit, ignoreFetch, ignoreSubmit) => {
-  const eventId = v4()
-  await createEvent(eventId)
-
+const performEvent = async (eventId, ignoreInit, ignoreFetch, ignoreSubmit) => {
   if (!ignoreInit) {
     const initPosts = await loadNewSubmissions()
 
