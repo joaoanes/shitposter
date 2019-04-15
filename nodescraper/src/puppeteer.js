@@ -18,7 +18,11 @@ const performEvent = async (ignoreInit, ignoreFetch, ignoreSubmit) => {
   const eventId = v4()
   await createEvent(eventId)
 
-  if (!ignoreInit) await updateEventPosts(eventId, 'Inited', await loadNewSubmissions())
+  if (!ignoreInit) {
+    const initPosts = await loadNewSubmissions()
+    debugger
+    await updateEventPosts(eventId, 'Inited', initPosts)
+  }
   if (!ignoreFetch) await updateEventPosts(eventId, 'Fetched', await fetchSubmissions())
   if (!ignoreSubmit) await updateEventPosts(eventId, 'Submitted', await uploadSubmissions())
 }
