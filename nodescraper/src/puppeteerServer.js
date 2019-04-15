@@ -18,7 +18,7 @@ app.use((req, res, next) => {
 })
 
 app.get('/stats', async (req, res) => {
-  const stats = await getStats().catch(e => e)
+  const stats = await getStats()
 
   res.send(stats)
 })
@@ -28,7 +28,7 @@ app.get('/execute', async (req, res) => {
   const eventId = v4()
   await createEvent(eventId)
   res.send(eventId)
-  await performEvent(eventId, ignoreInit, ignoreFetch, ignoreSubmit).catch(e => e)
+  await performEvent(eventId, ignoreInit, ignoreFetch, ignoreSubmit)
 })
 
 app.listen(port, () => {
