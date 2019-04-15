@@ -49,7 +49,7 @@ const listEvents = async () => (await assureInited()) && db('events')
 const createEvent = async (id) => (await assureInited()) && db('events').insert({ id })
 
 const updateEventPosts = async (id, type, posts) => (await assureInited()) && (
-  db('events').update({ [`posts${type}`]: posts, updatedAt: db.fn.now() })
+  db('events').update({ [`posts${type}`]: JSON.stringify(posts), updatedAt: db.fn.now() })
     .where({ id })
 )
 
