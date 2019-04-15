@@ -12,9 +12,9 @@ const getStats = async () => ({
   lastKnownId: await getLastKnownPost(),
   events: (await listEvents()).map(({ id, postsInited, postsSubmitted, postsFetched, createdAt, updatedAt }) => ({
     id,
-    postsInited: postsInited.length,
-    postsFetched: postsFetched.length,
-    postsSubmitted: postsSubmitted.length,
+    postsInited: postsInited ? postsInited.length : 0,
+    postsFetched: postsFetched ? postsFetched.length : 0,
+    postsSubmitted: postsSubmitted ? postsSubmitted.length : 0,
     createdAt,
     updatedAt,
   })),
