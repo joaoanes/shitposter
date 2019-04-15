@@ -31,7 +31,7 @@ const updateIndex = async (lastPostId) => {
     }
   )
   const { status, posts, lastSeenPostId } = JSON.parse(JSON.parse(Payload).body)
-  debugger
+
   if (status === 503) {
     puppeteerEvent('relambda', 'requeue', { lastSeenPostId })
     return updateIndex(lastSeenPostId)

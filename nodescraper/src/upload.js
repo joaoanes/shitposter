@@ -107,14 +107,14 @@ const uploadPosts = (event) => async (posts) => {
   )
 }
 
-const listPosts = async (force) => {
+const getAllPosts = async (force) => {
   let index
   try {
-    index = getPhonebook()
+    index = await getPhonebook()
   } catch (e) {
     // hope you don't like money.
     threadEvent('moneyCrusher', 'begin')
-    index = await listPostsExpensive()
+    index = await getPhonebookFromS3()
     threadEvent('moneyCrusher', 'end')
     await s3.putObject({ Key: 'posts/list', Body: JSON.stringify(index) }).promise()
   }
@@ -147,7 +147,7 @@ const addToPhonebook = async (postIds) => {
   threadEvent('phonebook-update', 'end')
 }
 
-const listPostsExpensive = async () => {
+const getPhonebookFromS3 = async () => {
   let isTruncated
   let marker
   let contents = []
@@ -176,7 +176,7 @@ const listPostsExpensive = async () => {
 module.exports = {
   loadFromS3,
   uploadPosts,
-  listPosts,
+  getAllPosts,
   getPostUrls,
   getPostRaw,
   uploadUrls,

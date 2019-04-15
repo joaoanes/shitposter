@@ -4,7 +4,7 @@ const { flow, uniqBy, reduce, groupBy, first, mapValues, map: mapFP } = require(
 const { parse: parseHTML } = require('node-html-parser')
 
 const { fetchThreads, parsePosts } = require('./scraper')
-const { uploadPosts, listPosts, getPostUrls, getPostRaw, uploadUrls, addToPhonebook } = require('./upload')
+const { uploadPosts, getAllPosts, getPostUrls, getPostRaw, uploadUrls, addToPhonebook } = require('./upload')
 const { threadIdToInteger, executeInChunks } = require('./junkyard')
 
 class IndexReconstructionStopped extends Error {
@@ -91,7 +91,7 @@ const updateIndex = async (lastSeenThread) => {
 }
 
 const postsNewerThan = async (lastPostId) => {
-  const allPosts = await listPosts()
+  const allPosts = await getAllPosts()
   const lastSeenPostId = extractPostFromPostId(lastPostId)
 
   return filter(allPosts, (postId) => extractPostFromPostId(postId) > lastSeenPostId)
