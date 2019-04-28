@@ -3,6 +3,7 @@ const { identity, mapValues, uniqBy, flatten, find } = require('lodash')
 const fileType = require('file-type')
 
 const { executeInChunks, executeInSequence, thunker } = require('./junkyard')
+const { submitEvent } = require('./log')
 
 const UNIQUEABLE_MIMES = [
   'image/jpeg',
@@ -12,6 +13,7 @@ const UNIQUEABLE_MIMES = [
 ]
 
 const sanitizeUrl = async ([urls, meta]) => {
+  submitEvent('sanitize', 'start', { urls })
   const normalizedUrls = urls.map(url => [
     url,
     {
@@ -29,7 +31,7 @@ const sanitizeUrl = async ([urls, meta]) => {
     uniqueUrls.map(thunker(fetchUrl)),
     (new Date()).getTime() + 900000
   )).filter(identity)
-
+  submitEvent('sanitize', 'finish', { urls })
   return validURls
 }
 

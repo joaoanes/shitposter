@@ -1,11 +1,12 @@
-const { chunk, uniqBy, flatten } = require('lodash')
+const { chunk } = require('lodash')
 
 const { getLastKnownPost, insertPosts, getPostsByStatus, updatePostsStatus, postsPerStatus, updateEventPosts, listEvents } = require('./db')
 const { invokeLambda } = require('./invoke')
 const { executeInChunks } = require('./junkyard')
 const { getPostUrls } = require('./upload')
-const { submit } = require('./submitter')
 const { submitEvent, puppeteerEvent } = require('./log')
+const { sanitize } = require('./sanitizer')
+const { submit } = require('./submitter')
 
 const getStats = async () => ({
   posts: await postsPerStatus(),
@@ -72,17 +73,13 @@ const uploadSubmissions = async () => {
     500,
   )
 
-  const urlsWithContent = urls.filter(([content, meta]) => content.length !== 0)
-  const unfurledUrls = flatten(urlsWithContent.map(([content, meta]) => content.map(url => [url, meta])))
-  const sanitizedUrls = uniqBy(unfurledUrls, ([content, meta]) => content)
-
-  debugger
+  const sanitizedUrls = await sanitize(urls)
 
   // TODO: Check dupes!
 
   await executeInChunks(
     sanitizedUrls.map(([url, { ratingIds, urlDate }]) => async () => {
-      submitEvent('execute', 'start', { url })
+      submitEvent('execute', 'start', { url, ratingIds, urlDate })
       const res = await submit(url, ratingIds, urlDate).catch(e => e)
       submitEvent('execute', 'finish', { url, res })
     }),
