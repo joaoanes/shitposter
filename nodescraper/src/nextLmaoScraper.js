@@ -79,15 +79,18 @@ const updateIndex = async (lastSeenThread) => {
     (id) => threadIdToInteger(id) >= lastSeenThread,
   )
 
-  const { stopped, ...fetchResults } = await fetchThreads(
+  const results = await fetchThreads(
     newThreads,
     parsePostsAndUpload,
     (new Date()).getTime() + 800000, // 14 mins
   )
 
-  await addToPhonebook(Object.values(fetchResults))
+  const { stopped: outOfTime, ...fetchResults } = results
+  const posts = Object.values(fetchResults)
 
-  return { posts: fetchResults, outOfTime: stopped }
+  await addToPhonebook(posts)
+
+  return { posts, outOfTime }
 }
 
 const postsNewerThan = async (lastPostId) => {

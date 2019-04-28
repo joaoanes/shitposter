@@ -1,14 +1,19 @@
 const { get } = require('lodash')
 
 const { list, fetch, IndexReconstructionStopped, ensureIndexUpdated } = require('./nextLmaoScraper')
-const { threadEvent } = require('./log')
+const { threadEvent, lambdaEvent } = require('./log')
 
-const apiGatewayResponse = (body, statusCode = 200) => ({
-  'isBase64Encoded': false,
-  statusCode,
-  'headers': {},
-  'body': JSON.stringify(body),
-})
+const apiGatewayResponse = (body, statusCode = 200) => {
+  const resBody = ({
+    'isBase64Encoded': false,
+    statusCode,
+    'headers': {},
+    'body': JSON.stringify(body),
+  })
+
+  lambdaEvent('response', 'finish', resBody)
+  return resBody
+}
 
 const newList = async (event) => {
   threadEvent('list', 'begin', { event })

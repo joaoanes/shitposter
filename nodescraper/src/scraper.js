@@ -131,7 +131,12 @@ const fetchThreads = async (threads : [string], doInThread : any, limit : Number
   pipeAsync(
     map(thunker(getThreadHTMLAndUpload(doInThread))),
     executeWithRescue(limit),
-    reduceFP.convert({ cap: false })((acc, curr, index, collection) => ({ ...({ ...acc, stopped: collection.stopped }), ...curr }), {}),
+    (res) => {
+      if (res.length === 0) {
+        return res
+      }
+      return reduceFP.convert({ cap: false })((acc, curr, index, collection) => ({ ...({ ...acc, stopped: collection.stopped }), ...curr }), {})(res)
+    }
   )(threads)
 )
 
