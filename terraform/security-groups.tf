@@ -99,6 +99,25 @@ resource "aws_security_group" "http-ssh" {
   }
 }
 
+
+resource "aws_security_group" "puppeteer" {
+  name = "puppeteer"
+
+  ingress {
+    protocol    = "tcp"
+    from_port   = 4001
+    to_port     = 4001
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_security_group" "default" {
   name                   = "default"
   description            = "default VPC security group"

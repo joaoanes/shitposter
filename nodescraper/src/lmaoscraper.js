@@ -22,7 +22,7 @@ const updateIndex = async (lastThreadId) => {
     (id) => threadIdToInteger(id) <= lastThreadId,
   )
 
-  const { stopped, ...fetchedThreads } = await fetchThreads(newThreads, e => e)
+  const fetchedThreads = await fetchThreads(newThreads, e => e)
 
   return flow(
     reduce.convert({ cap: false })((a, posts, thread) => (

@@ -17,6 +17,13 @@ data "aws_iam_policy_document" "lambda_s3_policy" {
   }
 }
 
+data "aws_iam_policy_document" "lambda_s3_list_policy" {
+  statement {
+    actions = ["s3:ListBucket"]
+    resources = ["arn:aws:s3:::${var.aws_s3_bucket_name}"]
+  }
+}
+
 data "aws_iam_policy_document" "lambda_assume_role_policy" {
   statement {
     actions = ["sts:AssumeRole"]
@@ -34,6 +41,9 @@ resource "aws_iam_policy" "lambda_logging_policy" {
 resource "aws_iam_policy" "lambda_s3_policy" {
   policy = "${data.aws_iam_policy_document.lambda_s3_policy.json}"
 }
+resource "aws_iam_policy" "lambda_s3_list_policy" {
+  policy = "${data.aws_iam_policy_document.lambda_s3_list_policy.json}"
+}
 
 
 resource "aws_iam_role" "iam_role_for_lambda" {
@@ -49,6 +59,11 @@ resource "aws_iam_role_policy_attachment" "iam_for_lambda_logging_policy_attachm
 resource "aws_iam_role_policy_attachment" "iam_for_lambda_s3_policy_attachment" {
   role       = "${aws_iam_role.iam_role_for_lambda.name}"
   policy_arn = "${aws_iam_policy.lambda_s3_policy.arn}"
+}
+
+resource "aws_iam_role_policy_attachment" "iam_for_lambda_s3_list_policy_attachment" {
+  role       = "${aws_iam_role.iam_role_for_lambda.name}"
+  policy_arn = "${aws_iam_policy.lambda_s3_list_policy.arn}"
 }
 
 resource "aws_lambda_function" "lambda" {

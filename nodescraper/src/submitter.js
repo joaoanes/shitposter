@@ -31,7 +31,7 @@ const submit = async (url, ratings, urlDate) => {
     sourceId: 1,
     reactions: reduce(ratings, (acc, count, id) => (
       [...acc, ...(new Array(count).fill(id))]
-    ), []).map(ratingId => ({ ratingId })),
+    ), []).map(ratingId => ({ ratingId: Number.parseInt(ratingId) })),
     urlDate: urlDate,
   }
 

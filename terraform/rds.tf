@@ -8,7 +8,6 @@ resource "aws_db_instance" "shitposter-prod" {
   username             = "shitposter"
   password             = "${random_string.postgres.result}"
   skip_final_snapshot = true
-  snapshot_identifier = "after-scrape"
 }
 
 resource "random_string" "postgres" {

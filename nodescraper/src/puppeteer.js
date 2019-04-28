@@ -127,9 +127,9 @@ const loadNewSubmissions = async () => {
   const lastKnownPostId = await getLastKnownPost()
   console.warn('last known post', lastKnownPostId)
   console.warn('updating index')
-  // await updateIndex(lastKnownPostId)
+  await updateIndex(lastKnownPostId)
   console.warn('index updated')
-  debugger
+
   const { posts } = await listPostsSince(lastKnownPostId)
   console.warn('got posts')
   await insertPosts(posts)

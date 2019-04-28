@@ -15,6 +15,7 @@ resource "aws_iam_policy" "shitposter" {
         "s3:Put*"
       ],
       "Resource": [
+        "arn:aws:s3:::shitposter-scraper-stuff/*",
         "arn:aws:s3:::shitposter-content/previews/*",
         "arn:aws:s3:::shitposter-content/content/*"
       ]
