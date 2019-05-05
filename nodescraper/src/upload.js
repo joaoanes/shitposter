@@ -138,12 +138,17 @@ const addToPhonebook = async (postIds) => {
   } catch (e) {
     allPosts = []
   }
-  const newPosts = difference(postIds, allPosts)
-  if (newPosts.length === 0 || (newPosts.length === 1 && newPosts[0] === undefined)) return
 
-  const newAllPosts = uniq([...allPosts, ...newPosts])
-  threadEvent('phonebook-update', 'start', { difference: difference.length })
-  await s3.putObject({ Key: 'posts/list', Body: JSON.stringify(newAllPosts) }).promise()
+  const newAllPosts = new Set([...allPosts, postIds])
+  if (newAllPosts.size === 0 || newAllPosts.size === allPosts.length) return
+
+  threadEvent('phonebook-update', 'start', { length: newAllPosts.size })
+
+  await s3.putObject({
+    Key: 'posts/list',
+    Body: JSON.stringify(Array.from(newAllPosts)),
+  }).promise()
+
   threadEvent('phonebook-update', 'end')
 }
 
