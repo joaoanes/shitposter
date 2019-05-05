@@ -11,3 +11,4 @@ zip -r ../scrape.zip .
 cd ..
 rm -rf lib
 yarn
+yarn build

@@ -6,6 +6,7 @@ const { parse: parseHTML } = require('node-html-parser')
 const { fetchThreads, parsePosts } = require('./scraper')
 const { uploadPosts, getAllPosts, getPostUrls, getPostRaw, uploadUrls, addToPhonebook } = require('./upload')
 const { threadIdToInteger, executeInChunks } = require('./junkyard')
+const { lambdaEvent } = require('./log')
 
 class IndexReconstructionStopped extends Error {
   constructor (post) {
@@ -75,9 +76,11 @@ const updateIndex = async (lastSeenThread) => {
   const allThreads = await getThreads()
 
   const newThreads = filter(
-    allThreads.sort((a, b) => a - b),
-    (id) => threadIdToInteger(id) >= lastSeenThread,
+    allThreads.sort((a, b) => threadIdToInteger(a) - threadIdToInteger(b)),
+    (id) => threadIdToInteger(id) >= threadIdToInteger(lastSeenThread),
   )
+
+  lambdaEvent('update-index', 'start', { newThreads, allThreads, lastSeenThread })
 
   const results = await fetchThreads(
     newThreads,

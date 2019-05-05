@@ -88,6 +88,7 @@ const checkTimeOrEBreak = (thunk, timeLimit) => async (args) => {
 }
 
 const threadIdToInteger = (id) => {
+  if (id == null) return 0
   const a = id.split('')
     .map((char) => (char.charCodeAt(0) - 97 + 1))
     .reduce(
