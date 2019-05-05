@@ -58,10 +58,7 @@ const listPostsSince = async (lastPostId) => {
     }
   )
 
-  debugger
-
   if (StatusCode !== 200) {
-    // debugger
     throw new Error('unexpected list status!')
   }
   return JSON.parse(JSON.parse(Payload).body)
@@ -114,15 +111,13 @@ const fetchSubmissions = async () => {
     []
   )
 
-  debugger
-
   await updatePostsStatus(results, 'fetched')
   return results
 }
 
 const loadNewSubmissions = async () => {
   console.warn('starto')
-  // debugger
+
   const lastKnownPostId = await getLastKnownPost()
   console.warn('last known post', lastKnownPostId)
   console.warn('updating index')

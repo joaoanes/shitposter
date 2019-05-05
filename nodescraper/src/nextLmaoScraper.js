@@ -115,8 +115,8 @@ const fetch = async (lastPostId, posts) => {
   const postsToFetch = posts || (await postsNewerThan(lastPostId))
   const rawPosts = await executeInChunks(
     postsToFetch.map(post => () => getPostUrls(post).then(results => ({ postId: post, results }))),
-    Number.MAX_SAFE_INTEGER,
-    200,
+    (new Date()).getTime() + 720000, // 12mins
+    400,
   )
 
   const [withoutResults, withResults] = partition(rawPosts, ({ results }) => results === null)

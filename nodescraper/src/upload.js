@@ -139,7 +139,7 @@ const addToPhonebook = async (postIds) => {
     allPosts = []
   }
 
-  const newAllPosts = new Set([...allPosts, postIds])
+  const newAllPosts = new Set([...allPosts, ...postIds])
   if (newAllPosts.size === 0 || newAllPosts.size === allPosts.length) return
 
   threadEvent('phonebook-update', 'start', { length: newAllPosts.size })
