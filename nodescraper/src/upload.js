@@ -80,7 +80,7 @@ const getPostRaw = async (postId) => {
 }
 
 const uploadPosts = (event) => async (posts) => {
-  threadEvent('raw-upload', 'started')
+  // threadEvent('raw-upload', 'started')
 
   if (posts && posts.length === 0) {
     return posts
@@ -92,14 +92,14 @@ const uploadPosts = (event) => async (posts) => {
       Body: JSON.stringify(post),
     })
       .promise()
-      .then((res) => threadEvent('raw-upload', 'finished', { postId }) || res)
+      // .then((res) => threadEvent('raw-upload', 'finished', { postId }) || res)
   )
   const uploadedPosts = await executeWithRescue(
     (new Date()).getTime() + 300000,
     200
   )(thunks)
 
-  threadEvent('raw-upload', 'finished')
+  // threadEvent('raw-upload', 'finished')
 
   return map(
     map(uploadedPosts, 'Key'),
@@ -132,6 +132,7 @@ const getPhonebook = async () => {
 
 const addToPhonebook = async (postIds) => {
   var allPosts
+
   try {
     const request = await s3.getObject({ Key: 'posts/list' }).promise()
     allPosts = JSON.parse(request.Body)

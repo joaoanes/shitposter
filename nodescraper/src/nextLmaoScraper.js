@@ -41,11 +41,9 @@ const extractPostFromPostId = (postId) => {
 const extractThreadFromPostId = (postId) => {
   let id = null
   try {
-    id = threadIdToInteger(
-      postId.match('(?<threadId>.*)-(?<postId>.*)').groups.threadId
-    )
+    id = postId.match('(?<threadId>.*)-(?<postId>.*)').groups.threadId
   } catch (e) {
-
+    return ''
   }
 
   return id
@@ -72,20 +70,22 @@ const parsePostsAndUpload = async (fetchedThread) => {
   return uploadPosts()(posts)
 }
 
-const updateIndex = async (lastSeenThread) => {
+const updateIndex = async (lastSeenPostId) => {
   const allThreads = await getThreads()
+
+  const lastSeenThreadId = extractThreadFromPostId(lastSeenPostId)
 
   const newThreads = filter(
     allThreads.sort((a, b) => threadIdToInteger(a) - threadIdToInteger(b)),
-    (id) => threadIdToInteger(id) >= threadIdToInteger(lastSeenThread),
+    (id) => threadIdToInteger(id) >= threadIdToInteger(lastSeenThreadId),
   )
 
-  lambdaEvent('update-index', 'start', { newThreads, allThreads, lastSeenThread })
+  lambdaEvent('update-index', 'start', { newThreads, allThreads, lastSeenThreadId })
 
   const results = await fetchThreads(
     newThreads,
     parsePostsAndUpload,
-    (new Date()).getTime() + 800000, // 14 mins
+    (new Date()).getTime() + 8000, // 14 mins
   )
 
   const { stopped: outOfTime, ...fetchResults } = results
@@ -104,7 +104,7 @@ const postsNewerThan = async (lastPostId) => {
 }
 
 const ensureIndexUpdated = async (lastSeenPostId) => {
-  const { outOfTime, posts } = await updateIndex(extractThreadFromPostId(lastSeenPostId))
+  const { outOfTime, posts } = await updateIndex(lastSeenPostId)
   if (outOfTime) {
     throw new IndexReconstructionStopped(
       maxBy(posts, extractPostFromPostId)

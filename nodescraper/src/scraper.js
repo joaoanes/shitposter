@@ -135,7 +135,12 @@ const fetchThreads = async (threads : [string], doInThread : any, limit : Number
       if (res.length === 0) {
         return res
       }
-      return reduceFP.convert({ cap: false })((acc, curr, index, collection) => ({ ...({ ...acc, stopped: collection.stopped }), ...curr }), {})(res)
+      return reduceFP.convert({ cap: false })((acc, curr, index, collection) => {
+        const re = [...acc, ...curr]
+        re.stopped = collection.stopped
+        // TODO: this is kinda stupid, to put it mildly
+        return re
+      }, [])(res)
     }
   )(threads)
 )
@@ -150,9 +155,9 @@ const getThreadHTML = async (threadId: string) => {
   const rawThreads = await Promise.all(
     (new Array(finalPage)).fill(',')
       .map(async (_, currentPage) => {
-        threadEvent('fetching', 'queued', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
+        // threadEvent('fetching', 'queued', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
         const yld = await networkQueue.acquire()
-        threadEvent('fetching', 'started', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
+        // threadEvent('fetching', 'started', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
 
         let result
         try {
@@ -168,16 +173,16 @@ const getThreadHTML = async (threadId: string) => {
           ])
         } catch (e) {
           result = null
-          threadEvent('fetching', 'timedout', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
+          // threadEvent('fetching', 'timedout', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
         }
         await yld()
-        threadEvent('fetching', 'finished', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
+        // threadEvent('fetching', 'finished', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
         return result
       })
   )
   const posts = extractPosts(rawThreads)
 
-  threadEvent('fetching', 'end', { threadId })
+  threadEvent('fetching', 'end', { threadId, posts: posts[threadId].length })
   return posts
 }
 

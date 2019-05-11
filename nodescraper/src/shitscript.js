@@ -24,7 +24,7 @@ const testList = async () => {
 const testFetch = async () => {
   const lol = await fetch({
     id: testEventId,
-    multiValueQueryStringParameters: { lastPostId: 'bvnje-cwvaov' },
+
   })
   console.log(lol)
 }
@@ -32,7 +32,7 @@ const testFetch = async () => {
 const testUpdate = async () => {
   const lol = await updateIndex({
     id: testEventId,
-    lastPostId: 'bvnje-cwvaov',
+    // lastPostId: 'bpwhk-cscsqb',
   })
   console.log(lol)
 }
@@ -43,6 +43,6 @@ const testUpdate = async () => {
 // testSanitize()
 
 // testAll()
-// testUpdate()
-testList()
+testUpdate()
+// testList()
 // testFetch()
