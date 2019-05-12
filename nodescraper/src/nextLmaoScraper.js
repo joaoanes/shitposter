@@ -85,7 +85,7 @@ const updateIndex = async (lastSeenPostId) => {
   const results = await fetchThreads(
     newThreads,
     parsePostsAndUpload,
-    (new Date()).getTime() + 8000, // 14 mins
+    (new Date()).getTime() + 800000, // 14 mins
   )
 
   const { stopped: outOfTime, ...fetchResults } = results
