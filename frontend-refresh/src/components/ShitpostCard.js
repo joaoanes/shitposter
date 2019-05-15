@@ -27,6 +27,9 @@ const styles = theme => ({
     marginTop: 20,
     transition: 'height 0.5s ease',
   },
+  sourceContainer: {
+    marginTop: 0,
+  },
   nameContainer: {
     paddingLeft: 15,
     paddingRight: 45,
@@ -128,13 +131,18 @@ class ShitpostCard extends React.PureComponent {
               <Divider style={{ height: 2, backgroundColor: colorTypes[this.props.shitpost.type] }} />
               {
                 fullscreen && (
-                  <div style={{ paddingTop: 5, paddingBottom: 5, height: 20, backgroundColor: 'black' }}>
+                  <Card
+                  raised={fullscreen}
+                  className={classes.sourceContainer}
+                >
+                  <div style={{ paddingTop: 5, paddingBottom: 5, height: 20 }}>
                     <a
-                      style={{ textAlign: 'center', display: 'block', color: 'white' }}
-                      href={shitpost.url}
+                      style={{ textAlign: 'center', display: 'block', color: 'black' }}
+                      href={shitpost.originalUrl}
                     >Source link</a>
                     <Divider style={{ height: 2, marginTop: 5, backgroundColor: colorTypes[this.props.shitpost.type] }} />
                   </div>
+                  </Card>
                 )
               }
               <Tooltip
@@ -145,7 +153,7 @@ class ShitpostCard extends React.PureComponent {
                 <Button
                   variant='fab'
                   aria-label='Fullscreen'
-                  style={{ position: 'absolute', bottom: -25, right: 20 }}
+                  style={{ position: 'absolute', bottom: -30, right: 20 }}
                   onClick={this.handleClick}
                 >
                   <Fullscreen />
@@ -156,7 +164,7 @@ class ShitpostCard extends React.PureComponent {
               className={classes.actions}
               disableActionSpacing
             >
-                          <Tooltip title='Get share link!'>
+              {/* <Tooltip title='Get share link!'>
                 <IconButton aria-label='Share'>
                   <a
                     target='_blank'
@@ -164,7 +172,7 @@ class ShitpostCard extends React.PureComponent {
                     href={`/${shitpost.id}`}
                   ><Share /></a>
                 </IconButton>
-              </Tooltip>
+              </Tooltip> */}
               <RatingButton
                 ratePost={ratePost}
                 shitpost={shitpost}
@@ -192,6 +200,7 @@ export default compose(
     ...props,
     shitpost: {
       ...props.shitpost,
+      originalUrl: props.shitpost.url, //the mythical hack upon a hack
       url: props.shitpost.permalink || props.shitpost.url,
     },
   }))

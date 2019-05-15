@@ -61,7 +61,7 @@ class CardWrapper extends React.PureComponent {
 
     const shitpost = shitposts[index]
     return (
-      <div style={style} >
+      <div style={{...style, marginTop: index === 0 ? 200 : 0}} >
         <CardComponent
           shitpost={shitpost}
           fullscreen={fullscreen.indexOf(shitpost.id) !== -1}
@@ -109,20 +109,32 @@ class ShitpostList extends React.Component {
   }
 
   isFullscreen(id) {
-    return this.props.fullscreen[0].indexOf(id) !== -1
+    return this.props.fullscreen[0] ? this.props.fullscreen[0].indexOf(id) !== -1 : false
   }
 
   ref = React.createRef()
 
   setFullscreen = async (args) => {
-    this.props.setFullscreen(args)
-    const index = Object.values(this.state.shitposts).findIndex(({id}) => id === args[0])
-    await this.ref.current.resetAfterIndex(index - 1)
-    this.ref.current.scrollToItem(index, "start")
+    const alreadyFullscreen = this.isFullscreen(args[0])
+    if (alreadyFullscreen) {
+      this.props.setFullscreen([null, 300])
+    } else {
+      this.props.setFullscreen(args)
+    }
+
+    const index = Object.values(this.state.shitposts)
+      .findIndex(({id}) => id === args[0])
+    const updateFromIndex = index === 0 ? 0 : index - 1
+
+    await this.ref.current.resetAfterIndex(updateFromIndex)
+    console.log(this.ref.current)
+    this.ref.current.scrollToItem(
+      index,
+      alreadyFullscreen ? "auto" : "smart"
+    )
   }
 
   render() {
-
     console.log("list rerender!", this.props.fullscreen)
 
     const {
@@ -131,18 +143,19 @@ class ShitpostList extends React.Component {
 
     const { shitposts, itemCount } = this.state
 
-
-
-    const isItemLoaded = (index) => {
-      return shitposts[index] ? true : false
-    }
+    const isItemLoaded = (index) => (
+      index < shitposts.length ? true : false
+    )
 
     const itemSize = (index) => {
-      const f = this.isFullscreen(shitposts[index].id) ? this.props.fullscreen[1] + 128 : 400
-      console.log("itemsize!", index, f)
-      return f
+      let extra = 0
+      if (index === 0) {
+        extra = 200
+      }
+      return this.isFullscreen(shitposts[index].id)
+      ? this.props.fullscreen[1] + 128 + extra
+      : 400 + extra
     }
-
 
     return (
       <div style={styles.container}>
@@ -161,16 +174,12 @@ class ShitpostList extends React.Component {
                   itemCount={itemCount}
                   itemData={[shitposts, this.props.fullscreen, this.setFullscreen]}
                   itemSize={itemSize}
-                  initialScrollOffset={200}
-                  overscanCount={5}
                   width={width}
                   style={styles.list}
                 >
                   { CardWrapper }
                 </VariableSizeList>
-
               )}
-
             </InfiniteLoader>
           )}
         </AutoSizer>
@@ -220,7 +229,7 @@ export default compose(
         fetchPolicy: 'cache-and-network',
       },
     }),
-    withState('fullscreen', 'setFullscreen', [[], 300]),
+    withState('fullscreen', 'setFullscreen', [null, 300]),
   branch(
     ({ data: { networkStatus } }) => networkStatus < 3, // ? console.log(`starting at ${(new Date()).getTime()}`) || true : console.log(`ending at ${(new Date()).getTime()}`) && false,
     renderComponent(() => <div style={{ margin: 40, display: 'flex', justifyContent: 'center' }}><CircularProgress /></div>)

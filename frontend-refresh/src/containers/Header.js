@@ -5,7 +5,7 @@ export default class Root extends Component {
   render () {
     return (
       <div style={styles.header}>
-        <Giphy />
+        <div style={styles.banner}/>
         <div style={styles.titleContainer}>
           <span style={styles.title}>Shitpost.network</span>
           <span style={styles.subTitle}>v0.2</span>
@@ -16,6 +16,12 @@ export default class Root extends Component {
 }
 
 const styles = {
+  banner: {
+    backgroundColor: 'black',
+    objectFit: 'bottom',
+    backgroundImage: "url(https://source.unsplash.com/1500x120/?vaporwave)",
+    height: 100,
+  },
   header: {
     paddingTop: 15,
     zIndex: 100,

@@ -31,7 +31,8 @@ export default class ImageRenderer extends React.Component {
 
 const styles = {
   image: {
-    width: '100%', height: 'auto',
+    width: "100%",
+    display: 'flex'
   },
   imageFullscreen: {
     backgroundRepeat: 'no-repeat',
@@ -41,6 +42,7 @@ const styles = {
   },
   imageNormal: {
     backgroundRepeat: 'no-repeat',
-    backgroundSize: 'cover',
+    objectFit: 'cover',
+    minHeight: 300,
   },
 }

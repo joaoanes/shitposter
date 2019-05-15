@@ -1,6 +1,6 @@
 import React from 'react'
-import { Tweet } from 'react-twitter-widgets'
-import { SizeMe } from 'react-sizeme'
+import { TwitterTweetEmbed } from 'react-twitter-embed'
+import AutoSizer from "react-virtualized-auto-sizer"
 
 export default class TweetRenderer extends React.Component {
   props: {
@@ -10,34 +10,27 @@ export default class TweetRenderer extends React.Component {
   }
 
 
-  handleLoad = () => {
-
+  handleLoad = (e) => {
     this.props.reportSize(
-      800
+      e.shadowRoot.children[1].clientHeight
     )
   }
 
-  tweetRef = React.createRef()
-
-
-  render () {
+  render() {
     const { url } = this.props.shitpost
     const tweetId = url.slice(url.lastIndexOf('/') + 1)
 
     return (
-      <div style={{ width: '100%', height: '800px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-
-          <Tweet
-            tweetId={tweetId}
-            ref={this.tweetRef}
-            onLoad={this.handleLoad}
-            options={{
-              align: 'center',
-              height: 800,
-            }}
-          />
-          </div>
-
+      <div style={{ width: '100%', height: "auto", minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <TwitterTweetEmbed
+          tweetId={tweetId}
+          ref={this.tweetRef}
+          onLoaded={this.handleLoad}
+          options={{
+            align: 'center',
+          }}
+        />
+      </div>
     )
   }
 }
