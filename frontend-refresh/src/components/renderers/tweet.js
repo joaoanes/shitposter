@@ -11,6 +11,9 @@ export default class TweetRenderer extends React.Component {
 
 
   handleLoad = (e) => {
+    if (e.shadowRoot.children[1].clientHeight === 0) {
+      debugger
+    }
     this.props.reportSize(
       e.shadowRoot.children[1].clientHeight
     )

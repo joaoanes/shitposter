@@ -7,13 +7,13 @@ export default class YoutubeRenderer extends React.Component {
       url: String,
     },
     fullscreen: boolean,
-    reportSize: (id : String) => void,
+    reportSize: (id: String) => void,
   }
   handleReady = (e) => {
     this.props.reportSize(e.wrapper.clientHeight)
   }
 
-  render () {
+  render() {
     const { shitpost } = this.props
     const { url } = shitpost
 

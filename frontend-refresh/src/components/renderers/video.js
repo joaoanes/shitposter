@@ -11,7 +11,7 @@ export default class ImageRenderer extends React.Component {
     handleLoad({target: video}) {
       debugger
       this.props.reportSize(
-        video.naturalHeight * 800 / video.naturalWidth
+        video.videoHeight * 800 / video.videoWidth
       )
     }
 
@@ -22,7 +22,7 @@ export default class ImageRenderer extends React.Component {
         <video
           controls
           src={url}
-          onLoad={this.handleLoad.bind(this)}
+          onCanPlay={this.handleLoad.bind(this)}
           style={{ ...styles.video, ...(fullscreen ? styles.videoFullScreen : styles.videoNoFullscreen) }}
         />
       )

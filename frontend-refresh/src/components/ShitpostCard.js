@@ -4,14 +4,11 @@ import { withStyles } from '@material-ui/core/styles'
 import Card from '@material-ui/core/Card'
 import CardActions from '@material-ui/core/CardActions'
 import { Paper, Divider, Button, Tooltip } from '@material-ui/core'
-import IconButton from '@material-ui/core/IconButton'
 import red from '@material-ui/core/colors/red'
 import { Fullscreen } from '@material-ui/icons'
-import Share from '@material-ui/icons/Share'
 import { compose, mapProps, withState } from 'recompose'
-import { graphql } from 'react-apollo'
-import gql from 'graphql-tag'
-import AnimateHeight from 'react-animate-height'
+import MediaQuery from 'react-responsive';
+
 import _ from "lodash"
 
 import RatingButton from './RatingButton'
@@ -73,7 +70,7 @@ class ShitpostCard extends React.PureComponent {
     fullscreen: boolean,
     rated: boolean,
     isRating: boolean,
-    setFullscreen: (fullscreen : boolean) => void,
+    setFullscreen: (fullscreen: boolean) => void,
   }
 
   handleClick = () => {
@@ -84,7 +81,7 @@ class ShitpostCard extends React.PureComponent {
     console.log(this.props.shitpost.id, "mounted!")
   }
 
-  render () {
+  render() {
     const { classes, ratePost, shitpost, rated, isRating, fullscreen } = this.props
     let TypeRenderer
 
@@ -120,45 +117,60 @@ class ShitpostCard extends React.PureComponent {
                     </Paper>
                   )}
               </div>
-              <div style={fullscreen ? { width: '100%', height: 'auto' } : { maxHeight: 300, overflow: 'hidden' }} >
+              <MediaQuery query="(min-device-width: 1224px)">
+                <div style={fullscreen ? { width: '100%', height: 'auto' } : { maxHeight: 300, overflow: 'hidden' }} >
+                  <TypeRenderer
+                    fullscreen={fullscreen}
+                    shitpost={shitpost}
+                    reportSize={this.props.setReportedSize}
+                  />
+                </div>
+              </MediaQuery>
+              <MediaQuery query="(max-width: 1224px)">
+                <div onClick={ fullscreen ? () => 0 : this.handleClick } onDoubleClick={ fullscreen ? this.handleClick : () => 0 } style={fullscreen ? { width: '100%', height: 'auto' } : { maxHeight: 300, overflow: 'hidden' }} >
+                  <div style={ fullscreen ? {} : {pointerEvents: "none"}}>
 
-                <TypeRenderer
-                  fullscreen={fullscreen}
-                  shitpost={shitpost}
-                  reportSize={this.props.setReportedSize}
-                />
-              </div>
+                    <TypeRenderer
+                      fullscreen={fullscreen}
+                      shitpost={shitpost}
+                      reportSize={this.props.setReportedSize}
+                    />
+                  </div>
+                </div>
+              </MediaQuery>
               <Divider style={{ height: 2, backgroundColor: colorTypes[this.props.shitpost.type] }} />
               {
                 fullscreen && (
                   <Card
-                  raised={fullscreen}
-                  className={classes.sourceContainer}
-                >
-                  <div style={{ paddingTop: 5, paddingBottom: 5, height: 20 }}>
-                    <a
-                      style={{ textAlign: 'center', display: 'block', color: 'black' }}
-                      href={shitpost.originalUrl}
-                    >Source link</a>
-                    <Divider style={{ height: 2, marginTop: 5, backgroundColor: colorTypes[this.props.shitpost.type] }} />
-                  </div>
+                    raised={fullscreen}
+                    className={classes.sourceContainer}
+                  >
+                    <div style={{ paddingTop: 5, paddingBottom: 5, height: 20 }}>
+                      <a
+                        style={{ textAlign: 'center', display: 'block', color: 'black' }}
+                        href={shitpost.originalUrl}
+                      >Source link</a>
+                      <Divider style={{ height: 2, marginTop: 5, backgroundColor: colorTypes[this.props.shitpost.type] }} />
+                    </div>
                   </Card>
                 )
               }
-              <Tooltip
-                id='tooltip-fab'
-                className={classes.fab}
-                title={`Make it ${fullscreen ? 'smaller' : 'bigger'}!`}
-              >
-                <Button
-                  variant='fab'
-                  aria-label='Fullscreen'
-                  style={{ position: 'absolute', bottom: -30, right: 20 }}
-                  onClick={this.handleClick}
+              <MediaQuery query="(min-device-width: 1224px)">
+                <Tooltip
+                  id='tooltip-fab'
+                  className={classes.fab}
+                  title={`Make it ${fullscreen ? 'smaller' : 'bigger'}!`}
                 >
-                  <Fullscreen />
-                </Button>
-              </Tooltip>
+                  <Button
+                    variant='fab'
+                    aria-label='Fullscreen'
+                    style={{ position: 'absolute', bottom: -30, right: 20 }}
+                    onClick={this.handleClick}
+                  >
+                    <Fullscreen />
+                  </Button>
+                </Tooltip>
+              </MediaQuery>
             </div>
             <CardActions
               className={classes.actions}

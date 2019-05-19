@@ -10,7 +10,6 @@ export default class ImageRenderer extends React.Component {
     }
 
     handleLoad({target: img}) {
-
       this.props.reportSize(
         img.naturalHeight * 800 / img.naturalWidth
       )

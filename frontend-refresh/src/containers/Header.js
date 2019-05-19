@@ -8,7 +8,7 @@ export default class Root extends Component {
         <div style={styles.banner}/>
         <div style={styles.titleContainer}>
           <span style={styles.title}>Shitpost.network</span>
-          <span style={styles.subTitle}>v0.2</span>
+          <span style={styles.subTitle}>alpha-1-bb0eb3</span>
         </div>
       </div>
     )
