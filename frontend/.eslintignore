@@ -1,4 +1,0 @@
-scripts/**
-*.test.js
-config/
-**/registerServiceWorker.js
