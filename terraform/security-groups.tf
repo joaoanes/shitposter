@@ -45,6 +45,24 @@ resource "aws_security_group" "shitposter" {
   }
 }
 
+resource "aws_security_group" "redis" {
+  name = "shitposter-redis"
+
+  ingress {
+    protocol    = "tcp"
+    from_port   = 6379
+    to_port     = 6379
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_security_group" "http-ssh" {
   name = "http-ssh"
 
@@ -71,6 +89,25 @@ resource "aws_security_group" "http-ssh" {
     from_port = 8 #type number, in our case, Echo (ping)
 
     to_port = 0 #code, and the Echo ICMP type only uses code 0
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+
+resource "aws_security_group" "puppeteer" {
+  name = "puppeteer"
+
+  ingress {
+    protocol    = "tcp"
+    from_port   = 4001
+    to_port     = 4001
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {

@@ -13,7 +13,7 @@ defmodule ShitposterBackend.Shitpost do
     field :permalink, :string
     field :name, :string
     field :type, :string #actually an enum!
-    field :url_date, :date
+    field :url_date, :utc_datetime
     belongs_to :source, Source
     belongs_to :submitter, User
     has_many :reactions, Reaction, foreign_key: :shitpost_id

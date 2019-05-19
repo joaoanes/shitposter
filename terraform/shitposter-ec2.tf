@@ -1,13 +1,14 @@
 resource "aws_instance" "shitposter" {
   ami = "${data.aws_ami.ubuntu-bionic.id}"
-  instance_type = "t2.nano"
+  instance_type = "t2.medium"
   key_name = "${aws_key_pair.mac.key_name}"
 
   security_groups = [
       "${aws_security_group.http-ssh.name}",
       "${aws_security_group.https.name}",
       "${aws_security_group.default.name}",
-      "${aws_security_group.shitposter.name}"
+      "${aws_security_group.shitposter.name}",
+      "${aws_security_group.puppeteer.name}",
     ]
   iam_instance_profile = "${aws_iam_instance_profile.shitposter.name}"
 
@@ -55,14 +56,70 @@ resource "aws_instance" "shitposter" {
         "MIX_ENV=prod mix deps.get",
         "MIX_ENV=prod mix deps.compile",
 
-        "sudo sh -c \"echo '[Unit]\nDescription=My app daemon\n[Service]\nType=simple\nUser=ubuntu\nRestart=on-failure\nEnvironment=MIX_ENV=prod PORT=4000\nEnvironment=DATABASE_URL=${data.template_file.database_dsn.rendered}\nWorkingDirectory=/home/ubuntu/shitposter/backend\nExecStart=/usr/local/bin/mix phoenix.server\n[Install]\nWantedBy=multi-user.target' > /etc/systemd/system/shitposter.service\"",
+        "sudo sh -c \"echo '[Unit]\nDescription=Shitposter!\n[Service]\nType=simple\nUser=ubuntu\nRestart=on-failure\nEnvironment=MIX_ENV=prod\nEnvironment=PORT=4000\nEnvironment=DATABASE_URL=${data.template_file.database_dsn.rendered}\nWorkingDirectory=/home/ubuntu/shitposter/backend\nExecStart=/usr/bin/mix phx.server\n[Install]\nWantedBy=multi-user.target' > /etc/systemd/system/shitposter.service\"",
+        "sudo systemctl daemon-reload",
         "sudo systemctl enable shitposter",
 
         "MIX_ENV=prod DATABASE_URL=${data.template_file.database_dsn.rendered} mix do ecto.migrate",
 
         "cd lib/shitposter_backend/workers/scraper/",
         "yarn",
-        "sudo reboot &"
+        #"sudo reboot &"
+    ]
+  }
+  provisioner "remote-exec" {
+    connection {
+      user = "ubuntu"
+    }
+
+    inline = [
+        "sleep 5",
+        # "sudo apt update",
+        # "curl -sL https://deb.nodesource.com/setup_10.x -o nodesource_setup.sh",
+        # "sudo bash nodesource_setup.sh",
+        # "sudo apt update",
+        # "sudo apt install nodejs --yes",
+        # "sudo apt install build-essential make --yes",
+        # "sudo apt install libxss1 libnss3 libasound2 --yes",
+        # "sudo npm install -g yarn",
+
+        # "sudo chown ubuntu /home/ubuntu/.config",
+
+
+        # "chmod 0600 ~/.ssh/deploy-key",
+        # "eval $(ssh-agent)",
+        # "ssh-add ~/.ssh/deploy-key",
+        # "ssh-keyscan github.com >> ~/.ssh/known_hosts",
+
+        "git clone git@github.com:joaoanes/shitposter.git puppeteer",
+        "cd puppeteer/nodescraper",
+
+        "yarn",
+        "yarn build",
+
+        "sudo sh -c \"echo '[Unit]\nDescription=Shitposter puppeteer!\n[Service]\nType=simple\nUser=ubuntu\nRestart=on-failure\nEnvironment=NODE_ENV=prod\nEnvironment=SHITPOSTER_GRAPHQL_URL=http://localhost:4000\nEnvironment=BUCKET_NAME=${aws_s3_bucket.shitposter-scraper-next.bucket}\nEnvironment=SHITPOSTER_GRAPHQL_TOKEN=eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJTaGl0cG9zdGVyQmFja2VuZCIsImV4cCI6MTU4MzM4MzYxMCwiaWF0IjoxNTUyMjc5NjEwLCJpc3MiOiJTaGl0cG9zdGVyQmFja2VuZCIsImp0aSI6IjI3ZTZlMjU1LTY1NDEtNGVmOS05M2Y4LTRlYzI0MmJiOTQ5YiIsIm5iZiI6MTU1MjI3OTYwOSwic3ViIjoiMSIsInR5cCI6ImFjY2VzcyJ9.mbuhNN5Njr0uKpwOlaTO7u3BTWYt97ganJ1_dn_g0tItGfb66ryKDQuV3U9ezGdYuYbqJZxLSvl3FUDF9w_k3A\nEnvironment=PORT=4001\nEnvironment=DATABASE_URL=${module.puppeteer.database_url}\nWorkingDirectory=/home/ubuntu/puppeteer/nodescraper\nExecStart=/usr/bin/node ./lib/puppeteerServer.js\n[Install]\nWantedBy=multi-user.target' > /etc/systemd/system/puppeteer.service\"",
+        "sudo systemctl daemon-reload",
+        "sudo systemctl enable puppeteer",
+
+        #"sudo reboot &",
+    ]
+  }
+
+   provisioner "remote-exec" {
+    connection {
+      user = "ubuntu"
+    }
+
+    inline = [
+        "wget https://github.com/advantageous/systemd-cloud-watch/releases/download/v0.2.1/systemd-cloud-watch_linux",
+        "chmod +x ./systemd-cloud-watch_linux",
+        "echo 'log_group = \"shitposter-ec2-journald\"' >> .cwconfig",
+        "sudo sh -c \"echo '[Unit]\nDescription=journald-cloudwatch-logs\nWants=basic.target\nAfter=basic.target network.target\n[Service]\nUser=nobody\nGroup=nobody\nExecStart=/home/ubuntu/systemd-cloud-watch_linux /home/ubuntu/.cwconfig\nKillMode=process\nRestart=on-failure\nRestartSec=42s' > /etc/systemd/system/cw.service\"",
+
+        "sudo systemctl daemon-reload",
+        "sudo systemctl enable cw",
+
+        "sudo reboot &",
     ]
   }
 }

@@ -1,6 +1,5 @@
 const { executeInSequence } = require('./junkyard')
-const { fetch, parse, submit, all } = require('./lambda')
-const { getThreads } = require('./lmaoscraper')
+const { list, fetch, updateIndex } = require('./lambda')
 
 function sleep (ms) {
   return new Promise(resolve => setTimeout(() => resolve(Math.random()), ms))
@@ -15,37 +14,35 @@ const testSequence = async () => {
   console.warn('all done!', f)
 }
 
-const testEventId = 'foxxer9000'
+const testEventId = 'ballz'
 
-const testParse = async () => {
-  console.warn(
-    await parse({ id: testEventId, multiValueQueryStringParameters: { threads: ['buuex', 'buqdh'] } })
-  )
+const testList = async () => {
+  const lol = await list()
+  console.log(lol)
 }
 
 const testFetch = async () => {
-  console.warn(
-    await fetch({ id: testEventId, multiValueQueryStringParameters: { threads: ['buuex', 'buqdh'] } })
-  )
+  const lol = await fetch({
+    id: testEventId,
+
+  })
+  console.log(lol)
 }
 
-const testSubmit = async () => {
-  console.warn(
-    await submit({ id: testEventId, multiValueQueryStringParameters: { threads: ['buuex', 'buqdh'] } })
-  )
-}
-
-const testAll = async () => {
-  console.warn(
-    await all({ id: testEventId, multiValueQueryStringParameters: { threads: ['buuex', 'buqdh'] } })
-  )
-}
-
-const testThreads = async () => {
-  console.log(threads)
+const testUpdate = async () => {
+  const lol = await updateIndex({
+    id: testEventId,
+    // lastPostId: 'bpwhk-cscsqb',
+  })
+  console.log(lol)
 }
 
 // testParse()
 // testFetch()
 // testSubmit()
-testAll()
+// testSanitize()
+
+// testAll()
+testUpdate()
+// testList()
+// testFetch()

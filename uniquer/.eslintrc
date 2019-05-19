@@ -1,0 +1,78 @@
+{
+  "env": {
+    "node": true,
+    "es6": true,
+  },
+
+  "parserOptions": {
+    "ecmaVersion": 9,
+  },
+
+  "extends": [
+    "eslint:recommended",
+  ],
+
+  "rules": {
+    // Possible Errors
+    "no-misleading-character-class": "error",
+    "no-template-curly-in-string": "error",
+
+    // Best practices
+    "array-callback-return": "error",
+    "consistent-return": "error",
+    "default-case": "error",
+    "eqeqeq": "error",
+    "no-eq-null": "error",
+    "no-param-reassign": "error",
+    "no-return-assign": "error",
+    "no-return-await": "error",
+    "require-await": "error",
+    "radix": "error",
+    "no-console": "off",
+
+    // Variables
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "no-undefined": "error",
+
+    // Stylistic issues
+    "array-bracket-spacing": "error",
+    "comma-dangle": ["error", {
+      "arrays": "always-multiline",
+      "objects": "always-multiline",
+      "imports": "always-multiline",
+      "exports": "always-multiline",
+      "functions": "always-multiline"
+    }],
+    "comma-spacing": ["error", { "before": false, "after": true }],
+    "comma-style": ["error", "last"],
+    "computed-property-spacing": ["error", "never"],
+    "eol-last": ["error", "always"],
+    "indent": ["error", 2, { "SwitchCase": 1 }],
+    "jsx-quotes": ["error", "prefer-double"],
+    "key-spacing": ["error", { "beforeColon": false }],
+    "keyword-spacing": "error",
+    "max-len": ["error", { "code": 140 }],
+    "new-parens": "error",
+    "no-mixed-operators": "error",
+    "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 0 }],
+    "no-nested-ternary": "error",
+    "no-trailing-spaces": "error",
+    "no-tabs": "error",
+    "prefer-object-spread": "error",
+    "quotes": ["error", "double"],
+    "space-before-function-paren": ["error", { "anonymous": "never", "named": "never", "asyncArrow": "always" }],
+    "space-in-parens": "error",
+    "space-infix-ops": "error",
+    "spaced-comment": ["error", "always", { "exceptions": ["-"] }],
+
+    // ECMAScript 6
+    "arrow-spacing": "error",
+    "arrow-body-style": ["error", "as-needed"],
+    "arrow-parens": ["error", "always"],
+    "no-duplicate-imports": "error",
+    "no-var": "error",
+    "prefer-const": ["error", { "destructuring": "all" }],
+    "prefer-template": "error",
+    "template-curly-spacing": "error",
+  },
+}

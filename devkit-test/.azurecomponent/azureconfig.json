@@ -1,0 +1,18 @@
+{
+    "componentConfigs": [
+        {
+            "id": "8073a378-ff3f-4879-2f37-c4403d7250dd",
+            "folder": "",
+            "name": "",
+            "dependencies": [],
+            "type": "IoTHub",
+            "componentInfo": {
+                "values": {
+                    "iotHubConnectionString": "HostName=pixelsTest.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=nSZOCbh2dNzh7NuyDjEa6uNzFmDEHlxhEogw6BazySQ=",
+                    "eventHubConnectionString": "Endpoint=sb://ihsuprodamres050dednamespace.servicebus.windows.net/;SharedAccessKeyName=iothubowner;SharedAccessKey=nSZOCbh2dNzh7NuyDjEa6uNzFmDEHlxhEogw6BazySQ=",
+                    "eventHubConnectionPath": "iothub-ehub-pixelstest-1424606-06e989e76f"
+                }
+            }
+        }
+    ]
+}

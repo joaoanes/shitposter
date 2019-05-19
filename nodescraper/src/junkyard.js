@@ -4,6 +4,10 @@ const { compose, ifElse, is, tail, reduce } = require('ramda')
 
 let FUCKINGSINGLETONSBreak = false
 process.on('SIGINT', () => {
+  if (FUCKINGSINGLETONSBreak) {
+    console.warn('Hard exiting...')
+    process.exit()
+  }
   FUCKINGSINGLETONSBreak = true
 })
 
@@ -16,18 +20,18 @@ class LimitReachedException extends Error {
   }
 }
 
-const executeWithRescue = (limit) => async (thunks) => {
+const executeWithRescue = (limit, chunks) => async (thunks) => {
   let results
   try {
-    results = await executeInSequence(
+    results = await (chunks ? executeInChunks : executeInSequence)(
       thunks,
-      limit
+      limit,
+      chunks
     )
   } catch (e) {
     if (e instanceof LimitReachedException) {
       results = e.partialResults
-
-      console.warn('missing results!')
+      results.stopped = true
     } else {
       throw e
     }
@@ -36,6 +40,7 @@ const executeWithRescue = (limit) => async (thunks) => {
 }
 
 const composeFunctions = (func = (e) => e, func2) => async () =>
+  // eslint-disable-next-line no-undef
   func2.apply(this, arguments).then(func)
 
 const executeInSequence = (promiseThunks, limit) => (
@@ -50,21 +55,26 @@ const executeInSequence = (promiseThunks, limit) => (
 const executeInChunks = async (promiseThunks, limit, chunks = 20) => (
   chunk(promiseThunks, chunks).reduce(
     (promise, thunks) => promise.then(
-      checkTimeOrEBreak(async () => (
+      checkTimeOrEBreak(aggregateChunks(async () => (
         Promise.all(thunks.map((thunk) => thunk()))
-      ))
+      )))
     ),
     Promise.resolve([])
   )
 )
 
-const thunker = (func) => (id) => async () => (
-  func(id)
+const thunker = (func) => (arg) => async () => (
+  func(arg)
 )
 
 const aggregate = (thunk) => async (previous) => {
   const res = await thunk()
   return [...previous, res]
+}
+
+const aggregateChunks = (thunk) => async (previous) => {
+  const res = await thunk()
+  return [...previous, ...res]
 }
 
 const checkTimeOrEBreak = (thunk, timeLimit) => async (args) => {
@@ -78,6 +88,7 @@ const checkTimeOrEBreak = (thunk, timeLimit) => async (args) => {
 }
 
 const threadIdToInteger = (id) => {
+  if (id == null) return 0
   const a = id.split('')
     .map((char) => (char.charCodeAt(0) - 97 + 1))
     .reduce(

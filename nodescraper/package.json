@@ -6,11 +6,20 @@
   "dependencies": {
     "aws-sdk": "^2.409.0",
     "axios": "^0.18.0",
+    "cors": "^2.8.5",
+    "dotenv": "^7.0.0",
+    "express": "^4.16.4",
+    "file-type": "^10.9.0",
     "graphql-request": "^1.8.2",
+    "image-hash": "^2.0.0",
+    "knex": "^0.16.4",
     "lodash": "^4.17.11",
+    "mmmagic": "^0.5.2",
     "node-html-parser": "^1.1.12",
+    "pg": "^7.9.0",
     "progress": "^2.0.3",
-    "ramda": "^0.26.1"
+    "ramda": "^0.26.1",
+    "uuid": "^3.3.2"
   },
   "scripts": {
     "build": "flow-remove-types src/ -d lib/"

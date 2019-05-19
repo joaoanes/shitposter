@@ -1,7 +1,7 @@
 // @flow
 
 const axios = require('axios')
-const { flatten, reduce } = require('lodash')
+const { flatten, reduce, countBy } = require('lodash')
 const { get, flow, map, filter, mapValues, groupBy, reduce: reduceFP } = require('lodash/fp')
 
 const { threadEvent } = require('./log')
@@ -17,7 +17,7 @@ const extractMessages = (data: any) => {
 }
 
 const fetchPage = async (threadId: string, page: number) => axios.get(
-  `https://forum.facepunch.com/f/fastthread/${threadId}/stuff/${page}/?json=1`,
+  `https://forum.facepunch.com/thread/${threadId}/${page}?json=1`,
   {
     maxRedirects: 0,
   }
@@ -51,7 +51,6 @@ const parsePosts = async (data : [Object]) => {
     extractMessages,
     map(parseMessage),
     map(parseMeta),
-    filter(([urls, meta]) => urls.length !== 0)
   )(data)
 
   return urls
@@ -75,14 +74,17 @@ const translateFPtoSN = (ratingId) => {
 }
 
 const parseMeta = ([_msg, meta]) => {
-  const { Votes: votes, CreatedDate: date } = meta
+  const { Votes: votes, CreatedDate: date, internalPostId } = meta
 
   const allRatings = reduce(votes, (acc, val, key) => [...acc, ...(new Array(val).fill(Number.parseInt(key)))], [])
   return [
     _msg,
     {
-      ratingIds: allRatings.map(translateFPtoSN).filter(e => e),
+      ratingIds: countBy(
+        allRatings.map(translateFPtoSN).filter(e => e)
+      ),
       urlDate: date,
+      internalPostId,
     },
   ]
 }
@@ -125,11 +127,21 @@ const extractUrls = (message) => (
 const getThreadHTMLAndUpload = (func = Promise.resolve) => async (id) =>
   getThreadHTML(id).then(func)
 
-const fetchThreads = async (threads : [string], doInThread : any) => (
+const fetchThreads = async (threads : [string], doInThread : any, limit : Number) => (
   pipeAsync(
     map(thunker(getThreadHTMLAndUpload(doInThread))),
-    executeWithRescue((new Date()).getTime() + 700000),
-    reduceFP((acc, curr) => ({ ...acc, ...curr }), {}),
+    executeWithRescue(limit),
+    (res) => {
+      if (res.length === 0) {
+        return res
+      }
+      return reduceFP.convert({ cap: false })((acc, curr, index, collection) => {
+        const re = [...acc, ...curr]
+        re.stopped = collection.stopped
+        // TODO: this is kinda stupid, to put it mildly
+        return re
+      }, [])(res)
+    }
   )(threads)
 )
 
@@ -143,9 +155,9 @@ const getThreadHTML = async (threadId: string) => {
   const rawThreads = await Promise.all(
     (new Array(finalPage)).fill(',')
       .map(async (_, currentPage) => {
-        threadEvent('fetching', 'queued', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
+        // threadEvent('fetching', 'queued', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
         const yld = await networkQueue.acquire()
-        threadEvent('fetching', 'started', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
+        // threadEvent('fetching', 'started', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
 
         let result
         try {
@@ -161,16 +173,16 @@ const getThreadHTML = async (threadId: string) => {
           ])
         } catch (e) {
           result = null
-          threadEvent('fetching', 'timedout', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
+          // threadEvent('fetching', 'timedout', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
         }
         await yld()
-        threadEvent('fetching', 'finished', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
+        // threadEvent('fetching', 'finished', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
         return result
       })
   )
   const posts = extractPosts(rawThreads)
 
-  threadEvent('fetching', 'end', { threadId })
+  threadEvent('fetching', 'end', { threadId, posts: posts[threadId].length })
   return posts
 }
 
