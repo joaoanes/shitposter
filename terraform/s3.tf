@@ -97,6 +97,16 @@ resource "aws_s3_bucket" "shitposter-uniquer" {
   acl    = "private"
 }
 
+resource "aws_s3_bucket" "shitposter-scraper-stuff" {
+  bucket = "shitposter-scraper-stuff"
+  acl    = "private"
+}
+
+resource "aws_s3_bucket" "shitposter-scraper-next" {
+  bucket = "shitposter-scraper-next"
+  acl    = "private"
+}
+
 output "frontend-url" {
   value = "${aws_s3_bucket.frontend.website_endpoint}"
 }

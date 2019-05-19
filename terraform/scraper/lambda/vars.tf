@@ -11,7 +11,7 @@ variable "aws_lambda_function_name" {
 }
 
 variable "aws_s3_bucket_name" {
-  default = "shitposter-scraper-stuff"
+
 }
 
 variable "shitposter_token" {
