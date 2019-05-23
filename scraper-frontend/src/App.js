@@ -3,7 +3,7 @@ import axios from 'axios'
 import logo from './logo.svg';
 import './App.css';
 
-const BACKEND_URL = "http://18.197.147.202:4001"
+const BACKEND_URL = "https://puppeteer.shitpost.network"
 
 class App extends Component {
   state = {
