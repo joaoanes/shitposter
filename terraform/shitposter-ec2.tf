@@ -119,6 +119,24 @@ resource "aws_instance" "shitposter" {
         "sudo systemctl daemon-reload",
         "sudo systemctl enable cw",
 
+        #"sudo reboot &",
+    ]
+  }
+
+  provisioner "remote-exec" {
+    connection {
+      user = "ubuntu"
+    }
+
+    inline = [
+        "wget https://github.com/mholt/caddy/releases/download/v1.0.0/caddy_v1.0.0_linux_amd64.tar.gz",
+        "tar -xvf caddy_v1.0.0_linux_amd64.tar.gz caddy",
+        "echo -e 'https://api.shitpost.network {\n proxy / localhost:4000\n tls joao.anes@gmail.com\n}\nhttps://puppeteer.shitpost.network {\n proxy / localhost:4001\n tls joao.anes@gmail.com\n}' >> ./Caddyfile",
+        "sudo sh -c \"echo '[Unit]\nDescription=caddy\nWants=basic.target\nAfter=basic.target network.target\n[Service]\nUser=root\nExecStart=/home/ubuntu/caddy -agree -conf /home/ubuntu/Caddyfile\nKillMode=process\nRestart=on-failure\nRestartSec=42s' > /etc/systemd/system/caddy.service\"",
+
+        "sudo systemctl daemon-reload",
+        "sudo systemctl enable caddy",
+
         "sudo reboot &",
     ]
   }
