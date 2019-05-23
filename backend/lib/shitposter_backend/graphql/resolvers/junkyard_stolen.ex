@@ -61,7 +61,7 @@ defmodule ShitposterBackend.GraphQL.Resolvers.Junkyard do
     )
     case type_arg do
       nil -> ordered
-      _ -> query
+      _ -> ordered
       |> where(
         [..., q],
         q.type == ^type_arg
