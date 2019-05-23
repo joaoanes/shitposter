@@ -24,6 +24,8 @@ defmodule ShitposterBackend.GraphQL.Schema do
 
     connection field :shitposts, node_type: :shitpost do
       arg :order_by, type: :string, default_value: "id"
+      arg :type, type: :string, default_value: nil
+      arg :direction, type: :string, default_value: "desc"
       resolve Resolvers.all(ShitposterBackend.Shitpost)
     end
 

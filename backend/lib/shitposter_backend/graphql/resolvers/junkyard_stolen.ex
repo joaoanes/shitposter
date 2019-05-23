@@ -10,10 +10,11 @@ defmodule ShitposterBackend.GraphQL.Resolvers.Junkyard do
     String.to_existing_atom(target)
   end
 
-  @spec orderable(Queryable.t, %{order_by: String.t}) :: Ecto.Query.t
-  def orderable(queryable, %{order_by: order_arg}) do
-    {field_key, assocs} =
-      order_arg
+  def orderable(queryable, %{order_by: order_arg, direction: direction} = args) do
+  type_arg = Map.get(args, :type, nil)
+
+  {field_key, assocs} =
+  order_arg
       |> String.split(".")
       |> List.pop_at(-1)
 
@@ -51,14 +52,27 @@ defmodule ShitposterBackend.GraphQL.Resolvers.Junkyard do
         detail: "invalid field `#{field_key}`"
       )
 
-    order_by(
+    direction_atom = String.to_existing_atom(direction)
+
+    ordered = order_by(
       query,
       [..., l],
-      desc: field(l, ^field_atom)
+      {^direction_atom, field(l, ^field_atom)}
     )
+    case type_arg do
+      nil -> ordered
+      _ -> query
+      |> where(
+        [..., q],
+        q.type == ^type_arg
+      )
+    end
+
   end
 
-  def orderable(query, _), do: query
+  def orderable(query, _) do
+    query
+  end
 end
 
 defmodule Nope do
