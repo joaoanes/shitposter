@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import Giphy from '../components/Giphy'
 
+const { REACT_APP_TAG, REACT_APP_COMMIT } = process.env
+
 export default class Root extends Component {
   render () {
     return (
@@ -8,7 +10,7 @@ export default class Root extends Component {
         <div style={styles.banner}/>
         <div style={styles.titleContainer}>
           <span style={styles.title}>Shitpost.network</span>
-          <span style={styles.subTitle}>alpha-1-bb0eb3</span>
+          { REACT_APP_TAG && REACT_APP_COMMIT && <span style={styles.subTitle}>{`${REACT_APP_TAG}-${REACT_APP_COMMIT.substr(0, 8)}`}</span> }
         </div>
       </div>
     )
