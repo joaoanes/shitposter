@@ -11,7 +11,7 @@ defmodule ShitposterBackend.GraphQL.Resolvers.Junkyard do
   end
 
   def orderable(queryable, %{order_by: order_arg, direction: direction} = args) do
-  type_arg = Map.get(args, :type, nil)
+  types_arg = Map.get(args, :types, [])
 
   {field_key, assocs} =
   order_arg
@@ -59,12 +59,13 @@ defmodule ShitposterBackend.GraphQL.Resolvers.Junkyard do
       [..., l],
       {^direction_atom, field(l, ^field_atom)}
     )
-    case type_arg do
-      nil -> ordered
+
+    case types_arg do
+      [] -> ordered
       _ -> ordered
       |> where(
         [..., q],
-        q.type == ^type_arg
+        q.type in ^types_arg
       )
     end
 
