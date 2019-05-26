@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default class ImageRenderer extends React.Component {
+export default class ImageRenderer extends React.PureComponent {
     props: {
       shitpost: {
         url: String,

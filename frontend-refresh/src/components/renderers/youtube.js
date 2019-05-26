@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactPlayer from 'react-player'
 
-export default class YoutubeRenderer extends React.Component {
+export default class YoutubeRenderer extends React.PureComponent {
   props: {
     shitpost: {
       url: String,

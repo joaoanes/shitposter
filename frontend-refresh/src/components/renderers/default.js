@@ -3,7 +3,7 @@ import md5 from 'md5'
 
 const bucketUrl = 'https://s3.eu-central-1.amazonaws.com/shitposter-content'
 
-export default class DefaultRenderer extends React.Component {
+export default class DefaultRenderer extends React.PureComponent {
     props: {
       fullscreen: boolean,
       shitpost: {

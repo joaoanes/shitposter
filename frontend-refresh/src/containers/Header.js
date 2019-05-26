@@ -1,20 +1,67 @@
 import React, { Component } from 'react'
-import Giphy from '../components/Giphy'
+import { map } from 'lodash'
+import { compose, withState } from 'recompose'
+
+import { FilterList } from '@material-ui/icons'
+
+import ToggleButton from '../components/ToggleButton'
 
 const { REACT_APP_TAG, REACT_APP_COMMIT } = process.env
 
-export default class Root extends Component {
-  render () {
+class Root extends Component {
+
+  changeFilter = (filter) => {
+    return {
+      ...this.props.filters,
+      [filter]: !this.props.filters[filter]
+    }
+  }
+  render() {
+    const { extended, setExtended, filters, setFilters } = this.props
     return (
-      <div style={styles.header}>
-        <div style={styles.banner}/>
+      <div style={styles.header} onClick={() => setExtended(!extended)}>
+        <div style={styles.banner}>
+          <FilterList style={{color: "white", fontSize: 70, marginLeft: 350, marginTop: 25}} />
+          </div>
         <div style={styles.titleContainer}>
           <span style={styles.title}>Shitpost.network</span>
-          { REACT_APP_TAG && REACT_APP_COMMIT && <span style={styles.subTitle}>{`${REACT_APP_TAG}-${REACT_APP_COMMIT.substr(0, 8)}`}</span> }
+          {REACT_APP_TAG && REACT_APP_COMMIT && <span style={styles.subTitle}>{`${REACT_APP_TAG}-${REACT_APP_COMMIT.substr(0, 8)}`}</span>}
+        </div>
+        <div style={{ ...styles.filterContainer, height: extended ? 60 : 0 }}>
+          <div style={styles.filterWrapper}>
+            {
+              map(filters, (value, filter) => (
+                <ToggleButton
+                  pressed={value}
+                  key={filter}
+                  color={getColor(filter)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setFilters(this.changeFilter(filter))
+                  }}
+                >{filter}</ToggleButton>
+              ))
+            }
+          </div>
         </div>
       </div>
     )
   }
+}
+
+const getColor = (type) => colorTypes[type.toUpperCase()]
+
+const colorTypes = {
+  WEBPAGE: 'grey',
+  TWEET: '#00aced',
+  IMAGE: 'purple',
+  YOUTUBE: 'red', // ugh
+  FACEBOOK_POST: "#3b5998",
+  VIDEO: "orange",
+  MUTE_VIDEO: "#3254ff",
+  AMP: 'black',
+  MEDIUM_POST: "green",
+  ANIMATED_IMAGE: "#12ff54",
 }
 
 const styles = {
@@ -41,7 +88,7 @@ const styles = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-
+    pointerEvents: "none",
   },
   title: {
     color: 'white',
@@ -67,4 +114,16 @@ const styles = {
     position: 'absolute',
     bottom: -15,
   },
+  filterContainer: {
+    width: "100%",
+    backgroundColor: "rgba(0,0,0,0.2)",
+    overflow: "hidden",
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 }
+
+export default compose(
+  withState("extended", "setExtended", false),
+)(Root)

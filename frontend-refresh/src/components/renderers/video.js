@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default class ImageRenderer extends React.Component {
+export default class ImageRenderer extends React.PureComponent {
     props: {
       shitpost: {
         url: String,
@@ -9,7 +9,6 @@ export default class ImageRenderer extends React.Component {
     }
 
     handleLoad({target: video}) {
-      debugger
       this.props.reportSize(
         video.videoHeight * 800 / video.videoWidth
       )

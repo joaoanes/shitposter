@@ -8,7 +8,6 @@ import red from '@material-ui/core/colors/red'
 import { Fullscreen } from '@material-ui/icons'
 import { compose, mapProps, withState } from 'recompose'
 import MediaQuery from 'react-responsive';
-
 import _ from "lodash"
 
 import RatingButton from './RatingButton'
@@ -129,7 +128,6 @@ class ShitpostCard extends React.PureComponent {
               <MediaQuery query="(max-width: 1224px)">
                 <div onClick={ fullscreen ? () => 0 : this.handleClick } onDoubleClick={ fullscreen ? this.handleClick : () => 0 } style={fullscreen ? { width: '100%', height: 'auto' } : { maxHeight: 300, overflow: 'hidden' }} >
                   <div style={ fullscreen ? {} : {pointerEvents: "none"}}>
-
                     <TypeRenderer
                       fullscreen={fullscreen}
                       shitpost={shitpost}

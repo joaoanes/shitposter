@@ -1,36 +1,37 @@
 import React from 'react'
 import { TwitterTweetEmbed } from 'react-twitter-embed'
+import TweetEmbed from 'react-tweet-embed'
 import AutoSizer from "react-virtualized-auto-sizer"
 
-export default class TweetRenderer extends React.Component {
+export default class TweetRenderer extends React.PureComponent {
   props: {
     shitpost: {
       url: String,
     },
   }
 
-
-  handleLoad = (e) => {
-    if (e.shadowRoot.children[1].clientHeight === 0) {
-      debugger
+  handleLoad = async (e) => {
+    if (e == null || Array.from(e.shadowRoot.children).find(e => e.getAttribute("data-twitter-event-id")).clientHeight === 0) {
+      await window.twttr.widgets.load()
+      return
     }
+
     this.props.reportSize(
-      e.shadowRoot.children[1].clientHeight
+      Array.from(e.shadowRoot.children).find(e => e.getAttribute("data-twitter-event-id")).clientHeight
     )
   }
 
   render() {
     const { url } = this.props.shitpost
     const tweetId = url.slice(url.lastIndexOf('/') + 1)
-
     return (
       <div style={{ width: '100%', height: "auto", minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <TwitterTweetEmbed
           tweetId={tweetId}
-          ref={this.tweetRef}
           onLoaded={this.handleLoad}
           options={{
-            align: 'center',
+            id: tweetId,
+            dnt: true,
           }}
         />
       </div>

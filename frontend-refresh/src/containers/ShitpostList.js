@@ -15,23 +15,7 @@ import EnhancedShitpostCard from './EnhancedShitpostCard'
 import { VariableSizeList } from 'react-window'
 import InfiniteLoader from 'react-window-infinite-loader'
 
-
-import { useEffect, useRef } from 'react'
-
-import _ from 'lodash'
-import { Place } from '@material-ui/icons';
-
-
-function difference(object, base) {
-	function changes(object, base) {
-		return _.transform(object, function(result, value, key) {
-			if (!_.isEqual(value, base[key])) {
-				result[key] = (_.isObject(value) && _.isObject(base[key])) ? changes(value, base[key]) : value;
-			}
-		});
-	}
-	return changes(object, base);
-}
+import _, { pickBy } from 'lodash'
 
 const EndMessage = () => <>' '<p style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', marginBottom: 40, marginTop: 40 }}>
   <b>Yay! You have seen it all!
@@ -169,8 +153,9 @@ class ShitpostList extends React.Component {
               {({ onItemsRendered }) => (
                 <VariableSizeList
                   onItemsRendered={onItemsRendered}
-                  ref={this.ref}
+                  overscanCount={1}
                   height={height}
+                  ref={this.ref}
                   itemCount={itemCount}
                   itemData={[shitposts, this.props.fullscreen, this.setFullscreen]}
                   itemSize={itemSize}
@@ -195,8 +180,8 @@ const styles = {
 
 export default compose(
   graphql(gql`
-  query getAfterShitposts($after: String) {
-    shitposts(first: 50, after: $after)
+  query getAfterShitposts($after: String, $types: [ShitpostType]) {
+    shitposts(first: 50, after: $after, types: $types)
     {
       pageInfo{
         startCursor
@@ -225,9 +210,10 @@ export default compose(
   }
   `, {
       props: paginated('shitposts'),
-      options: {
+      options: (props) => (() => {debugger})() || ({
+        variables: { types: Object.keys(pickBy(props.filters, value => value)).map(s => s.toUpperCase())},
         fetchPolicy: 'cache-and-network',
-      },
+      }),
     }),
     withState('fullscreen', 'setFullscreen', [null, 300]),
   branch(
