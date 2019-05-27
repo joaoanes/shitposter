@@ -8,7 +8,7 @@ export const FacebookSelector = ({ iconSize, reactions, variant, onSelect, showL
   const styles = reactCSS({
     'default': {
       selector: {
-        backgroundColor: '#fff',
+        backgroundColor: 'rgba(255,255,255,0.6)',
 
         padding: '2px',
         display: 'flex',

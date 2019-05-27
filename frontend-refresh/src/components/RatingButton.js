@@ -1,5 +1,4 @@
 import React, { Component, Fragment } from 'react'
-import { Tooltip } from '@material-ui/core'
 import ShitpostEmojiList from '../containers/ShitpostEmojiList'
 
 export default class RatingButton extends Component {
@@ -16,14 +15,12 @@ export default class RatingButton extends Component {
 
     return (
       <Fragment>
-        <Tooltip title='Like shitpost!'>
-          <ShitpostEmojiList
-            rated={rated}
-            isRating={isRating}
-            reactions={shitpost.fakeReactions}
-            onSelect={ratePost}
-          />
-        </Tooltip>
+        <ShitpostEmojiList
+          rated={rated}
+          isRating={isRating}
+          reactions={shitpost.fakeReactions}
+          onSelect={ratePost}
+        />
       </Fragment>
     )
   }

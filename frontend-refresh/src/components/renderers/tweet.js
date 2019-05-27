@@ -1,6 +1,5 @@
 import React from 'react'
 import { TwitterTweetEmbed } from 'react-twitter-embed'
-import TweetEmbed from 'react-tweet-embed'
 import AutoSizer from "react-virtualized-auto-sizer"
 
 export default class TweetRenderer extends React.PureComponent {
@@ -17,7 +16,7 @@ export default class TweetRenderer extends React.PureComponent {
     }
 
     this.props.reportSize(
-      Array.from(e.shadowRoot.children).find(e => e.getAttribute("data-twitter-event-id")).clientHeight
+      Array.from(e.shadowRoot.children).find(e => e.getAttribute("data-twitter-event-id")).clientHeight + 10
     )
   }
 

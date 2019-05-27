@@ -12,7 +12,7 @@ import apolloClient from '../apollo/client'
 
 class Root extends Component {
   render() {
-    const enhancedComponent = withProps((props) => ({
+    const ListWithFiltersComponent = withProps((props) => ({
       ...props,
       filters: this.props.filters,
     }))(ShitpostList)
@@ -22,7 +22,7 @@ class Root extends Component {
       <AutoSizer>
         {
           ({ width, height }) => (
-            <div style={{ width, height }}  >
+            <div style={{ ...styles.appContainer, width, height }}  >
               <div style={styles.headerContainer}>
                 <Header filters={filters} setFilters={setFilters}/>
               </div>
@@ -33,7 +33,7 @@ class Root extends Component {
                     <Route
                       exact
                       path='/'
-                      component={enhancedComponent}
+                      component={ListWithFiltersComponent}
                     />
                     <Route
                       path='/:id'
@@ -58,6 +58,10 @@ const styles = {
     width: "100%",
     height: 200,
     top: 0,
+  },
+  appContainer: {
+    background: "-webkit-linear-gradient(to top, #414345, #232526)",
+    background: "linear-gradient(to top, #414345, #232526)",
   }
 }
 

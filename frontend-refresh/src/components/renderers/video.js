@@ -10,7 +10,7 @@ export default class ImageRenderer extends React.PureComponent {
 
     handleLoad({target: video}) {
       this.props.reportSize(
-        video.videoHeight * 800 / video.videoWidth
+        (video.videoHeight * 900 / video.videoWidth)
       )
     }
 
@@ -39,7 +39,7 @@ const styles = {
     height: 'auto',
   },
   videoNoFullscreen: {
-    height: 300,
+    height: 450,
     maxWidth: 600,
   },
 }

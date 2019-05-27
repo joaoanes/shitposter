@@ -30,7 +30,6 @@ const EndMessage = () => <>' '<p style={{ textAlign: 'center', display: 'flex', 
 </p>''</>
 
 const mustLoad = (shitposts, nextPage) => async (start, finish) => {
-  debugger
   console.log(start, finish)
   if (finish > Object.keys(shitposts).length)
     return await nextPage()
@@ -92,7 +91,8 @@ class ShitpostList extends React.Component {
     this.props.addQuery(url, name)
   }
 
-  isFullscreen(id) {
+  isFullscreen(shitpost) {
+    const id = shitpost ? shitpost.id : null
     return this.props.fullscreen[0] ? this.props.fullscreen[0].indexOf(id) !== -1 : false
   }
 
@@ -136,9 +136,9 @@ class ShitpostList extends React.Component {
       if (index === 0) {
         extra = 200
       }
-      return this.isFullscreen(shitposts[index].id)
-      ? this.props.fullscreen[1] + 128 + extra
-      : 400 + extra
+      return this.isFullscreen(shitposts[index])
+      ? this.props.fullscreen[1] + 50 + extra
+      : 500 + extra
     }
 
     return (
@@ -153,7 +153,7 @@ class ShitpostList extends React.Component {
               {({ onItemsRendered }) => (
                 <VariableSizeList
                   onItemsRendered={onItemsRendered}
-                  overscanCount={1}
+                  overscanCount={3}
                   height={height}
                   ref={this.ref}
                   itemCount={itemCount}
@@ -210,7 +210,7 @@ export default compose(
   }
   `, {
       props: paginated('shitposts'),
-      options: (props) => (() => {debugger})() || ({
+      options: (props) => ({
         variables: { types: Object.keys(pickBy(props.filters, value => value)).map(s => s.toUpperCase())},
         fetchPolicy: 'cache-and-network',
       }),
