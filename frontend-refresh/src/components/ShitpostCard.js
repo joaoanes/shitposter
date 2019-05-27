@@ -124,7 +124,6 @@ class ShitpostCard extends React.PureComponent {
 
         <Divider style={{
           backgroundColor: colorTypes[this.props.shitpost.type],
-          animation: fullscreen ? this.props.shitpost.type.toLowerCase() + " 1.5s ease-in-out infinite alternate" : null
         }} />
 
       </div>
