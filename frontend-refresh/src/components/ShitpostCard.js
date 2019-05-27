@@ -89,17 +89,19 @@ class ShitpostCard extends React.PureComponent {
       <div
         id={shitpost.id}
         style={{
-          ...(fullscreen ? { zIndex: 1000, position: 'relative', width: 900, } : { width: 600, height: 450 }),
+          ...(fullscreen ? { zIndex: 1000, position: 'relative', width: 900, } : { width: 600, height: 450, }),
           marginLeft: "auto",
           marginRight: "auto",
+
         }}
       >
 
         <div onClick={fullscreen ? () => 0 : this.handleClick} onDoubleClick={fullscreen ? this.handleClick : () => 0} style={fullscreen ? { width: '100%', height: 'auto', overflow: "hidden" } : { overflow: 'hidden' }} >
           <div style={{
-            ...(fullscreen ? { overflow: "hidden" } : { pointerEvents: "none", height: 450 }),
+            ...(fullscreen ? { overflow: "hidden" } : { pointerEvents: "none", height: 450, display: 'flex'}),
             position: "relative",
-            backgroundColor: "black"
+            backgroundColor: "black",
+
           }}>
             <TypeRenderer
               fullscreen={fullscreen}

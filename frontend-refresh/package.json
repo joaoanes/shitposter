@@ -32,7 +32,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "REACT_APP_TAG=$(git describe --tags) REACT_APP_COMMIT=$(git rev-parse HEAD) react-scripts build",
+    "build": "REACT_APP_TAG=$(git describe --tags --abbrev=0) REACT_APP_COMMIT=$(git rev-parse HEAD) react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

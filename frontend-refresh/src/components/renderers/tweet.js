@@ -24,7 +24,7 @@ export default class TweetRenderer extends React.PureComponent {
     const { url } = this.props.shitpost
     const tweetId = url.slice(url.lastIndexOf('/') + 1)
     return (
-      <div style={{ width: '100%', height: "auto", minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ width: '100%', height: "auto", minHeight: 450, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <TwitterTweetEmbed
           tweetId={tweetId}
           onLoaded={this.handleLoad}

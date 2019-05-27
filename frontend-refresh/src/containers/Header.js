@@ -7,7 +7,7 @@ import { FilterList } from '@material-ui/icons'
 import ToggleButton from '../components/ToggleButton'
 import colorTypes from '../stuff/colors.js'
 
-const { REACT_APP_TAG = "uhhhh", REACT_APP_COMMIT = "UHHHHH" } = process.env
+const { REACT_APP_TAG = "uhhhh", REACT_APP_COMMIT = "5181fb910c9ad0959b4da9c3283f5f52d7360d40" } = process.env
 
 class Root extends Component {
 
@@ -21,9 +21,7 @@ class Root extends Component {
     const { extended, setExtended, filters, setFilters } = this.props
     return (
       <div style={styles.header} onClick={() => setExtended(!extended)}>
-        <div style={styles.banner}>
-          <FilterList style={{color: "white", fontSize: 70, marginLeft: 350, marginTop: 25}} />
-          </div>
+        <div style={styles.banner} />
         <div style={styles.titleContainer}>
           <div style={styles.titleWrapper}>
             <span style={styles.title}>Shitpost.network</span>
@@ -103,9 +101,6 @@ const styles = {
     textShadow: '0 0 10px rgb(255,255,255), 0 0 20px rgb(255,255,255), 0 0 30px rgb(255,255,255), 0 0 40px darkorange, 0 0 70px darkorange, 0 0 80px darkorange, 0 0 100px darkorange, 0 0 150px darkorange',
     fontFamily: 'Cedarville Cursive, sans-serif',
     color: "white",
-    "-webkit-animation": "neon5 1.5s ease-in-out infinite alternate",
-    "-moz-animation": "neon5 1.5s ease-in-out infinite alternate",
-    "animation": "neon5 1.5s ease-in-out infinite alternate"
   },
   subTitle: {
     color: 'white', // aha

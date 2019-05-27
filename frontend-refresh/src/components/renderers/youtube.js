@@ -20,6 +20,7 @@ export default class YoutubeRenderer extends React.PureComponent {
     return (
       <ReactPlayer url={url}
         width='100%'
+        controls
         onReady={this.handleReady}
       />
     )
