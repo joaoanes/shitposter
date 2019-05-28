@@ -15,6 +15,4 @@ const EnhancedShitpostCard = compose(
   pure,
 )(ShitpostCard)
 
-EnhancedShitpostCard.whyDidYouRender = true
-
 export default EnhancedShitpostCard

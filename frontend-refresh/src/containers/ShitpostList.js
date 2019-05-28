@@ -15,7 +15,7 @@ import EnhancedShitpostCard from './EnhancedShitpostCard'
 import { VariableSizeList } from 'react-window'
 import InfiniteLoader from 'react-window-infinite-loader'
 
-import _, { pickBy } from 'lodash'
+import { pickBy, max } from 'lodash'
 
 const EndMessage = () => <>' '<p style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', marginBottom: 40, marginTop: 40 }}>
   <b>Yay! You have seen it all!
@@ -39,17 +39,23 @@ const mustLoad = (shitposts, nextPage) => async (start, finish) => {
 
 class CardWrapper extends React.PureComponent {
     render = () => {
-    const { index, style, data: [shitposts, fullscreen, setFullscreen] } = this.props
+    const { index, style, data: [shitposts, fullscreen, setFullscreen, ref] } = this.props
     const CardComponent = (index >= shitposts.length) ? PlaceholderCard : EnhancedShitpostCard
-
+    const reset = () => {
+      console.log("resetting")
+      if (ref) {
+        ref.current.resetAfterIndex(0, false)
+      }
+    }
     const shitpost = shitposts[index]
     return (
       <div style={{...style, marginTop: index === 0 ? 200 : 0}} >
-        <CardComponent
+        {shitpost && <CardComponent
           shitpost={shitpost}
           fullscreen={fullscreen.indexOf(shitpost.id) !== -1}
           setFullscreen={setFullscreen}
-        />
+          reset={reset}
+        />}
       </div>
     )
   }
@@ -93,28 +99,25 @@ class ShitpostList extends React.Component {
 
   isFullscreen(shitpost) {
     const id = shitpost ? shitpost.id : null
-    return this.props.fullscreen[0] ? this.props.fullscreen[0].indexOf(id) !== -1 : false
+    console.log("is", id, "full", this.props.fullscreen[0])
+    return this.props.fullscreen[0] === id
   }
 
   ref = React.createRef()
 
-  setFullscreen = async (args) => {
-    const alreadyFullscreen = this.isFullscreen(args[0])
-    if (alreadyFullscreen) {
-      this.props.setFullscreen([null, 300])
-    } else {
-      this.props.setFullscreen(args)
-    }
+  setFullscreen = async (args, scroll = true) => {
+
+    this.props.setFullscreen(args)
 
     const index = Object.values(this.state.shitposts)
       .findIndex(({id}) => id === args[0])
     const updateFromIndex = index === 0 ? 0 : index - 1
 
     await this.ref.current.resetAfterIndex(updateFromIndex)
-    console.log(this.ref.current)
-    this.ref.current.scrollToItem(
+
+    scroll && this.ref.current.scrollToItem(
       index,
-      alreadyFullscreen ? "auto" : "smart"
+      "smart"
     )
   }
 
@@ -136,9 +139,11 @@ class ShitpostList extends React.Component {
       if (index === 0) {
         extra = 200
       }
-      return this.isFullscreen(shitposts[index])
-      ? this.props.fullscreen[1] + 50 + extra
-      : 500 + extra
+      const res = this.isFullscreen(shitposts[index])
+      ? max([this.props.fullscreen[1] + 50, 300]) + extra
+      : 300 + extra
+      console.log("size", index, res, this.props.fullscreen)
+      return res
     }
 
     return (
@@ -153,11 +158,11 @@ class ShitpostList extends React.Component {
               {({ onItemsRendered }) => (
                 <VariableSizeList
                   onItemsRendered={onItemsRendered}
-                  overscanCount={3}
+                  overscanCount={2}
                   height={height}
                   ref={this.ref}
                   itemCount={itemCount}
-                  itemData={[shitposts, this.props.fullscreen, this.setFullscreen]}
+                  itemData={[shitposts, this.props.fullscreen, this.setFullscreen, this.ref]}
                   itemSize={itemSize}
                   width={width}
                   style={styles.list}

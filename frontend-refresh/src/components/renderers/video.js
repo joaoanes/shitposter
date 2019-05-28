@@ -20,6 +20,7 @@ export default class ImageRenderer extends React.PureComponent {
       return (
         <video
           controls
+          preload="metadata"
           src={url}
           onCanPlay={this.handleLoad.bind(this)}
           style={{ ...styles.video, ...(fullscreen ? styles.videoFullScreen : styles.videoNoFullscreen) }}
@@ -39,7 +40,7 @@ const styles = {
     height: 'auto',
   },
   videoNoFullscreen: {
-    height: 450,
+    height: 250,
     maxWidth: 600,
   },
 }
