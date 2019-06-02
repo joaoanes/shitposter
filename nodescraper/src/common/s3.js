@@ -1,5 +1,5 @@
 const AWS = require('aws-sdk')
-const { map, uniq, difference } = require('lodash')
+const { map, uniq } = require('lodash')
 
 const { threadEvent } = require('./log')
 const { executeWithRescue } = require('./junkyard')

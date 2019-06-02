@@ -21,19 +21,19 @@ const getStats = async () => ({
   })),
 })
 
-const performEvent = async (eventId, ignoreInit, ignoreFetch, ignoreSubmit) => {
+const performEvent = async (eventId, ignoreInit, ignoreFetch, ignoreSubmit, scraperName) => {
   if (!ignoreInit) {
-    const initPosts = await loadNewSubmissions()
+    const initPosts = await loadNewSubmissions(scraperName)
 
     await updateEventPosts(eventId, 'Inited', initPosts)
   }
-  if (!ignoreFetch) await updateEventPosts(eventId, 'Fetched', await fetchSubmissions())
-  if (!ignoreSubmit) await updateEventPosts(eventId, 'Submitted', await uploadSubmissions())
+  if (!ignoreFetch) await updateEventPosts(eventId, 'Fetched', await fetchSubmissions(scraperName))
+  if (!ignoreSubmit) await updateEventPosts(eventId, 'Submitted', await uploadSubmissions(scraperName))
 }
 
-const updateIndex = async (lastPostId) => {
+const updateIndex = async (lastPostId, scraperName) => {
   let { Payload } = await invokeLambda(
-    'lmaoscraper_updateIndex',
+    `${scraperName}_updateIndex`,
     {
       lastPostId,
     }
@@ -43,16 +43,16 @@ const updateIndex = async (lastPostId) => {
   const { lastSeenPostId } = JSON.parse(body)
 
   if (statusCode === 503) {
-    puppeteerEvent('relambda', 'requeue', { lastSeenPostId })
-    return updateIndex(lastSeenPostId)
+    puppeteerEvent('relambda', 'requeue', { lastSeenPostId, scraperName })
+    return updateIndex(lastSeenPostId, `${scraperName}_updateIndex`)
   }
 
   return true
 }
 
-const listPostsSince = async (lastPostId) => {
+const listPostsSince = async (lastPostId, scraperName) => {
   let { StatusCode, Payload } = await invokeLambda(
-    'lmaoscraper_list',
+    `${scraperName}_list`,
     {
       lastPostId,
     }
@@ -89,12 +89,12 @@ const uploadSubmissions = async () => {
   return seenPostIds
 }
 
-const fetchSubmissions = async () => {
+const fetchSubmissions = async (scraperName) => {
   const seenPostIds = (await getPostsByStatus('seen')).map(({ id }) => id)
   const chunks = chunk(seenPostIds, 20000)
   const invocations = await Promise.all(
     chunks.map(chunk => invokeLambda(
-      'lmaoscraper_fetch',
+      `${scraperName}_fetch`,
       {
         posts: chunk,
       }
@@ -115,16 +115,16 @@ const fetchSubmissions = async () => {
   return results
 }
 
-const loadNewSubmissions = async () => {
+const loadNewSubmissions = async (scraperName) => {
   console.warn('starto')
 
   const lastKnownPostId = await getLastKnownPost()
   console.warn('last known post', lastKnownPostId)
   console.warn('updating index')
-  await updateIndex(lastKnownPostId)
+  await updateIndex(lastKnownPostId, scraperName)
   console.warn('index updated')
 
-  const { posts } = await listPostsSince(lastKnownPostId)
+  const { posts } = await listPostsSince(lastKnownPostId, scraperName)
   console.warn('got posts')
   await insertPosts(posts)
   console.warn('uploaded posts')
