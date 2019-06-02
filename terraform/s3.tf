@@ -103,6 +103,11 @@ resource "aws_s3_bucket" "shitposter-scraper-stuff" {
 }
 
 resource "aws_s3_bucket" "shitposter-scraper-next" {
+  bucket = "shitposter-scraper-multi"
+  acl    = "private"
+}
+
+resource "aws_s3_bucket" "shitposter-scraper-old" {
   bucket = "shitposter-scraper-next"
   acl    = "private"
 }

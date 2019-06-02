@@ -23,9 +23,13 @@ variable "shitposter_api_ip" {
 }
 
 variable "source_file" {
-  default = "../nodescraper/scrape.zip"
+  default = "../scrapers-lambda/scrape.zip"
 }
 
 variable "entry_point" {
+
+}
+
+variable "scraper_name" {
 
 }

@@ -67,7 +67,7 @@ resource "aws_iam_role_policy_attachment" "iam_for_lambda_s3_list_policy_attachm
 }
 
 resource "aws_lambda_function" "lambda" {
-  filename = "../nodescraper/scrape.zip"
+  filename = "../scrapers-lambda/scrape.zip"
   function_name = "${var.aws_lambda_function_name}"
   role = "${aws_iam_role.iam_role_for_lambda.arn}"
   memory_size = "512"
@@ -82,6 +82,7 @@ resource "aws_lambda_function" "lambda" {
       SHITPOSTER_GRAPHQL_URL = "http://${var.shitposter_api_ip}:4000/"
       SHITPOSTER_GRAPHQL_TOKEN = "${var.shitposter_token}"
       BUCKET_NAME = "${var.aws_s3_bucket_name}"
+      SCRAPER_NAME = "${var.scraper_name}"
     }
   }
 }
