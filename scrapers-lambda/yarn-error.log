@@ -1,0 +1,56 @@
+Arguments: 
+  /Users/joaoanes/.asdf/installs/nodejs/10.15.0/bin/node /Users/joaoanes/.asdf/installs/nodejs/10.15.0/.npm/bin/yarn build
+
+PATH: 
+  /Users/joaoanes/.asdf/installs/nodejs/10.15.0/bin:/Users/joaoanes/.asdf/installs/nodejs/10.15.0/.npm/bin::/Users/joaoanes/.asdf/shims:/Users/joaoanes/.asdf/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/joaoanes/.yarn/bin
+
+Yarn version: 
+  1.12.3
+
+Node version: 
+  10.15.0
+
+Platform: 
+  darwin x64
+
+Trace: 
+  SyntaxError: /Users/joaoanes/shitposter/lambda-lmaoscraper/package.json: Unexpected token } in JSON at position 264
+      at JSON.parse (<anonymous>)
+      at /Users/joaoanes/.asdf/installs/nodejs/10.15.0/.npm/lib/node_modules/yarn/lib/cli.js:1631:59
+      at Generator.next (<anonymous>)
+      at step (/Users/joaoanes/.asdf/installs/nodejs/10.15.0/.npm/lib/node_modules/yarn/lib/cli.js:304:30)
+      at /Users/joaoanes/.asdf/installs/nodejs/10.15.0/.npm/lib/node_modules/yarn/lib/cli.js:315:13
+
+npm manifest: 
+  {
+    "name": "lambda-lmaoscraper",
+    "version": "0.1.0",
+    "main": " ",
+    "license": "MIT",
+    "dependencies": {
+      "axios": "^0.18.0",
+      "lodash": "^4.17.11",
+      "node-html-parser": "^1.1.12"
+    },
+    "scripts": {
+      "build": "flow-remove-types src/ -d lib/",
+    },
+    "devDependencies": {
+      "babel-eslint": "^10.0.1",
+      "eslint": "^5.14.1",
+      "eslint-config-standard": "^12.0.0",
+      "eslint-plugin-flowtype": "^3.4.2",
+      "eslint-plugin-import": "^2.16.0",
+      "eslint-plugin-node": "^8.0.1",
+      "eslint-plugin-promise": "^4.0.1",
+      "eslint-plugin-standard": "^4.0.0",
+      "flow-bin": "^0.91.0",
+      "flow-remove-types": "^1.2.3"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
