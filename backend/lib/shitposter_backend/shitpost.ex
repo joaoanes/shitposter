@@ -6,12 +6,11 @@ defmodule ShitposterBackend.Shitpost do
   alias ShitposterBackend.Repo
   require Logger
 
-  import IEx
-
   schema "shitposts" do
     field :url, :string
     field :permalink, :string
     field :name, :string
+    field :source_link, :string
     field :type, :string #actually an enum!
     field :url_date, :utc_datetime
     belongs_to :source, Source
@@ -27,7 +26,7 @@ defmodule ShitposterBackend.Shitpost do
   @doc false
   def changeset(%Shitpost{} = shitpost, attrs) do
     shitpost
-    |> cast(attrs, [:url, :type, :name, :url_date, :source_id, :submitter_id, :permalink])
+    |> cast(attrs, [:url, :type, :name, :url_date, :source_id, :submitter_id, :source_link, :permalink])
     |> cast_assoc(:reactions)
     |> foreign_key_constraint(:submitter_id)
     |> foreign_key_constraint(:source_id)
@@ -35,14 +34,14 @@ defmodule ShitposterBackend.Shitpost do
   end
 
   def create(url, name) do
-    create(url, name, nil, nil, nil, nil)
+    create(url, name, nil, nil, nil, nil, nil)
   end
 
-  def create(url, name, %User{id: submitter_id}, source_id, rating_ids, url_date) do
-    create(url, name, submitter_id, source_id, rating_ids, url_date)
+  def create(url, name, %User{id: submitter_id}, source_id, rating_ids, url_date, source_link) do
+    create(url, name, submitter_id, source_id, rating_ids, url_date, source_link)
   end
 
-  def create(url, name, submitter_id, source_id, rating_ids, url_date) do
+  def create(url, name, submitter_id, source_id, rating_ids, url_date, source_link) do
     categorizerOutput = {:categorize, [url]}
     |> Honeydew.async(:categorizer, reply: true)
     |> Honeydew.yield(15000)
@@ -58,6 +57,7 @@ defmodule ShitposterBackend.Shitpost do
             source_id: source_id,
             submitter_id: submitter_id,
             url_date: url_date,
+            source_link: source_link,
           }
         )
 

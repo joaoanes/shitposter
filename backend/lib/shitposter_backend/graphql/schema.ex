@@ -60,9 +60,10 @@ defmodule ShitposterBackend.GraphQL.Schema do
       arg :name, :string
       arg :reactions, list_of(:reaction_input)
       arg :source_id, :integer
+      arg :source_link, :string
 
       resolve Resolvers.run(
-        &ShitposterBackend.Shitpost.create/6,
+        &ShitposterBackend.Shitpost.create/7,
         [
           [:args, :url],
           [:args, :name],
@@ -70,6 +71,7 @@ defmodule ShitposterBackend.GraphQL.Schema do
           [:args, :source_id],
           [:args, :reactions],
           [:args, :url_date],
+          [:args, :source_link],
         ]
       )
     end

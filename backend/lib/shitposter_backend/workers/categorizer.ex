@@ -30,7 +30,11 @@ defmodule ShitposterBackend.Workers.Categorizer do
 
 
     case type do
-      {:ok, [url, type]} -> [url, type]
+      {:ok, ["tweet", url]} -> (
+        Scraper.takeScreenshot(url)
+        ["tweet", url]
+      )
+      {:ok, [type, url]} -> [type, url]
       nil -> (
         Scraper.takeScreenshot(url)
         ["webpage", url]
