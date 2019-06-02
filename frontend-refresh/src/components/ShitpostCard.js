@@ -29,10 +29,18 @@ const styles = {
     overflow: 'visible',
     marginTop: 20,
     transition: 'height 0.5s ease',
+    maxHeight: "100vh"
   },
 
   sourceContainer: {
     marginTop: 0,
+  },
+
+  gradient: {
+    background: "linear-gradient(rgba(255,255,255,0) 80%, rgba(255,255,255,0.4))",
+    width: "100%",
+    height: "100%",
+    pointerEvents: 'none',
   },
 
   overlay: {
@@ -54,6 +62,7 @@ const styles = {
   }
 }
 
+let reported = {}
 
 class ShitpostCard extends React.PureComponent {
   props: {
@@ -73,6 +82,18 @@ class ShitpostCard extends React.PureComponent {
     console.log(this.props.shitpost.id, "mounted!")
   }
 
+  setSizeAndRerender = (size) => {
+    if (Object.keys(reported).indexOf(this.props.shitpost.id) !== -1) {
+      return this.props.setReportedSize(reported[this.props.shitpost.id])
+    }
+    this.props.setReportedSize(size)
+    reported = {...reported, [this.props.shitpost.id]: size}
+    if (this.props.fullscreen) {
+      console.log("setting size to", size, this.props.fullscreen, reported)
+      this.props.setFullscreen([this.props.shitpost.id, this.props.reportedSize], false)
+    }
+  }
+
   render() {
     const { ratePost, shitpost, rated, isRating, fullscreen } = this.props
     let TypeRenderer
@@ -89,7 +110,7 @@ class ShitpostCard extends React.PureComponent {
       <div
         id={shitpost.id}
         style={{
-          ...(fullscreen ? { zIndex: 1000, position: 'relative', width: 900, } : { width: 600, height: 450, }),
+          ...(fullscreen ? { zIndex: 1000, position: 'relative', width: 900, } : { width: 600, height: 250, }),
           marginLeft: "auto",
           marginRight: "auto",
 
@@ -98,7 +119,7 @@ class ShitpostCard extends React.PureComponent {
 
         <div onClick={fullscreen ? () => 0 : this.handleClick} onDoubleClick={fullscreen ? this.handleClick : () => 0} style={fullscreen ? { width: '100%', height: 'auto', overflow: "hidden" } : { overflow: 'hidden' }} >
           <div style={{
-            ...(fullscreen ? { overflow: "hidden" } : { pointerEvents: "none", height: 450, display: 'flex'}),
+            ...(fullscreen ? { overflow: "hidden" } : { pointerEvents: "none", height: 250, display: 'flex'}),
             position: "relative",
             backgroundColor: "black",
 
@@ -106,9 +127,10 @@ class ShitpostCard extends React.PureComponent {
             <TypeRenderer
               fullscreen={fullscreen}
               shitpost={shitpost}
-              reportSize={this.props.setReportedSize}
+              reportSize={this.setSizeAndRerender}
             />
-            {fullscreen && <div style={styles.overlay}>
+            <div style={styles.overlay}>
+              {fullscreen ?
               <div style={styles.ratingsContainer}>
                 <RatingButton
                   ratePost={ratePost}
@@ -118,7 +140,9 @@ class ShitpostCard extends React.PureComponent {
                   isRating={isRating}
                 />
               </div>
-            </div>}
+              : <div style={styles.gradient} />
+            }
+            </div>
           </div>
         </div>
 
@@ -136,7 +160,7 @@ ShitpostCard.propTypes = {
 }
 
 export default compose(
-  withState('reportedSize', 'setReportedSize', 300),
+  withState('reportedSize', 'setReportedSize', 301),
   mapProps((props) => ({
     ...props,
     shitpost: {
