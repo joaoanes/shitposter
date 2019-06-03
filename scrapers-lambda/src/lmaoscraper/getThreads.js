@@ -197,7 +197,7 @@ const getThreads = async () => {
   const links = html.querySelectorAll('.searchheader a').map(e => e.attributes.href)
   const newThreads = links.map(link => link.match(/general\/([a-z]*)\/.*/)[1])
 
-  return Array.from(new Set([...getThreadsConst(), newThreads]))
+  return Array.from(new Set([...getThreadsConst(), ...newThreads]))
 }
 
 module.exports = {
