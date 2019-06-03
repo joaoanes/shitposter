@@ -1,6 +1,6 @@
 const { flow, uniqBy, reduce, groupBy, first, mapValues } = require('lodash/fp')
 
-const { uploadPosts } = require('./upload')
+const { uploadPosts } = require('../s3')
 
 const threadIdToInteger = (id) => {
   if (id == null) return 0

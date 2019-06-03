@@ -1,11 +1,11 @@
 const { partition, map, maxBy, filter } = require('lodash')
 const { flow, reduce, groupBy, map: mapFP } = require('lodash/fp')
 
-const { fetchThreads, parsePosts } = require('./scraperFacepunch')
-const { getAllPosts, getPostUrls, getPostRaw, uploadUrls, addToPhonebook } = require('./s3')
-const { threadIdToInteger, executeInChunks } = require('./junkyard')
+const { fetchThreads, parsePosts } = require('./internals')
+const { getAllPosts, getPostUrls, getPostRaw, uploadUrls, addToPhonebook } = require('../s3')
+const { threadIdToInteger, executeInChunks } = require('../junkyard')
 const { extractPostFromPostId, extractThreadFromPostId, parsePostsAndUpload } = require('./facepunchJunkyard')
-const { lambdaEvent } = require('./log')
+const { lambdaEvent } = require('../log')
 
 class IndexReconstructionStopped extends Error {
   constructor (post) {

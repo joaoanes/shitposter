@@ -4,8 +4,8 @@ const axios = require('axios')
 const { flatten, reduce, countBy } = require('lodash')
 const { get, flow, map, filter, mapValues, groupBy, reduce: reduceFP } = require('lodash/fp')
 
-const { threadEvent } = require('./common/log')
-const { Semaphore, pipeAsync, thunker, executeWithRescue } = require('./common/junkyard')
+const { threadEvent } = require('../log')
+const { Semaphore, pipeAsync, thunker, executeWithRescue } = require('../junkyard')
 
 const extractMessages = (data     ) => {
   try {
