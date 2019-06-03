@@ -4,6 +4,7 @@
   "main": " ",
   "license": "MIT",
   "dependencies": {
+    "aws-sdk": "^2.466.0",
     "axios": "^0.18.0",
     "dotenv": "^8.0.0",
     "lodash": "^4.17.11",
