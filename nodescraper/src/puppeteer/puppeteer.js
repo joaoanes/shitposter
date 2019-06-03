@@ -44,7 +44,7 @@ const updateIndex = async (lastPostId, scraperName) => {
 
   if (statusCode === 503) {
     puppeteerEvent('relambda', 'requeue', { lastSeenPostId, scraperName })
-    return updateIndex(lastSeenPostId, `${scraperName}_updateIndex`)
+    return updateIndex(lastSeenPostId, scraperName)
   }
 
   return true
