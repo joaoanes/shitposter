@@ -59,7 +59,7 @@ const parsePostsAndUpload = async (fetchedThread) => {
   return uploadPosts()(posts)
 }
 
-export {
+module.exports = {
   extractPostFromPostId,
   parsePostsAndUpload,
   extractThreadFromPostId,
