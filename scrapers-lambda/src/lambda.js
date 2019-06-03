@@ -7,7 +7,7 @@ const { SCRAPER_NAME } = process.env
 
 const { list, fetch, IndexReconstructionStopped, ensureIndexUpdated } = require('./lib/facepunch/threadScraper')
 
-const getThreads = require(`./${SCRAPER_NAME}/getThreads`)
+const { getThreads } = require(`./${SCRAPER_NAME}/getThreads`)
 const { threadEvent, lambdaEvent } = require('./lib/log')
 
 const apiGatewayResponse = (body, statusCode = 200) => {
