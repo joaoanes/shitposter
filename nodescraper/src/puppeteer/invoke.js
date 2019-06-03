@@ -1,6 +1,6 @@
 const AWS = require('aws-sdk')
 
-const { lambdaEvent } = require('./log')
+const { lambdaEvent } = require('../common/log')
 
 const lambda = new AWS.Lambda({
   region: 'eu-central-1',

@@ -1,10 +1,10 @@
 const { chunk } = require('lodash')
 
 const { getLastKnownPost, insertPosts, getPostsByStatus, updatePostsStatus, postsPerStatus, updateEventPosts, listEvents } = require('./db')
+const { executeInChunks } = require('../common/junkyard')
 const { invokeLambda } = require('./invoke')
-const { executeInChunks } = require('./junkyard')
-const { getPostUrls } = require('./upload')
-const { submitEvent, puppeteerEvent } = require('./log')
+const { getPostUrls } = require('../common/s3')
+const { submitEvent, puppeteerEvent } = require('../common/log')
 const { sanitize } = require('./sanitizer')
 const { submit } = require('./submitter')
 

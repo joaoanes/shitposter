@@ -2,8 +2,8 @@ const axios = require('axios')
 const { identity, mapValues, uniqBy, flatten, find } = require('lodash')
 const fileType = require('file-type')
 
-const { executeInChunks, executeInSequence, thunker } = require('./junkyard')
-const { submitEvent } = require('./log')
+const { executeInChunks, executeInSequence, thunker } = require('../common/junkyard')
+const { submitEvent } = require('../common/log')
 
 const UNIQUEABLE_MIMES = [
   'image/jpeg',

@@ -10,8 +10,8 @@ const db = require('knex')({
   client: 'pg',
   connection: DATABASE_URL,
 })
-const { executeInChunks } = require('./junkyard')
-const { postEvent } = require('./log')
+const { executeInChunks } = require('../common/junkyard')
+const { postEvent } = require('../common/log')
 
 const destroyDb = () => db.schema.dropTableIfExists('extractedContent') && db.schema.dropTableIfExists('event')
 
