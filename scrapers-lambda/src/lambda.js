@@ -3,7 +3,7 @@ const { config } = require('dotenv')
 
 config()
 
-const { SCRAPER_NAME } = process.env
+const { SCRAPER_NAME = 'lmaoscraper' } = process.env
 
 const { list, fetch, IndexReconstructionStopped, ensureIndexUpdated } = require('./lib/facepunch/threadScraper')
 

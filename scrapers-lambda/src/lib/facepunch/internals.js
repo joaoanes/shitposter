@@ -146,48 +146,51 @@ const fetchThreads = async (threads : [string], doInThread : any, limit : Number
 )
 
 const getThreadHTML = async (threadId: string) => {
-  const finalPage = await threadSize(threadId)
-
-  const networkQueue = new Semaphore(10)
-
   threadEvent('fetching', 'begin', { threadId })
+  try {
+    const finalPage = await threadSize(threadId)
+    const networkQueue = new Semaphore(10)
 
-  const rawThreads = await Promise.all(
-    (new Array(finalPage)).fill(',')
-      .map(async (_, currentPage) => {
+    const rawThreads = await Promise.all(
+      (new Array(finalPage)).fill(',')
+        .map(async (_, currentPage) => {
         // threadEvent('fetching', 'queued', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
-        const yld = await networkQueue.acquire()
-        // threadEvent('fetching', 'started', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
+          const yld = await networkQueue.acquire()
+          // threadEvent('fetching', 'started', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
 
-        let result
-        try {
-          result = await Promise.race([
-            fetchPage(threadId, currentPage),
-            new Promise((resolve, reject) => {
-              setTimeout(
-                () => {
-                  reject(new Error('timeout'))
-                }
-                , 20000)
-            }),
-          ])
-        } catch (e) {
-          result = null
+          let result
+          try {
+            result = await Promise.race([
+              fetchPage(threadId, currentPage),
+              new Promise((resolve, reject) => {
+                setTimeout(
+                  () => {
+                    reject(new Error('timeout'))
+                  }
+                  , 20000)
+              }),
+            ])
+          } catch (e) {
+            result = null
           // threadEvent('fetching', 'timedout', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
-        }
-        await yld()
-        // threadEvent('fetching', 'finished', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
-        return result
-      })
-  )
-  const posts = extractPosts(rawThreads)
+          }
+          await yld()
+          // threadEvent('fetching', 'finished', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
+          return result
+        })
+    )
+    const posts = extractPosts(rawThreads)
 
-  threadEvent('fetching', 'end', { threadId, posts: posts[threadId].length })
-  return posts
+    threadEvent('fetching', 'end', { threadId, posts: posts[threadId].length })
+    return posts
+  } catch (e) {
+    threadEvent('fetching', 'error', { threadId, error: e })
+    return []
+  }
 }
 
 const threadSize = async (threadId: string) => (
-  axios.get(`https://forum.facepunch.com/f/fastthread/${threadId}/1/?json=1`)
+  axios.get(`https://forum.facepunch.com/f/thread/${threadId}/1/?json=1`)
     .then(
       (res) => res.data
     )
