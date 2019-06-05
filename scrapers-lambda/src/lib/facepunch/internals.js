@@ -126,6 +126,7 @@ const extractUrls = (message) => (
 
 const getThreadHTMLAndUpload = (func = Promise.resolve) => async (id) =>
   getThreadHTML(id).then(func)
+    .catch(e => [])
 
 const fetchThreads = async (threads : [string], doInThread : any, limit : Number) => (
   pipeAsync(

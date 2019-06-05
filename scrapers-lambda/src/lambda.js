@@ -59,7 +59,8 @@ const updateIndex = async (event) => {
     if (e instanceof IndexReconstructionStopped) {
       return apiGatewayResponse({ lastSeenPostId: e.lastSeenPost }, 503)
     } else {
-      throw e
+      threadEvent('updateIndex', 'error', { error: e })
+      apiGatewayResponse({ error: e }, 500)
     }
   }
 }
