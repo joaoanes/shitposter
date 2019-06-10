@@ -2,6 +2,10 @@ const threadEvent = (eventName, eventValue, dimensions) => {
   event(`thread_${eventName}`, eventValue, 'none', dimensions)
 }
 
+const pageEvent = (eventName, eventValue, dimensions) => {
+  event(`page_${eventName}`, eventValue, 'none', dimensions)
+}
+
 const puppeteerEvent = (eventName, eventValue, dimensions) => {
   event(`puppeteer_${eventName}`, eventValue, 'none', dimensions)
 }
@@ -42,4 +46,5 @@ module.exports = {
   postEvent,
   submitEvent,
   puppeteerEvent,
+  pageEvent,
 }

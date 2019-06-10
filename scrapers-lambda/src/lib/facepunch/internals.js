@@ -4,7 +4,7 @@ const axios = require('axios')
 const { flatten, reduce, countBy } = require('lodash')
 const { get, flow, map, filter, mapValues, groupBy, reduce: reduceFP } = require('lodash/fp')
 
-const { threadEvent } = require('../log')
+const { threadEvent, pageEvent } = require('../log')
 const { Semaphore, pipeAsync, thunker, executeWithRescue } = require('../junkyard')
 
 const extractMessages = (data: any) => {
@@ -16,22 +16,25 @@ const extractMessages = (data: any) => {
   }
 }
 
-const fetchPage = async (threadId: string, page: number) => axios.get(
-  `https://forum.facepunch.com/thread/${threadId}/${page}?json=1`,
-  {
-    maxRedirects: 0,
-  }
-)
-  .then(res => {
-    if (res.status !== 200) {
-      throw new Error('Oops wrong status' + res.status)
+const fetchPage = async (threadId: string, page: number) =>
+  pageEvent('fetching', 'start', { threadId, page }) ||
+  axios.get(
+    `https://forum.facepunch.com/thread/${threadId}/${page}?json=1`,
+    {
+      maxRedirects: 0,
     }
-    return res.data
-  })
-  .catch((e) => {
-    threadEvent('fetching', 'failed', { threadId, page, error: e })
-    return null
-  })
+  )
+    .then(res => {
+      pageEvent('fetching', 'complete', { threadId, page })
+      if (res.status !== 200) {
+        throw new Error('Oops wrong status' + res.status)
+      }
+      return res.data
+    })
+    .catch((e) => {
+      pageEvent('fetching', 'failed', { threadId, page, error: e })
+      return null
+    })
 
 const extractPosts = (
   flow(
@@ -155,9 +158,9 @@ const getThreadHTML = async (threadId: string) => {
     const rawThreads = await Promise.all(
       (new Array(finalPage)).fill(',')
         .map(async (_, currentPage) => {
-        // threadEvent('fetching', 'queued', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
+          // threadEvent('fetching', 'queued', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
           const yld = await networkQueue.acquire()
-          // threadEvent('fetching', 'started', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
+          threadEvent('fetching', 'started', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
 
           let result
           try {
@@ -173,10 +176,10 @@ const getThreadHTML = async (threadId: string) => {
             ])
           } catch (e) {
             result = null
-          // threadEvent('fetching', 'timedout', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
+            threadEvent('fetching', 'timedout', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
           }
           await yld()
-          // threadEvent('fetching', 'finished', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
+          threadEvent('fetching', 'finished', { threadId, currentPage, tasks: networkQueue.tasks.length, count: networkQueue.count })
           return result
         })
     )

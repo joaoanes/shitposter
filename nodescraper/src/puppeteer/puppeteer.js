@@ -1,4 +1,5 @@
 const { chunk } = require('lodash')
+const { ungzip } = require('node-gzip')
 
 const { getLastKnownPost, insertPosts, getPostsByStatus, updatePostsStatus, postsPerStatus, updateEventPosts, listEvents } = require('./db')
 const { executeInChunks } = require('../common/junkyard')
@@ -61,7 +62,8 @@ const listPostsSince = async (lastPostId, scraperName) => {
   if (StatusCode !== 200) {
     throw new Error('unexpected list status!')
   }
-  return JSON.parse(JSON.parse(Payload).body)
+  const { posts } = JSON.parse(JSON.parse(Payload).body)
+  return ungzip(posts)
 }
 
 const uploadSubmissions = async () => {
@@ -121,10 +123,10 @@ const loadNewSubmissions = async (scraperName) => {
   const lastKnownPostId = await getLastKnownPost()
   console.warn('last known post', lastKnownPostId)
   console.warn('updating index')
-  await updateIndex(lastKnownPostId, scraperName)
+  // await updateIndex(lastKnownPostId, scraperName)
   console.warn('index updated')
 
-  const { posts } = await listPostsSince(lastKnownPostId, scraperName)
+  const posts = await listPostsSince(lastKnownPostId, scraperName)
   console.warn('got posts')
   await insertPosts(posts)
   console.warn('uploaded posts')

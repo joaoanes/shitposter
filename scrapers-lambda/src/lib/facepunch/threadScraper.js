@@ -1,4 +1,4 @@
-const { partition, map, maxBy, filter } = require('lodash')
+const { partition, map, filter, last } = require('lodash')
 const { flow, reduce, groupBy, map: mapFP } = require('lodash/fp')
 
 const { fetchThreads, parsePosts } = require('./internals')
@@ -29,7 +29,7 @@ const updateIndex = async (lastSeenPostId, allThreads) => {
   const results = await fetchThreads(
     newThreads,
     parsePostsAndUpload,
-    (new Date()).getTime() + 800000, // 14 mins
+    (new Date()).getTime() + 810000, // 13.5 mins
   )
 
   const { stopped: outOfTime, ...fetchResults } = results
@@ -49,9 +49,10 @@ const postsNewerThan = async (lastPostId) => {
 
 const ensureIndexUpdated = async (lastSeenPostId, allThreads) => {
   const { outOfTime, posts } = await updateIndex(lastSeenPostId, allThreads)
+
   if (outOfTime) {
     throw new IndexReconstructionStopped(
-      maxBy(posts, extractPostFromPostId)
+      last(posts)
     )
   }
 

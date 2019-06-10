@@ -1,5 +1,6 @@
 const { get } = require('lodash')
 const { config } = require('dotenv')
+const { gzip } = require('node-gzip')
 
 config()
 
@@ -24,11 +25,14 @@ const apiGatewayResponse = (body, statusCode = 200) => {
 
 const newList = async (event) => {
   threadEvent('list', 'begin', { event })
+  const posts = await list(
+    get(event, 'lastPostId', null),
+  )
+
+  threadEvent('list', 'end', { event, posts: posts.length })
 
   return apiGatewayResponse({
-    posts: await list(
-      get(event, 'lastPostId', null),
-    ),
+    posts,
   })
 }
 
@@ -37,12 +41,13 @@ const newFetch = async (event) => {
 
   const posts = await fetch(
     get(event, 'lastPostId', null),
-    get(event, 'posts', undefined)
+    get(event, 'posts', undefined),
   )
   threadEvent('fetch', 'end', { event })
 
   return apiGatewayResponse({
-    posts,
+    gzip: true,
+    posts: gzip(posts),
   })
 }
 
@@ -51,7 +56,7 @@ const updateIndex = async (event) => {
   try {
     const posts = await ensureIndexUpdated(
       get(event, 'lastPostId', null),
-      await getThreads()
+      await getThreads(),
     )
     threadEvent('updateIndex', 'end', { event })
     return apiGatewayResponse({ posts: posts })

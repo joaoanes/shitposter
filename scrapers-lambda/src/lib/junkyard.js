@@ -43,21 +43,22 @@ const composeFunctions = (func = (e) => e, func2) => async () =>
   // eslint-disable-next-line no-undef
   func2.apply(this, arguments).then(func)
 
-const executeInSequence = (promiseThunks, limit) => (
-  promiseThunks.reduce(
+const executeInSequence = (promiseThunks, limit) => {
+  const uuid = require('uuid').v4
+  return promiseThunks.reduce(
     (promise, thunk) => promise.then(
-      checkTimeOrEBreak(aggregate(thunk), limit)
+      checkTimeOrEBreak(aggregate(thunk), limit, uuid)
     ),
     Promise.resolve([])
   )
-)
+}
 
 const executeInChunks = async (promiseThunks, limit, chunks = 20) => (
   chunk(promiseThunks, chunks).reduce(
     (promise, thunks) => promise.then(
       checkTimeOrEBreak(aggregateChunks(async () => (
         Promise.all(thunks.map((thunk) => thunk()))
-      )))
+      )), limit)
     ),
     Promise.resolve([])
   )
@@ -77,14 +78,25 @@ const aggregateChunks = (thunk) => async (previous) => {
   return [...previous, ...res]
 }
 
-const checkTimeOrEBreak = (thunk, timeLimit) => async (args) => {
+const checkTimeOrEBreak = (thunk, timeLimit, uuid) => async (args) => {
   if (
     (timeLimit !== null && (new Date()).getTime() > timeLimit) ||
     FUCKINGSINGLETONSBreak
   ) {
     throw new LimitReachedException('Out of time!', args)
   }
-  return thunk(args)
+
+  const timeRemaining = timeLimit - (new Date()).getTime()
+  return Promise.race([
+    new Promise(async (resolve, reject) => {
+      const res = await thunk(args)
+
+      resolve(res)
+    }),
+    new Promise((resolve, reject) => setTimeout(() => {
+      reject(new LimitReachedException('Out of time!', args))
+    }, timeRemaining)),
+  ])
 }
 
 const threadIdToInteger = (id) => {

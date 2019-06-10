@@ -80,7 +80,7 @@ const getPostRaw = async (postId) => {
 }
 
 const uploadPosts = (event) => async (posts) => {
-  // threadEvent('raw-upload', 'started')
+  threadEvent('raw-upload', 'started')
 
   if (posts && posts.length === 0) {
     return posts
@@ -107,23 +107,17 @@ const uploadPosts = (event) => async (posts) => {
   )
 }
 
-const getAllPosts = async (force) => {
-  let index
-  try {
-    index = await getPhonebook()
-  } catch (e) {
-    // hope you don't like money.
-    threadEvent('moneyCrusher', 'begin')
-    index = await getPhonebookFromS3()
-    threadEvent('moneyCrusher', 'end')
-    await s3.putObject({ Key: `${SCRAPER_NAME}/posts/list`, Body: JSON.stringify(index) }).promise()
-  }
+const getAllPosts = async (force, scraperName) =>
+  getPhonebook(scraperName)
 
-  return index
-}
+// // hope you don't like money.
+// threadEvent('moneyCrusher', 'begin')
+// index = await getPhonebookFromS3()
+// threadEvent('moneyCrusher', 'end')
+// await s3.putObject({ Key: `${scraperName}/posts/list`, Body: JSON.stringify(index) }).promise()
 
-const getPhonebook = async () => {
-  const request = await s3.getObject({ Key: `${SCRAPER_NAME}/posts/list` }).promise()
+const getPhonebook = async (scraperName = SCRAPER_NAME) => {
+  const request = await s3.getObject({ Key: `${scraperName}/posts/list` }).promise()
 
   return JSON.parse(
     request.Body
