@@ -92,8 +92,8 @@ const uploadSubmissions = async (scraperName) => {
 
       puppeteerEvent('upload', 'start', { urls: presentUrls.length })
 
-      const results = await Promise.all(
-        chunks.map(async (urls) => {
+      const results = await executeInSequence(
+        chunks.map((urls) => async () => {
           let { StatusCode, Payload } = await invokeLambda(
             `sanitizer`,
             {
