@@ -76,7 +76,9 @@ const uploadSubmissions = async (scraperName) => {
     500,
   )
 
-  const chunks = chunk(urls, 500)
+  const presentUrls = urls.filter(([urls, meta]) => urls ? urls.length > 0 : false)
+
+  const chunks = chunk(presentUrls, 200)
 
   const results = await Promise.all(
     chunks.map(async (urls) => {
