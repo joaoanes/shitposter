@@ -50,11 +50,11 @@ const uploadUrls = (event) => async (urls) => {
   )
 }
 
-const getPostUrls = async (postId) => {
+const getPostUrls = async (postId, scraperName) => {
   try {
     threadEvent('urls-fetch', 'started', { postId })
     const result = await s3.getObject({
-      Key: `posts/${postId}/urls.json`,
+      Key: `${scraperName}/posts/${postId}/urls.json`,
     })
       .promise()
       .then(res => threadEvent('urls-fetch', 'finished', { postId }) || res)

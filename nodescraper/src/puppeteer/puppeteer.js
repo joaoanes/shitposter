@@ -69,10 +69,10 @@ const listPostsSince = async (lastPostId, scraperName) => {
   return dropRequest.data
 }
 
-const uploadSubmissions = async () => {
-  const seenPostIds = (await getPostsByStatus('fetched')).map(({ id }) => id)
+const uploadSubmissions = async (scraperName) => {
+  const fetchedPostIds = (await getPostsByStatus('fetched')).map(({ id }) => id)
   const urls = await executeInChunks(
-    seenPostIds.map((postId) => () => getPostUrls(postId)),
+    fetchedPostIds.map((postId) => () => getPostUrls(postId, scraperName)),
     Number.MAX_SAFE_INTEGER,
     500,
   )
@@ -90,8 +90,8 @@ const uploadSubmissions = async () => {
     Number.MAX_SAFE_INTEGER,
     20,
   )
-  await updatePostsStatus(seenPostIds.map(postId => ({ postId })), 'submitted')
-  return seenPostIds
+  await updatePostsStatus(fetchedPostIds.map(postId => ({ postId })), 'submitted')
+  return fetchedPostIds
 }
 
 const fetchSubmissions = async (scraperName) => {

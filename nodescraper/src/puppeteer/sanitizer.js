@@ -25,7 +25,17 @@ const sanitizeUrl = async ([urls, meta]) => {
     },
   ]).filter(([url, meta]) => url !== null)
 
-  const uniqueUrls = uniqBy(normalizedUrls, ([url]) => url)
+  // TODO: deal better with the fuckening
+  // aka tags being present in old regex-extracted urls
+  // neat
+  const unfuckedUrls = normalizedUrls.map(([url, meta]) => {
+    if (url[0] === '[') {
+      const match = url.match(/\[[^\]]*\](.*)\[[^\]]*\]/ig)
+      return [match[0], meta]
+    }
+  })
+
+  const uniqueUrls = uniqBy(unfuckedUrls, ([url]) => url)
 
   const validURls = (await executeInSequence(
     uniqueUrls.map(thunker(fetchUrl)),
