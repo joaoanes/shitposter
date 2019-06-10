@@ -13,13 +13,24 @@ const graphQLClient = new GraphQLClient(
   },
 )
 
-const submit = async (url, ratings, urlDate) => {
+const extractThreadFromPostId = (postId) => {
+  let id = null
+  try {
+    id = postId.match('(?<threadId>.*)-(?<postId>.*)').groups.threadId
+  } catch (e) {
+    return ''
+  }
+
+  return id
+}
+
+const submit = async (url, ratings, urlDate, internalId) => {
   if (!URL || !TOKEN) {
     throw new Error('missing URL or token')
   }
 
   const query = `
-  mutation addPost($name : String, $url : String!, $sourceId: Int!, $urlDate: String, $reactions: [ReactionInput] ) {
+  mutation addPost($name : String, $url : String!, $sourceId: Int!, $urlDate: String, $sourceLink: String, $reactions: [ReactionInput] ) {
     addShitpostAdv(name: $name, url: $url, sourceId:$sourceId, reactions:$reactions, urlDate:$urlDate) {
       id
     }
@@ -29,6 +40,7 @@ const submit = async (url, ratings, urlDate) => {
   const variables = {
     url,
     sourceId: 1,
+    sourceLink: `https://forum.facepunch.com/thread/${extractThreadFromPostId(internalId)}`,
     reactions: reduce(ratings, (acc, count, id) => (
       [...acc, ...(new Array(count).fill(id))]
     ), []).map(ratingId => ({ ratingId: Number.parseInt(ratingId) })),

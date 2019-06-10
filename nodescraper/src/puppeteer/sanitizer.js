@@ -30,8 +30,8 @@ const sanitizeUrl = async ([urls, meta]) => {
   // neat
   const unfuckedUrls = normalizedUrls.map(([url, meta]) => {
     if (url[0] === '[') {
-      const match = url.match(/\[[^\]]*\](.*)\[[^\]]*\]/ig)
-      return [match[0], meta]
+      const match = url.match(/\[[^\]]*\](.*)\[[^\]]*\]/i)
+      return [match ? match[1] : url, meta]
     }
   })
 
@@ -41,7 +41,7 @@ const sanitizeUrl = async ([urls, meta]) => {
     uniqueUrls.map(thunker(fetchUrl)),
     (new Date()).getTime() + 900000
   )).filter(identity)
-  submitEvent('sanitize', 'finish', { urls })
+  submitEvent('sanitize', 'finish', { urls: validURls })
   return validURls
 }
 

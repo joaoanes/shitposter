@@ -82,9 +82,9 @@ const uploadSubmissions = async (scraperName) => {
   // TODO: Check dupes!
 
   await executeInChunks(
-    sanitizedUrls.map(([url, { ratingIds, urlDate }]) => async () => {
-      submitEvent('execute', 'start', { url, ratingIds, urlDate })
-      const res = await submit(url, ratingIds, urlDate).catch(e => e)
+    sanitizedUrls.map(([url, { ratingIds, urlDate, internalPostId }]) => async () => {
+      submitEvent('execute', 'start', { url, ratingIds, urlDate, internalPostId })
+      const res = await submit(url, ratingIds, urlDate, internalPostId).catch(e => e)
       submitEvent('execute', 'finish', { url, res })
     }),
     Number.MAX_SAFE_INTEGER,
