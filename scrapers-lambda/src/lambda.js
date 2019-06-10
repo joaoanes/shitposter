@@ -10,6 +10,7 @@ const { list, fetch, IndexReconstructionStopped, ensureIndexUpdated } = require(
 
 const { getThreads } = require(`./${SCRAPER_NAME}/getThreads`)
 const { threadEvent, lambdaEvent } = require('./lib/log')
+const { dropFileToS3 } = require('./lib/s3')
 
 const apiGatewayResponse = (body, statusCode = 200) => {
   const resBody = ({
@@ -29,10 +30,15 @@ const newList = async (event) => {
     get(event, 'lastPostId', null),
   )
 
+  threadEvent('list', 'drop-start', { event })
+  const dropUrl = await dropFileToS3(posts)
+  threadEvent('list', 'drop-end', { event, dropUrl })
+
   threadEvent('list', 'end', { event, posts: posts.length })
 
   return apiGatewayResponse({
-    posts,
+    drop: true,
+    dropUrl,
   })
 }
 
@@ -46,8 +52,7 @@ const newFetch = async (event) => {
   threadEvent('fetch', 'end', { event })
 
   return apiGatewayResponse({
-    gzip: true,
-    posts: gzip(posts),
+    posts,
   })
 }
 

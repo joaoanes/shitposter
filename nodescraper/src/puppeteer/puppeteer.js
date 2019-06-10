@@ -1,5 +1,5 @@
 const { chunk } = require('lodash')
-const { ungzip } = require('node-gzip')
+const { get } = require('axios')
 
 const { getLastKnownPost, insertPosts, getPostsByStatus, updatePostsStatus, postsPerStatus, updateEventPosts, listEvents } = require('./db')
 const { executeInChunks } = require('../common/junkyard')
@@ -62,8 +62,11 @@ const listPostsSince = async (lastPostId, scraperName) => {
   if (StatusCode !== 200) {
     throw new Error('unexpected list status!')
   }
-  const { posts } = JSON.parse(JSON.parse(Payload).body)
-  return ungzip(posts)
+  const { dropUrl } = JSON.parse(JSON.parse(Payload).body)
+
+  const dropRequest = await get(`https://shitposter-scraper-multi.s3.eu-central-1.amazonaws.com/${dropUrl}`)
+
+  return dropRequest.data
 }
 
 const uploadSubmissions = async () => {
@@ -127,7 +130,7 @@ const loadNewSubmissions = async (scraperName) => {
   console.warn('index updated')
 
   const posts = await listPostsSince(lastKnownPostId, scraperName)
-  console.warn('got posts')
+  console.warn('got posts', posts.length)
   await insertPosts(posts)
   console.warn('uploaded posts')
 

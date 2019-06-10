@@ -1,5 +1,6 @@
 const AWS = require('aws-sdk')
 const { map, uniq } = require('lodash')
+const { v4 } = require('uuid')
 
 const { threadEvent } = require('./log')
 const { executeWithRescue } = require('./junkyard')
@@ -177,6 +178,16 @@ const getPhonebookFromS3 = async () => {
   )
 }
 
+const dropFileToS3 = async (array) => {
+  const uuid = v4()
+  await s3.putObject({
+    Key: `${SCRAPER_NAME}/drop/${uuid}`,
+    Body: JSON.stringify(array),
+  }).promise()
+
+  return `${SCRAPER_NAME}/drop/${uuid}`
+}
+
 module.exports = {
   loadFromS3,
   uploadPosts,
@@ -186,4 +197,5 @@ module.exports = {
   uploadUrls,
   addToPhonebook,
   getPhonebook,
+  dropFileToS3,
 }
