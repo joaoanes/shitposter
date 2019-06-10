@@ -2,7 +2,7 @@ const { chunk, flatten } = require('lodash')
 const { get } = require('axios')
 
 const { getLastKnownPost, insertPosts, getPostsByStatus, updatePostsStatus, postsPerStatus, updateEventPosts, listEvents } = require('./db')
-const { executeInChunks } = require('../common/junkyard')
+const { executeInChunks, executeInSequence } = require('../common/junkyard')
 const { invokeLambda } = require('./invoke')
 const { getPostUrls } = require('../common/s3')
 const { submitEvent, puppeteerEvent } = require('../common/log')
@@ -74,7 +74,7 @@ const uploadSubmissions = async (scraperName) => {
 
   const fetchedPostIdsChunks = chunk(fetchedPostIds, 3000)
 
-  return Promise.all(fetchedPostIdsChunks.map(async (postIds) => {
+  return executeInSequence(fetchedPostIdsChunks.map(async (postIds) => {
     const urls = await executeInChunks(
       postIds.map((postId) => () => getPostUrls(postId, scraperName)),
       Number.MAX_SAFE_INTEGER,
