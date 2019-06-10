@@ -80,7 +80,7 @@ const uploadSubmissions = async (scraperName) => {
 
   puppeteerEvent('upload', 'loaded', { urls: urls.length })
 
-  const presentUrls = urls.filter((post) => post[0] ? post[0].length > 0 : false)
+  const presentUrls = urls.filter((post) => post ? post[0].length > 0 : false)
 
   puppeteerEvent('upload', 'filtered', { urls: presentUrls.length })
 
