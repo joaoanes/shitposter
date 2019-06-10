@@ -2,8 +2,8 @@ const axios = require('axios')
 const { identity, mapValues, uniqBy, flatten, find } = require('lodash')
 const fileType = require('file-type')
 
-const { executeInChunks, executeInSequence, thunker } = require('../common/junkyard')
-const { submitEvent } = require('../common/log')
+const { executeInChunks, executeInSequence, thunker } = require('./junkyard')
+const { submitEvent } = require('./log')
 
 const UNIQUEABLE_MIMES = [
   'image/jpeg',
@@ -83,8 +83,8 @@ const sanitize = async (urls) => (
     flatten(
       (await executeInChunks(
         urls.map((url) => () => sanitizeUrl(url)),
-        (new Date()).getTime() + 900000,
-        100,
+        (new Date()).getTime() + 810000,
+        30,
       )).filter(identity)
     ),
     ([url]) => url
@@ -93,5 +93,4 @@ const sanitize = async (urls) => (
 
 module.exports = {
   sanitize,
-  fetchUrl,
 }

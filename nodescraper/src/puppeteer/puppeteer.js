@@ -1,4 +1,4 @@
-const { chunk } = require('lodash')
+const { chunk, flatten } = require('lodash')
 const { get } = require('axios')
 
 const { getLastKnownPost, insertPosts, getPostsByStatus, updatePostsStatus, postsPerStatus, updateEventPosts, listEvents } = require('./db')
@@ -6,7 +6,6 @@ const { executeInChunks } = require('../common/junkyard')
 const { invokeLambda } = require('./invoke')
 const { getPostUrls } = require('../common/s3')
 const { submitEvent, puppeteerEvent } = require('../common/log')
-const { sanitize } = require('./sanitizer')
 const { submit } = require('./submitter')
 
 const getStats = async () => ({
@@ -77,12 +76,32 @@ const uploadSubmissions = async (scraperName) => {
     500,
   )
 
-  const sanitizedUrls = await sanitize(urls)
+  const chunks = chunk(urls, 500)
 
-  // TODO: Check dupes!
+  const results = await Promise.all(
+    chunks.map(async (urls) => {
+      let { StatusCode, Payload } = await invokeLambda(
+        `sanitizer`,
+        {
+          urls,
+        }
+      )
+
+      if (StatusCode !== 200) {
+        throw new Error('unexpected list status!')
+      }
+      const { urls: sanitizedUrls } = JSON.parse(JSON.parse(Payload).body)
+      return sanitizedUrls
+    }
+    )
+  )
+
+  const flattenedResults = flatten(results)
+
+  // TODO: Check for dupes!
 
   await executeInChunks(
-    sanitizedUrls.map(([url, { ratingIds, urlDate, internalPostId }]) => async () => {
+    flattenedResults.map(([url, { ratingIds, urlDate, internalPostId }]) => async () => {
       submitEvent('execute', 'start', { url, ratingIds, urlDate, internalPostId })
       const res = await submit(url, ratingIds, urlDate, internalPostId).catch(e => e)
       submitEvent('execute', 'finish', { url, res })

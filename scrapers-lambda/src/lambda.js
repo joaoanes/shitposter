@@ -1,6 +1,5 @@
 const { get } = require('lodash')
 const { config } = require('dotenv')
-const { gzip } = require('node-gzip')
 
 config()
 
@@ -8,9 +7,9 @@ const { SCRAPER_NAME = 'lmaoscraper' } = process.env
 
 const { list, fetch, IndexReconstructionStopped, ensureIndexUpdated } = require('./lib/facepunch/threadScraper')
 
-const { getThreads } = require(`./${SCRAPER_NAME}/getThreads`)
 const { threadEvent, lambdaEvent } = require('./lib/log')
 const { dropFileToS3 } = require('./lib/s3')
+const { sanitize: doSanitize } = require('./lib/sanitizerLambda')
 
 const apiGatewayResponse = (body, statusCode = 200) => {
   const resBody = ({
@@ -57,6 +56,7 @@ const newFetch = async (event) => {
 }
 
 const updateIndex = async (event) => {
+  const { getThreads } = require(`./${SCRAPER_NAME}/getThreads`)
   threadEvent('updateIndex', 'begin', { event })
   try {
     const posts = await ensureIndexUpdated(
@@ -75,6 +75,16 @@ const updateIndex = async (event) => {
   }
 }
 
+const sanitize = async (event) => {
+  threadEvent('sanitize', 'begin', { event })
+  const urls = await doSanitize(
+    get(event, 'urls', null)
+  )
+  threadEvent('sanitize', 'end', { event, urls: urls.length })
+  return apiGatewayResponse({ urls })
+}
+
 exports.list = newList
 exports.fetch = newFetch
 exports.updateIndex = updateIndex
+exports.sanitize = sanitize

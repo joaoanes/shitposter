@@ -7,7 +7,7 @@ variable "aws_account_id" {
 }
 
 variable "aws_lambda_function_name" {
-  default = "lmaoscraper"
+
 }
 
 variable "aws_s3_bucket_name" {
