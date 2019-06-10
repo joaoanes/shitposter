@@ -74,57 +74,58 @@ const uploadSubmissions = async (scraperName) => {
 
   const fetchedPostIdsChunks = chunk(fetchedPostIds, 3000)
 
-  return executeInSequence(fetchedPostIdsChunks.map(async (postIds) => {
-    const urls = await executeInChunks(
-      postIds.map((postId) => () => getPostUrls(postId, scraperName)),
-      Number.MAX_SAFE_INTEGER,
-      20,
-    )
+  return executeInSequence(
+    fetchedPostIdsChunks.map((postIds) => async () => {
+      const urls = await executeInChunks(
+        postIds.map((postId) => () => getPostUrls(postId, scraperName)),
+        Number.MAX_SAFE_INTEGER,
+        20,
+      )
 
-    puppeteerEvent('upload', 'loaded', { urls: urls.length })
+      puppeteerEvent('upload', 'loaded', { urls: urls.length })
 
-    const presentUrls = urls.filter((post) => post ? post[0].length > 0 : false)
+      const presentUrls = urls.filter((post) => post ? post[0].length > 0 : false)
 
-    puppeteerEvent('upload', 'filtered', { urls: presentUrls.length })
+      puppeteerEvent('upload', 'filtered', { urls: presentUrls.length })
 
-    const chunks = chunk(presentUrls, 200)
+      const chunks = chunk(presentUrls, 200)
 
-    puppeteerEvent('upload', 'start', { urls: presentUrls.length })
+      puppeteerEvent('upload', 'start', { urls: presentUrls.length })
 
-    const results = await Promise.all(
-      chunks.map(async (urls) => {
-        let { StatusCode, Payload } = await invokeLambda(
-          `sanitizer`,
-          {
-            urls,
+      const results = await Promise.all(
+        chunks.map(async (urls) => {
+          let { StatusCode, Payload } = await invokeLambda(
+            `sanitizer`,
+            {
+              urls,
+            }
+          )
+
+          if (StatusCode !== 200) {
+            throw new Error('unexpected list status!')
           }
-        )
+          const { urls: sanitizedUrls } = JSON.parse(JSON.parse(Payload).body)
+          puppeteerEvent('upload', 'sanitizer-return', { urls: sanitizedUrls.length })
+          return sanitizedUrls
+        })
+      )
 
-        if (StatusCode !== 200) {
-          throw new Error('unexpected list status!')
-        }
-        const { urls: sanitizedUrls } = JSON.parse(JSON.parse(Payload).body)
-        puppeteerEvent('upload', 'sanitizer-return', { urls: sanitizedUrls.length })
-        return sanitizedUrls
-      })
-    )
+      const flattenedResults = flatten(results)
 
-    const flattenedResults = flatten(results)
+      // TODO: Check for dupes!
 
-    // TODO: Check for dupes!
-
-    await executeInChunks(
-      flattenedResults.map(([url, { ratingIds, urlDate, internalPostId }]) => async () => {
-        submitEvent('execute', 'start', { url, ratingIds, urlDate, internalPostId })
-        const res = await submit(url, ratingIds, urlDate, internalPostId).catch(e => e)
-        submitEvent('execute', 'finish', { url, res })
-      }),
-      Number.MAX_SAFE_INTEGER,
-      20,
-    )
-    await updatePostsStatus(postIds.map(postId => ({ postId })), 'submitted')
-    return postIds
-  }))
+      await executeInChunks(
+        flattenedResults.map(([url, { ratingIds, urlDate, internalPostId }]) => async () => {
+          submitEvent('execute', 'start', { url, ratingIds, urlDate, internalPostId })
+          const res = await submit(url, ratingIds, urlDate, internalPostId).catch(e => e)
+          submitEvent('execute', 'finish', { url, res })
+        }),
+        Number.MAX_SAFE_INTEGER,
+        20,
+      )
+      await updatePostsStatus(postIds.map(postId => ({ postId })), 'submitted')
+      return postIds
+    }))
 }
 
 const fetchSubmissions = async (scraperName) => {
