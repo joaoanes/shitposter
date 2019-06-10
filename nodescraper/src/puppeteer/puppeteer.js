@@ -71,8 +71,12 @@ const listPostsSince = async (lastPostId, scraperName) => {
 const uploadSubmissions = async (scraperName) => {
   const fetchedPostIds = (await getPostsByStatus('fetched')).map(({ id }) => id)
   puppeteerEvent('upload', 'load')
+
   const urls = await executeInChunks(
-    fetchedPostIds.map((postId) => () => getPostUrls(postId, scraperName)),
+    fetchedPostIds.map((postId) => () => getPostUrls(postId, scraperName)).catch((error) => {
+      puppeteerEvent('upload', 'load-error', { error })
+      return [[], {}]
+    }),
     Number.MAX_SAFE_INTEGER,
     100,
   )
