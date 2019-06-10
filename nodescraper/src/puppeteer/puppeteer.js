@@ -73,12 +73,9 @@ const uploadSubmissions = async (scraperName) => {
   puppeteerEvent('upload', 'load')
 
   const urls = await executeInChunks(
-    fetchedPostIds.map((postId) => () => getPostUrls(postId, scraperName).catch((error) => {
-      puppeteerEvent('upload', 'load-error', { error })
-      return [[], {}]
-    })),
+    fetchedPostIds.map((postId) => () => getPostUrls(postId, scraperName)),
     Number.MAX_SAFE_INTEGER,
-    100,
+    20,
   )
 
   puppeteerEvent('upload', 'loaded', { urls: urls.length })

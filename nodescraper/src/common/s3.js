@@ -51,19 +51,18 @@ const uploadUrls = (event) => async (urls) => {
 }
 
 const getPostUrls = async (postId, scraperName) => {
-  try {
-    // threadEvent('urls-fetch', 'started', { postId })
-    const result = await s3.getObject({
-      Key: `${scraperName}/posts/${postId}/urls.json`,
+  // threadEvent('urls-fetch', 'started', { postId })
+  const result = await s3.getObject({
+    Key: `${scraperName}/posts/${postId}/urls.json`,
+  })
+    .promise()
+  // .then(res => threadEvent('urls-fetch', 'finished', { postId }) || res)
+    .then(res => JSON.parse(res.Body))
+    .catch(error => {
+      threadEvent('urls-fetch URL', 'fail', { error, postId })
+      return null
     })
-      .promise()
-      // .then(res => threadEvent('urls-fetch', 'finished', { postId }) || res)
-      .then(res => JSON.parse(res.Body))
-    return result
-  } catch (error) {
-    threadEvent('urls-fetch URL', 'fail', { error, postId })
-    return null
-  }
+  return result
 }
 
 const getPostRaw = async (postId) => {
