@@ -126,7 +126,7 @@ const loadNewSubmissions = async (scraperName) => {
   const lastKnownPostId = await getLastKnownPost()
   console.warn('last known post', lastKnownPostId)
   console.warn('updating index')
-  // await updateIndex(lastKnownPostId, scraperName)
+  await updateIndex(lastKnownPostId, scraperName)
   console.warn('index updated')
 
   const posts = await listPostsSince(lastKnownPostId, scraperName)
