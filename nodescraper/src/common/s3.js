@@ -56,7 +56,7 @@ const getPostUrls = async (postId, scraperName) => {
     Key: `${scraperName}/posts/${postId}/urls.json`,
   })
     .promise()
-  // .then(res => threadEvent('urls-fetch', 'finished', { postId }) || res)
+    .then(res => threadEvent('urls-fetch', 'finished', { postId }) || res)
     .then(res => JSON.parse(res.Body))
     .catch(error => {
       threadEvent('urls-fetch URL', 'fail', { error, postId })
