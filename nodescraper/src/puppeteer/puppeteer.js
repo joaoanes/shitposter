@@ -89,7 +89,7 @@ const uploadSubmissions = async (scraperName) => {
 
     const chunks = chunk(presentUrls, 200)
 
-    puppeteerEvent('upload', 'start', { urls: urls.length })
+    puppeteerEvent('upload', 'start', { urls: presentUrls.length })
 
     const results = await Promise.all(
       chunks.map(async (urls) => {
