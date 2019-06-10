@@ -73,7 +73,7 @@ const uploadSubmissions = async (scraperName) => {
   const urls = await executeInChunks(
     fetchedPostIds.map((postId) => () => getPostUrls(postId, scraperName)),
     Number.MAX_SAFE_INTEGER,
-    500,
+    100,
   )
 
   const presentUrls = urls.filter(([urls, meta]) => urls ? urls.length > 0 : false)

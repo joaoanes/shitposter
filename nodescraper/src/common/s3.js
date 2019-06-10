@@ -61,7 +61,7 @@ const getPostUrls = async (postId, scraperName) => {
       .then(res => JSON.parse(res.Body))
     return result
   } catch (error) {
-    threadEvent('urls-fetch URL', 'fail', { error })
+    threadEvent('urls-fetch URL', 'fail', { error, postId })
     return null
   }
 }
