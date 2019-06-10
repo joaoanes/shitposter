@@ -70,15 +70,22 @@ const listPostsSince = async (lastPostId, scraperName) => {
 
 const uploadSubmissions = async (scraperName) => {
   const fetchedPostIds = (await getPostsByStatus('fetched')).map(({ id }) => id)
+  puppeteerEvent('upload', 'load')
   const urls = await executeInChunks(
     fetchedPostIds.map((postId) => () => getPostUrls(postId, scraperName)),
     Number.MAX_SAFE_INTEGER,
     100,
   )
 
-  const presentUrls = urls.filter(([urls, meta]) => urls ? urls.length > 0 : false)
+  puppeteerEvent('upload', 'loaded', { urls: urls.length })
+
+  const presentUrls = urls.filter((post) => post[0] ? post[0].length > 0 : false)
+
+  puppeteerEvent('upload', 'filtered', { urls: presentUrls.length })
 
   const chunks = chunk(presentUrls, 200)
+
+  puppeteerEvent('upload', 'start', { urls: urls.length })
 
   const results = await Promise.all(
     chunks.map(async (urls) => {
@@ -93,9 +100,9 @@ const uploadSubmissions = async (scraperName) => {
         throw new Error('unexpected list status!')
       }
       const { urls: sanitizedUrls } = JSON.parse(JSON.parse(Payload).body)
+      puppeteerEvent('upload', 'sanitizer-return', { urls: sanitizedUrls.length })
       return sanitizedUrls
-    }
-    )
+    })
   )
 
   const flattenedResults = flatten(results)
