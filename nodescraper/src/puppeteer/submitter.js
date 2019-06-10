@@ -31,7 +31,7 @@ const submit = async (url, ratings, urlDate, internalId) => {
 
   const query = `
   mutation addPost($name : String, $url : String!, $sourceId: Int!, $urlDate: String, $sourceLink: String, $reactions: [ReactionInput] ) {
-    addShitpostAdv(name: $name, url: $url, sourceId:$sourceId, reactions:$reactions, urlDate:$urlDate) {
+    addShitpostAdv(name: $name, url: $url, sourceId:$sourceId, reactions:$reactions, urlDate:$urlDate, sourceLink:$sourceLink) {
       id
     }
   }
