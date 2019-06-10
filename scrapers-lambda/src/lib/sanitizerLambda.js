@@ -1,16 +1,15 @@
 const axios = require('axios')
-const { identity, mapValues, uniqBy, flatten, find } = require('lodash')
-const fileType = require('file-type')
+const { identity, mapValues, uniqBy, flatten } = require('lodash')
 
-const { executeInChunks, executeInSequence, thunker } = require('./junkyard')
+const { executeInSequence, thunker, executeInChunks } = require('./junkyard')
 const { submitEvent } = require('./log')
 
-const UNIQUEABLE_MIMES = [
-  'image/jpeg',
-  'image/jpg',
-  'image/png',
-  'image/gif',
-]
+// const UNIQUEABLE_MIMES = [
+//   'image/jpeg',
+//   'image/jpg',
+//   'image/png',
+//   'image/gif',
+// ]
 
 const sanitizeUrl = async ([urls, meta]) => {
   submitEvent('sanitize', 'start', { urls })
@@ -45,56 +44,52 @@ const sanitizeUrl = async ([urls, meta]) => {
   return validURls
 }
 
-const fetchUrl = async ([url, meta]) => {
-  const encodedURL = encodeURI(url)
+const fetchUrl = async ([url, meta]) => Promise.race([
+  axios.head(encodeURI(url)),
+  new Promise((resolve, reject) => setTimeout(() => reject(new Error('Timeout!')), 7000)),
+]).then(res => {
+  if (res.status !== 200) {
+    submitEvent('sanitize', 'status', { status: res.status })
 
-  try {
-    const res = await Promise.race([
-      axios.head(encodedURL),
-      new Promise((resolve, reject) => setTimeout(() => reject(new Error('Timeout!')), 7000)),
-    ])
-
-    if (res.status !== 200) {
-      submitEvent('sanitize', 'status', { status: res.status })
-
-      if (res.status === 301 || res.status === 302 || res.status === 307 || res.status === 308) {
-        submitEvent('sanitize', 'redirect', { redirect: res.request.res.responseUrl })
-        return [res.request.res.responseUrl, meta]
-      }
-
-      return null
+    if (res.status === 301 || res.status === 302 || res.status === 307 || res.status === 308) {
+      submitEvent('sanitize', 'redirect', { redirect: res.request.res.responseUrl })
+      return [res.request.res.responseUrl, meta]
     }
-    // const getRes = await axios.get(
-    //   encodedURL,
-    //   {
-    //     responseType: 'arraybuffer',
-    //     headers: {
-    //       'Range': `bytes=0-${fileType.minimumBytes}`,
-    //     },
-    //   }
-    // )
 
-    // const fileBuffer = Buffer.from(getRes.data)
-    // const type = fileType(fileBuffer)
-
-    // if (find(UNIQUEABLE_MIMES, (mime) => (type === mime))) {
-    //   // I guess we throw it to something now
-    // }
-  } catch (e) {
-    console.warn(e.message, url)
     return null
   }
+  // const getRes = await axios.get(
+  //   encodedURL,
+  //   {
+  //     responseType: 'arraybuffer',
+  //     headers: {
+  //       'Range': `bytes=0-${fileType.minimumBytes}`,
+  //     },
+  //   }
+  // )
 
-  return [encodedURL, meta]
-}
+  // const fileBuffer = Buffer.from(getRes.data)
+  // const type = fileType(fileBuffer)
+
+  // if (find(UNIQUEABLE_MIMES, (mime) => (type === mime))) {
+  //   // I guess we throw it to something now
+  // }
+
+  return [encodeURI(url), meta]
+})
+  .catch(e => {
+    console.warn(e.message, url)
+    return null
+  })
 
 const sanitize = async (urls) => (
   uniqBy(
     flatten(
       (await executeInChunks(
-        urls.map((url) => () => sanitizeUrl(url)),
+        // TODO: why is it throwing?
+        urls.map((url) => () => sanitizeUrl(url).catch(e => null)),
         (new Date()).getTime() + 810000,
-        30,
+        40,
       )).filter(identity)
     ),
     ([url]) => url
