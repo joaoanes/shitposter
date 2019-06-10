@@ -49,27 +49,37 @@ const fetchUrl = async ([url, meta]) => {
   const encodedURL = encodeURI(url)
 
   try {
-    const res = await axios.head(encodedURL, { timeout: 5000 })
+    const res = await Promise.race([
+      axios.head(encodedURL),
+      new Promise((resolve, reject) => setTimeout(() => reject(new Error('Timeout!')), 7000)),
+    ])
+
     if (res.status !== 200) {
-      console.warn('rogue ', res.status)
+      submitEvent('sanitize', 'status', { status: res.status })
+
+      if (res.status === 301 || res.status === 302 || res.status === 307 || res.status === 308) {
+        submitEvent('sanitize', 'redirect', { redirect: res.request.res.responseUrl })
+        return [res.request.res.responseUrl, meta]
+      }
+
       return null
     }
-    const getRes = await axios.get(
-      encodedURL,
-      {
-        responseType: 'arraybuffer',
-        headers: {
-          'Range': `bytes=0-${fileType.minimumBytes}`,
-        },
-      }
-    )
+    // const getRes = await axios.get(
+    //   encodedURL,
+    //   {
+    //     responseType: 'arraybuffer',
+    //     headers: {
+    //       'Range': `bytes=0-${fileType.minimumBytes}`,
+    //     },
+    //   }
+    // )
 
-    const fileBuffer = Buffer.from(getRes.data)
-    const type = fileType(fileBuffer)
+    // const fileBuffer = Buffer.from(getRes.data)
+    // const type = fileType(fileBuffer)
 
-    if (find(UNIQUEABLE_MIMES, (mime) => (type === mime))) {
-      // I guess we throw it to something now
-    }
+    // if (find(UNIQUEABLE_MIMES, (mime) => (type === mime))) {
+    //   // I guess we throw it to something now
+    // }
   } catch (e) {
     console.warn(e.message, url)
     return null
