@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk')
 const { map, uniq } = require('lodash')
 const { v4 } = require('uuid')
+const Regex = require('named-regexp-groups')
 
 const { threadEvent } = require('./log')
 const { executeWithRescue } = require('./junkyard')
@@ -45,10 +46,27 @@ const uploadUrls = (event) => async (urls) => {
 
   threadEvent('uploading', 'finished')
 
+  const match = new Regex(`${SCRAPER_NAME}/posts/(?<id>.*)/urls.json`)()
+
   return map(
     map(uploadedPosts, 'Key'),
-    (key) => key.match(`${SCRAPER_NAME}/posts/(?<id>.*)/urls.json`).groups.id
+    (key) => match.exec(key).groups.id
   )
+}
+
+const checkPostUrls = async (postId) => {
+  try {
+    threadEvent('urls-check', 'started', { postId })
+    await s3.getObject({
+      Key: `${SCRAPER_NAME}/posts/${postId}/urls.json`,
+    })
+      .promise()
+      .then(res => threadEvent('urls-check', 'finished', { postId }) || res)
+    return true
+  } catch (error) {
+    threadEvent('urls-check URL', 'fail', { error })
+    return false
+  }
 }
 
 const getPostUrls = async (postId) => {
@@ -90,7 +108,7 @@ const uploadPosts = (event) => async (posts) => {
   const thunks = map(posts, (post, postId) =>
     () => s3.upload({
       Key: `${SCRAPER_NAME}/posts/${postId}/raw.json`,
-      Body: JSON.stringify(post),
+      Body: JSON.stringify({ id: postId, raw: post }),
     })
       .promise()
       // .then((res) => threadEvent('raw-upload', 'finished', { postId }) || res)
@@ -100,11 +118,12 @@ const uploadPosts = (event) => async (posts) => {
     200
   )(thunks)
 
-  // threadEvent('raw-upload', 'finished')
+  threadEvent('raw-upload', 'finished')
 
+  const match = new Regex(`${SCRAPER_NAME}/posts/(?<id>.*)/raw.json`)
   return map(
     map(uploadedPosts, 'Key'),
-    (key) => key.match(`${SCRAPER_NAME}/posts/(?<id>.*)/raw.json`).groups.id
+    (key) => match.exec(key).groups.id
   )
 }
 
@@ -119,6 +138,7 @@ const getAllPosts = async (force, scraperName) =>
 
 const getPhonebook = async (scraperName = SCRAPER_NAME) => {
   const request = await s3.getObject({ Key: `${scraperName}/posts/list` }).promise()
+    .catch(() => ({ Body: '[]' }))
 
   return JSON.parse(
     request.Body
@@ -130,15 +150,16 @@ const addToPhonebook = async (postIds) => {
 
   try {
     const request = await s3.getObject({ Key: `${SCRAPER_NAME}/posts/list` }).promise()
+      .catch(() => ({ Body: '[]' }))
     allPosts = JSON.parse(request.Body)
   } catch (e) {
-    threadEvent('phonebook-update', 'error', { error: e })
+    threadEvent('phonebook-update', 'error', { error: e.toString() })
     allPosts = []
   }
 
   const newAllPosts = new Set([...allPosts, ...postIds])
   if (newAllPosts.size === 0 || newAllPosts.size === allPosts.length) {
-    threadEvent('phonebook-update', 'early-return')
+    threadEvent('phonebook-update', 'early-return', { newAllPosts: newAllPosts.size })
     return
   }
 
@@ -152,7 +173,7 @@ const addToPhonebook = async (postIds) => {
   threadEvent('phonebook-update', 'end')
 }
 
-const getPhonebookFromS3 = async () => {
+const getPhonebookFromS3 = async () => { //eslint-disable-line
   let isTruncated
   let marker
   let contents = []
@@ -172,9 +193,11 @@ const getPhonebookFromS3 = async () => {
     }
   } while (isTruncated)
 
+  const match = new Regex(`${SCRAPER_NAME}/posts/(?<name>.*)/`)
+
   // TODO: why is this happening? we shouldn't need an unique
   return uniq(
-    map(contents, post => post.Key.match(`${SCRAPER_NAME}/posts/(?<name>.*)/`).groups.name).filter(id => id.match('.*-.*'))
+    map(contents, post => match.exec(post.Key).groups.name).filter(id => id.match('.*-.*'))
   )
 }
 
@@ -198,4 +221,5 @@ module.exports = {
   addToPhonebook,
   getPhonebook,
   dropFileToS3,
+  checkPostUrls,
 }

@@ -1,6 +1,7 @@
 const process = require('process')
-const { chunk } = require('lodash')
-const { compose, ifElse, is, tail, reduce } = require('ramda')
+const { chunk, reduce } = require('lodash')
+const { map } = require('lodash/fp')
+const { compose, ifElse, is, tail, reduce: reduceRamda } = require('ramda')
 
 let FUCKINGSINGLETONSBreak = false
 process.on('SIGINT', () => {
@@ -19,6 +20,10 @@ class LimitReachedException extends Error {
     this.partialResults = partialResults
   }
 }
+
+const mapWait = (fun) => (e) => (
+  Promise.all(map(fun)(e))
+)
 
 const executeWithRescue = (limit, chunks) => async (thunks) => {
   let results
@@ -43,13 +48,15 @@ const composeFunctions = (func = (e) => e, func2) => async () =>
   // eslint-disable-next-line no-undef
   func2.apply(this, arguments).then(func)
 
-const executeInSequence = (promiseThunks, limit) => {
+const executeInSequence = (promiseThunks, limit = null) => {
   const uuid = require('uuid').v4
-  return promiseThunks.reduce(
+
+  return reduce(
+    promiseThunks,
     (promise, thunk) => promise.then(
       checkTimeOrEBreak(aggregate(thunk), limit, uuid)
     ),
-    Promise.resolve([])
+    Promise.resolve([]),
   )
 }
 
@@ -83,16 +90,24 @@ const checkTimeOrEBreak = (thunk, timeLimit, uuid) => async (args) => {
     (timeLimit !== null && (new Date()).getTime() > timeLimit) ||
     FUCKINGSINGLETONSBreak
   ) {
+    debugger
+    console.log(timeLimit)
     throw new LimitReachedException('Out of time!', args)
+  }
+
+  const resolvePromise = new Promise(async (resolve, reject) => {
+    const res = await thunk(args)
+
+    resolve(res)
+  })
+
+  if (timeLimit === null) {
+    return resolvePromise
   }
 
   const timeRemaining = timeLimit - (new Date()).getTime()
   return Promise.race([
-    new Promise(async (resolve, reject) => {
-      const res = await thunk(args)
-
-      resolve(res)
-    }),
+    resolvePromise,
     new Promise((resolve, reject) => setTimeout(() => {
       reject(new LimitReachedException('Out of time!', args))
     }, timeRemaining)),
@@ -131,7 +146,7 @@ function pipeAsync () {
   if (Array.isArray(arguments[0])) {
     return pipeAsync.apply(this, arguments[0])
   }
-  return reduce(_pipeAsync, arguments[0], tail(arguments))
+  return reduceRamda(_pipeAsync, arguments[0], tail(arguments))
 };
 
 class Semaphore {
@@ -193,4 +208,5 @@ module.exports = {
   thunker,
   pipeAsync,
   Semaphore,
+  mapWait,
 }

@@ -6,12 +6,21 @@
   "dependencies": {
     "aws-sdk": "^2.466.0",
     "axios": "^0.19.0",
+    "cheerio": "^1.0.0-rc.3",
+    "chrome-aws-lambda": "1.18.1",
     "dotenv": "^8.0.0",
     "file-type": "^11.1.0",
+    "fs-extra": "^8.1.0",
+    "html-formatter": "^0.1.9",
+    "htmlparser2": "^3.10.1",
     "lodash": "^4.17.11",
+    "named-regexp-groups": "^1.0.3",
     "node-gzip": "^1.1.2",
     "node-html-parser": "^1.1.12",
-    "ramda": "^0.26.1"
+    "nodekogiri": "^1.0.3",
+    "puppeteer-core": "1.18.1",
+    "ramda": "^0.26.1",
+    "xregexp": "^4.2.4"
   },
   "scripts": {
     "build": "flow-remove-types src/ -d lib/"

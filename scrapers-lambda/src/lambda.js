@@ -5,7 +5,8 @@ config()
 
 const { SCRAPER_NAME = 'lmaoscraper' } = process.env
 
-const { list, fetch, IndexReconstructionStopped, ensureIndexUpdated } = require('./lib/facepunch/threadScraper')
+const { list, fetch, IndexReconstructionStopped, ensureIndexUpdated } = require('./lib/sa/threadScraper')
+const { parse } = require('./lib/sa/parser')
 
 const { threadEvent, lambdaEvent } = require('./lib/log')
 const { dropFileToS3 } = require('./lib/s3')
@@ -59,18 +60,20 @@ const updateIndex = async (event) => {
   const { getThreads } = require(`./${SCRAPER_NAME}/getThreads`)
   threadEvent('updateIndex', 'begin', { event })
   try {
+    const allThreads = await getThreads()
+
     const posts = await ensureIndexUpdated(
       get(event, 'lastPostId', null),
-      await getThreads(),
+      allThreads
     )
     threadEvent('updateIndex', 'end', { event })
-    return apiGatewayResponse({ posts: posts })
+    return apiGatewayResponse({ postIds: posts.length })
   } catch (e) {
     if (e instanceof IndexReconstructionStopped) {
       return apiGatewayResponse({ lastSeenPostId: e.lastSeenPost }, 503)
     } else {
-      threadEvent('updateIndex', 'error', { error: e })
-      apiGatewayResponse({ error: e }, 500)
+      threadEvent('updateIndex', 'error', { error: e.toString() })
+      apiGatewayResponse({ error: e.toString() }, 500)
     }
   }
 }
@@ -84,7 +87,17 @@ const sanitize = async (event) => {
   return apiGatewayResponse({ urls })
 }
 
+const newParse = async (event) => {
+  threadEvent('parse', 'begin', { event })
+  const urls = await parse(
+    get(event, 'Records', null)
+  )
+  threadEvent('parse', 'end', { event, urls: urls.length })
+  return apiGatewayResponse({ urls })
+}
+
 exports.list = newList
 exports.fetch = newFetch
 exports.updateIndex = updateIndex
 exports.sanitize = sanitize
+exports.parse = newParse

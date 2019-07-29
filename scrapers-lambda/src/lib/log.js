@@ -14,6 +14,14 @@ const lambdaEvent = (eventName, eventValue, dimensions) => {
   event(`lambda_${eventName}`, eventValue, 'none', dimensions)
 }
 
+const sqsEvent = (eventName, eventValue, dimensions) => {
+  event(`sqs_${eventName}`, eventValue, 'none', dimensions)
+}
+
+const parseEvent = (eventName, eventValue, dimensions) => {
+  event(`parse_${eventName}`, eventValue, 'none', dimensions)
+}
+
 const submitEvent = (eventName, eventValue, dimensions) => {
   event(`submit_${eventName}`, eventValue, 'none', dimensions)
 }
@@ -47,4 +55,6 @@ module.exports = {
   submitEvent,
   puppeteerEvent,
   pageEvent,
+  sqsEvent,
+  parseEvent,
 }

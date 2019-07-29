@@ -42,7 +42,7 @@ const updateIndex = async (lastPostId, scraperName) => {
 
   const { lastSeenPostId } = JSON.parse(body)
 
-  if (statusCode === 503) {
+  if (statusCode !== 200) {
     puppeteerEvent('relambda', 'requeue', { lastSeenPostId, scraperName })
     return updateIndex(lastSeenPostId, scraperName)
   }
