@@ -39,6 +39,10 @@ resource "aws_s3_bucket" "shitposter-content" {
 POLICY
 }
 
+resource "aws_s3_bucket" "lambda-repo" {
+  bucket= "shitposter-lambda-repo"
+}
+
 resource "aws_s3_bucket" "frontend" {
   bucket = "shitposter-frontend"
   acl    = "public-read"
