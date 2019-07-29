@@ -1,21 +1,25 @@
 import React, { Component } from 'react';
 import axios from 'axios'
-import logo from './logo.svg';
+import { sortBy } from 'lodash'
+
 import './App.css';
 
 const BACKEND_URL = "https://puppeteer.shitpost.network"
 
 class App extends Component {
+
   state = {
+    loading: true,
     ignoreInit: false,
     ignoreFetch: false,
     ignoreSubmit: false,
+    scraperName: "sa-cute",
   }
 
   refresh = async () => {
     const request = await axios.get(`${BACKEND_URL}/stats`)
     const {events, lastKnownId, posts} = request.data
-    this.setState({events, lastKnownId, posts})
+    this.setState({events, lastKnownId, posts, loading: false})
   }
 
   componentDidMount = async () => {
@@ -23,8 +27,8 @@ class App extends Component {
   }
 
   submitEvent = async () => {
-    const { ignoreFetch, ignoreInit, ignoreSubmit } = this.state
-    const params = {}
+    const { ignoreFetch, ignoreInit, ignoreSubmit, scraperName } = this.state
+    const params = { scraperName }
     if (ignoreFetch) { params["ignoreFetch"] = true }
     if (ignoreInit) { params["ignoreInit"] = true }
     if (ignoreSubmit) { params["ignoreSubmit"] = true }
@@ -40,11 +44,11 @@ class App extends Component {
   }
 
   render() {
-    if (Object.keys(this.state).length === 3) {
+    const { events, lastKnownId, posts, ignoreFetch, ignoreInit, ignoreSubmit, lastEvent, scraperName, loading } = this.state
+    if (loading) {
       return (<div>pls w8</div>)
     }
-    console.log(this.state)
-    const { events, lastKnownId, posts, ignoreFetch, ignoreInit, ignoreSubmit, lastEvent } = this.state
+
     return (
       <div className="App">
         <header className="App-header">
@@ -65,6 +69,12 @@ class App extends Component {
             <span>ignoreSubmit</span>
             <input type="checkbox" id="ignoreSubmit" value={ignoreSubmit} onChange={(e) => {this.changeChangebox.bind(this)(e.target.id)}} />
           </div>
+          <select
+            value={scraperName}
+            onChange={({ target: { value: scraperName } }) => this.setState({ scraperName }) }
+            >
+              <option value="sa-cute" >sa-cute</option>
+            </select>
           {
             lastEvent ? (<div>
               last event: {lastEvent}
@@ -72,14 +82,15 @@ class App extends Component {
           }
         </header>
         {
-          events.map(({id, postsInited, postsFetched, postsSubmitted, createdAt, updatedAt}) => (
+          sortBy(events, "updatedAt").map(({id, postsInited, postsFetched, postsSubmitted, createdAt, updatedAt}) => (
             <div key={id}>
-              <div>{id}</div>
+              <h2>{id}</h2>
               <div>load: {this.showPosts(postsInited)}</div>
               <div>fetch: {this.showPosts(postsFetched)}</div>
               <div>submit: {this.showPosts(postsSubmitted)}</div>
               <div>{createdAt}</div>
               <div>{updatedAt}</div>
+              <br></br>
             </div>
           ))
         }
