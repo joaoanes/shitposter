@@ -1,9 +1,8 @@
-const { partition, filter, last } = require('lodash')
-const { uniq, flow, map, initial, sortBy } = require('lodash/fp')
+const { uniq, flow, map } = require('lodash/fp')
 
-const { extractPostFromPostId, extractDetailsFromPostId, parsePostsAndUpload } = require('./junkyard')
+const { extractDetailsFromPostId, parsePostsAndUpload } = require('./junkyard')
 const { getThreads } = require('./fetch')
-const { getAllPosts, getPostUrls, getPostRaw, uploadUrls, addToPhonebook, getPhonebook } = require('../s3')
+const { addToPhonebook, getPhonebook } = require('../s3')
 const { lambdaEvent } = require('../log')
 
 const updateIndex = async (allThreads) => {

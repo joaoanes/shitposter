@@ -201,9 +201,8 @@ const getThreadPostsAsHTML = async (threadId: string, postExtractor: (string, nu
         }
 
         threadEvent('fetching', 'finished', { threadId, currentPage })
-        debugger
+
         const posts = await postExtractor(threadId, currentPage)(result)
-        debugger
 
         return doWithPosts(posts)
       })

@@ -3,13 +3,15 @@ const { config } = require('dotenv')
 
 config()
 
-const { SCRAPER_NAME = 'lmaoscraper' } = process.env
+const { SCRAPER_NAME = 'lmaoscraper', NEXT_SQS_URL } = process.env
 
-const { list, fetch, IndexReconstructionStopped, ensureIndexUpdated } = require('./lib/sa/threadScraper')
+const { fetch, IndexReconstructionStopped, ensureIndexUpdated } = require('./lib/sa/threadScraper')
 const { parse } = require('./lib/sa/parser')
+const { list } = require('./lib/sa/list')
 
 const { threadEvent, lambdaEvent } = require('./lib/log')
 const { dropFileToS3 } = require('./lib/s3')
+const { sendMessage } = require('./lib/sqs')
 const { sanitize: doSanitize } = require('./lib/sanitizerLambda')
 
 const apiGatewayResponse = (body, statusCode = 200) => {
@@ -26,20 +28,26 @@ const apiGatewayResponse = (body, statusCode = 200) => {
 
 const newList = async (event) => {
   threadEvent('list', 'begin', { event })
+
+  const trace = get(event, 'invokeTrace', null)
+  // TODO: list() lists AND pushes to sqs. BAD.
   const posts = await list(
     get(event, 'lastPostId', null),
+    trace,
   )
-
-  threadEvent('list', 'drop-start', { event })
-  const dropUrl = await dropFileToS3(posts)
-  threadEvent('list', 'drop-end', { event, dropUrl })
-
   threadEvent('list', 'end', { event, posts: posts.length })
 
-  return apiGatewayResponse({
-    drop: true,
-    dropUrl,
-  })
+  if (!trace) {
+    threadEvent('list', 'drop-start', { event })
+    const dropUrl = await dropFileToS3(posts)
+    threadEvent('list', 'drop-end', { event, dropUrl })
+    return apiGatewayResponse({
+      drop: true,
+      dropUrl,
+    })
+  }
+
+  return apiGatewayResponse({})
 }
 
 const newFetch = async (event) => {
@@ -89,9 +97,19 @@ const sanitize = async (event) => {
 
 const newParse = async (event) => {
   threadEvent('parse', 'begin', { event })
-  const urls = await parse(
-    get(event, 'Records', null)
-  )
+  let urls
+  try {
+    urls = await parse(
+      get(event, 'Records', null)
+    )
+
+    await Promise.all(
+      urls.map(url => sendMessage(NEXT_SQS_URL, { url }))
+    )
+  } catch (e) {
+    return apiGatewayResponse({ error: e.toString(), event }, 500)
+  }
+
   threadEvent('parse', 'end', { event, urls: urls.length })
   return apiGatewayResponse({ urls })
 }
@@ -101,3 +119,22 @@ exports.fetch = newFetch
 exports.updateIndex = updateIndex
 exports.sanitize = sanitize
 exports.parse = newParse
+
+newParse({
+  'Records': [{
+    'messageId': '92ad0c5b-1743-465a-b0f6-cc65b473d152',
+    'receiptHandle': 'AQEBw/WA6G0mo8EDCyhNOkZ12N75K2tlVpvg7CzpLAoOnAfwvP79Lwx/3R+YNmQy6pT1eVL4xDuqOtbX+qStcbrlXx0iyCz3au9JR4wK9tuBuwU+a/i/JLloaYwd6cQTTX53XOB5RMPm4WILHnV0LOsetWsEwkVsjBcGcFyomiVMvj30JkPht+NAApGQiArnmRXLIlWnNgT1vvGT2WwXhpPOyy7jVjpkgCnkgGdE9021Var9Nde6qwoYT0ltB/SeZ7OXLkaXZZrdl5z1gupu9EMjtoVxCejE2s0EUXpx0bw1ht9IfwcnTz7nZlgxiRLii4INzDxeXqI7+hGNMXJsVASm5e+r35ed3sDBdpRJkU2RAW4cej2miDKHDRoZFV6X78UEKyTnuRfgtIWJ+LeVR2M7aA==',
+    'body': '{"postId":"sa-3769444-149-466655802"}',
+    'attributes': {
+      'ApproximateReceiveCount': '1',
+      'SentTimestamp': '1564971406727',
+      'SenderId': 'AROAUOISLBCKBJJBQXR2N:sa-cute_list',
+      'ApproximateFirstReceiveTimestamp': '1564971461236',
+    },
+    'messageAttributes': {},
+    'md5OfBody': '647893b19e2fff67365c13d2f7e57c33',
+    'eventSource': 'aws:sqs',
+    'eventSourceARN': 'arn:aws:sqs:eu-central-1:305518020756:sa-cute_parse',
+    'awsRegion': 'eu-central-1',
+  }],
+})

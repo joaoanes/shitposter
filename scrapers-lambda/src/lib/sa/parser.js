@@ -1,19 +1,37 @@
-const { flatten, reduce, countBy, chunk } = require('lodash')
-const { get, flow, map, filter, reduce: reduceFP } = require('lodash/fp')
+const { flow, map, filter, flatMap } = require('lodash/fp')
+const { URL } = require('url')
+
 const { getPostRaw } = require('../s3')
-const { thunker } = require('../junkyard')
+const { parseHTML, document } = require('../parsers/htmlparser')
+const { thunker, executeInSequence, pipeAsync } = require('../junkyard')
 
 const parsePosts = async (data) => {
-  const urls = flow(
+  const urls = await pipeAsync(
     getPostsFromRecords,
     fetchPosts,
-    extractMessages,
+    extractPosts,
     map(parseMessage),
+    filter(([urls, meta]) => urls.length !== 0),
     map(parseMeta),
+    unwind
   )(data)
 
   return urls
 }
+
+const inBlacklist = (url) => url.indexOf('.somethingawful.com') === -1
+
+const isURL = (url) => {
+  try {
+    return new URL(url) && true
+  } catch (e) {
+    return false
+  }
+}
+
+const unwind = (
+  flatMap(([urls, meta]) => urls.map(url => [url, meta]))
+)
 
 const getPostsFromRecords =
   flow(
@@ -22,52 +40,39 @@ const getPostsFromRecords =
     map('postId')
   )
 
-const fetchPosts = (postIds) => {
-  postIds.map(thunker(getPostRaw))
-}
+const fetchPosts = async (postIds) => (
+  executeInSequence(
+    postIds.map(thunker(getPostRaw))
+  )
+)
 
-const extractMessages = (html) => (
-  flatten(
-    [
-      /\[img\](.*?)\[\/img\]/ig,
-      /\[video\](.*?)\[\/video\]/ig,
-      /\[media\](.*?) \[\/media\]/ig,
-    ].map((regex) => {
-      const matches = html.match(regex)
-      if (matches === null) {
-        return []
-      }
-      return matches
-    })
-  ).filter(e => e)
+const extractPosts = (posts) => (
+  posts.map(({ raw, id }) => [null, { raw, id }])
 )
 
 const parseMeta = ([_msg, meta]) => {
-
+  const doc = document(meta.raw)
+  return [
+    _msg,
+    {
+      id: meta.id,
+      originalPostId: doc.at('table').id,
+      postedAt: new Date(
+        doc.at('.postdate').text()
+          .slice(5)
+      ).toISOString(),
+      postedBy: doc.at('td.userinfo').class.split(' ').filter(e => e !== 'userinfo')[0].slice(7),
+    },
+  ]
 }
-// const { Votes: votes, CreatedDate: date, internalPostId } = meta
 
-// const allRatings = reduce(votes, (acc, val, key) => [...acc, ...(new Array(val).fill(Number.parseInt(key)))], [])
-//  [
-//   _msg,
-//   {
-//     ratingIds: [], // TODO: what do?
-//     urlDate: date,
-//     internalPostId,
-//   },
-// ]
-
-const parseMessage = ([msgString, meta]) => {
-  // let parsedMsg
-  // try {
-  //   parsedMsg = JSON.parse(msgString)
-  //   if (parsedMsg['ops'] == null) {
-  //     throw new Error('No ops')
-  //   }
-  // } catch (e) {
-  //   return [extractUrlsOld(msgString), meta]
-  // }
-  // return [extractUrls(parsedMsg), meta]
+const parseMessage = ([_, meta]) => {
+  const { raw: rawPost } = meta
+  const urls = parseHTML(rawPost)
+    .filter(e => e) // remove nulls
+    .filter(isURL)
+    .filter(inBlacklist)
+  return [urls, meta]
 }
 
 module.exports = {
