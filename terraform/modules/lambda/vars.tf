@@ -45,3 +45,11 @@ variable "next_sqs_url" {
 variable "no_queue" {
   default = false
 }
+
+variable "sqs_trigger_enabled" {
+  default = true
+}
+
+variable "sqs_fifo" {
+  default = false
+}

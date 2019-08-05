@@ -17,6 +17,14 @@ data "aws_iam_policy_document" "lambda_s3_policy" {
   }
 }
 
+data "aws_iam_policy_document" "lambda_invoke_policy" {
+  statement {
+    actions   = ["lambda:InvokeFunction"]
+    // TODO: hardcoded!
+    resources = ["arn:aws:lambda:*"]
+  }
+}
+
 data "aws_iam_policy_document" "lambda_sqs_policy" {
   statement {
     sid       = "AllowSQSPermissions"
@@ -63,12 +71,16 @@ resource "aws_iam_policy" "lambda_s3_list_policy" {
   policy = "${data.aws_iam_policy_document.lambda_s3_list_policy.json}"
 }
 
+resource "aws_iam_policy" "lambda_invoke_policy" {
+  policy = "${data.aws_iam_policy_document.lambda_invoke_policy.json}"
+}
+
 resource "aws_iam_policy" "lambda_sqs_policy" {
   policy = "${data.aws_iam_policy_document.lambda_sqs_policy.json}"
 }
 
 resource "aws_iam_role" "iam_role_for_lambda" {
-  name               = "${var.aws_lambda_function_name}_LoggingAndBucketAccess"
+  name               = "${var.aws_lambda_function_name}_BundledAccess"
   assume_role_policy = "${data.aws_iam_policy_document.lambda_assume_role_policy.json}"
 }
 
@@ -92,11 +104,16 @@ resource "aws_iam_role_policy_attachment" "iam_for_lambda_sqs_policy_attachment"
   policy_arn = "${aws_iam_policy.lambda_sqs_policy.arn}"
 }
 
+resource "aws_iam_role_policy_attachment" "iam_for_lambda_invoke_policy_attachment" {
+  role       = "${aws_iam_role.iam_role_for_lambda.name}"
+  policy_arn = "${aws_iam_policy.lambda_invoke_policy.arn}"
+}
+
 resource "aws_lambda_event_source_mapping" "event_source_mapping" {
   count            = "${var.no_queue ? 0 : 1}"
-  batch_size       = 1
+  batch_size       = 10
   event_source_arn = "${aws_sqs_queue.scraper_queue.arn}"
-  enabled          = true
+  enabled          = "${var.sqs_trigger_enabled}"
   function_name    = "${aws_lambda_function.lambda.arn}"
 }
 

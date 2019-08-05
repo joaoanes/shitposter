@@ -3,6 +3,7 @@ module "sa-cute-lambda" {
   shitposter_api_ip = "${aws_instance.shitposter.public_ip}"
   bucket_name = "${aws_s3_bucket.shitposter-scraper-next.bucket}"
   scraper_name = "sa-cute"
+  sqs_final_url = "${module.sanitizer.queue_url}"
 }
 
 
@@ -14,6 +15,7 @@ module "sanitizer" {
   aws_s3_bucket_name = ""
   shitposter_api_ip = ""
   scraper_name = ""
+  sqs_trigger_enabled = false
 }
 
 module "extractor" {
@@ -23,4 +25,5 @@ module "extractor" {
   aws_s3_bucket_name = ""
   shitposter_api_ip = ""
   scraper_name = ""
+  sqs_trigger_enabled = false
 }
