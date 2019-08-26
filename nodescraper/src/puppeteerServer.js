@@ -32,7 +32,7 @@ app.get('/execute', async (req, res) => {
   await performEvent(eventId, ignoreInit, ignoreSubmit, scraperName)
 })
 
-app.get('/post/:id/url', async (req, res) => {
+app.post('/post/:id/url', async (req, res) => {
   try {
     await addUrl(req.params.id, req.params.url)
   } catch (e) {
@@ -43,7 +43,7 @@ app.get('/post/:id/url', async (req, res) => {
   res.status(200).send()
 })
 
-app.get('/post/:id/report', async (req, res) => {
+app.post('/post/:id/report', async (req, res) => {
   try {
     await updatePostStatus(req.params.id, req.params.status)
   } catch (e) {
