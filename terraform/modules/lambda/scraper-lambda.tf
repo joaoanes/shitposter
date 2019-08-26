@@ -19,7 +19,7 @@ data "aws_iam_policy_document" "lambda_s3_policy" {
 
 data "aws_iam_policy_document" "lambda_invoke_policy" {
   statement {
-    actions   = ["lambda:InvokeFunction"]
+    actions = ["lambda:InvokeFunction"]
     // TODO: hardcoded!
     resources = ["arn:aws:lambda:*"]
   }
@@ -27,8 +27,8 @@ data "aws_iam_policy_document" "lambda_invoke_policy" {
 
 data "aws_iam_policy_document" "lambda_sqs_policy" {
   statement {
-    sid       = "AllowSQSPermissions"
-    effect    = "Allow"
+    sid    = "AllowSQSPermissions"
+    effect = "Allow"
 
     actions = [
       "sqs:ChangeMessageVisibility",
@@ -118,8 +118,8 @@ resource "aws_lambda_event_source_mapping" "event_source_mapping" {
 }
 
 resource "aws_lambda_function" "lambda" {
-  s3_bucket = "shitposter-lambda-repo"
-  s3_key = "scrape.zip"
+  s3_bucket        = "shitposter-lambda-repo"
+  s3_key           = "scrape.zip"
   function_name    = "${var.aws_lambda_function_name}"
   role             = "${aws_iam_role.iam_role_for_lambda.arn}"
   memory_size      = "${var.aws_lambda_memory}"
@@ -136,7 +136,8 @@ resource "aws_lambda_function" "lambda" {
       BUCKET_NAME              = "${var.aws_s3_bucket_name}"
       SCRAPER_NAME             = "${var.scraper_name}"
       NEXT_SQS_URL             = "${var.next_sqs_url}"
-      CUSTOM_CHROME = "true"
+      PUPPETEER_URL            = "${var.puppeteer_url}"
+      CUSTOM_CHROME            = "true"
     }
   }
 }

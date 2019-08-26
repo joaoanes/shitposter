@@ -53,3 +53,7 @@ variable "sqs_trigger_enabled" {
 variable "sqs_fifo" {
   default = false
 }
+
+variable "puppeteer_url" {
+  default = "https://puppeteer.shitpost.network/"
+}
