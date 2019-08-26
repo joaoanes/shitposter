@@ -13,7 +13,7 @@ const db = require('knex')({
 const { executeInChunks } = require('../common/junkyard')
 const { postEvent } = require('../common/log')
 
-const destroyDb = () => db.schema.dropTableIfExists('extractedContent') && db.schema.dropTableIfExists('event')
+const destroyDb = () => db.schema.dropTableIfExists('extractedContent') && db.schema.dropTableIfExists('event') && db.schema.dropTableIfExists('urls')
 
 const initDb = async () => {
   console.warn('initting db')
@@ -31,7 +31,7 @@ const initDb = async () => {
     await db.schema.createTableIfNotExists('urls', (table) => {
       table.string('id').primary()
       table.string('url')
-      table.integer('extractedContentId').notNullable()
+      table.string('extractedContentId').notNullable()
       table
         .foreign('extractedContentId')
         .references('id')
