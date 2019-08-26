@@ -1,12 +1,12 @@
 const axios = require('axios')
 const { flatten, pickBy } = require('lodash')
-const { get, flow, map, filter, reduce } = require('lodash/fp')
+const { flow, map, filter, reduce } = require('lodash/fp')
 const { HTML } = require('nodekogiri')
 const chromium = require('chrome-aws-lambda')
 const Regex = require('named-regexp-groups')
 
 const { threadEvent, pageEvent } = require('../log')
-const { mapWait, pipeAsync, thunker, executeWithRescue } = require('../junkyard')
+const { mapWait, pipeAsync, executeWithRescue } = require('../junkyard')
 
 const getThreads = async (threadIds, limit, doAfterPost, threadsAndPagesToIgnore) => {
   const browser = await chromium.puppeteer.launch({

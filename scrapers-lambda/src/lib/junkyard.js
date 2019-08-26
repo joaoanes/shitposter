@@ -90,8 +90,6 @@ const checkTimeOrEBreak = (thunk, timeLimit, uuid) => async (args) => {
     (timeLimit !== null && (new Date()).getTime() > timeLimit) ||
     FUCKINGSINGLETONSBreak
   ) {
-    debugger
-    console.log(timeLimit)
     throw new LimitReachedException('Out of time!', args)
   }
 

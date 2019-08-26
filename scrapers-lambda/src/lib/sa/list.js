@@ -1,7 +1,7 @@
 const { chunk, filter } = require('lodash')
 
-const { getAllPosts, getPostUrls, getPostRaw, uploadUrls, addToPhonebook } = require('../s3')
-const { extractPostFromPostId, extractThreadFromPostId, parsePostsAndUpload } = require('./junkyard')
+const { getAllPosts } = require('../s3')
+const { extractPostFromPostId } = require('./junkyard')
 const { sendMessage } = require('../sqs')
 const { invokeLambda } = require('../invoke')
 

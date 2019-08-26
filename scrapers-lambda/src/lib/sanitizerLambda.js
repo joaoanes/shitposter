@@ -82,12 +82,14 @@ const fetchUrl = async ([url, meta]) => Promise.race([
     return null
   })
 
-const sanitize = async (urls) => (
+const sanitize = async (records) => (
   uniqBy(
     flatten(
       (await executeInChunks(
         // TODO: why is it throwing?
-        urls.map((url) => () => sanitizeUrl(url).catch(e => null)),
+        records
+          .map(({ url }) => url)
+          .map((url) => () => sanitizeUrl(url).catch(e => null)),
         (new Date()).getTime() + 810000,
         40,
       )).filter(identity)

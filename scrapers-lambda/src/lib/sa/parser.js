@@ -5,14 +5,14 @@ const { getPostRaw } = require('../s3')
 const { parseHTML, document } = require('../parsers/htmlparser')
 const { thunker, executeInSequence, pipeAsync } = require('../junkyard')
 
-const parsePosts = async (data) => {
+const parsePosts = async (data, hashtags) => {
   const urls = await pipeAsync(
     getPostsFromRecords,
     fetchPosts,
     extractPosts,
     map(parseMessage),
     filter(([urls, meta]) => urls.length !== 0),
-    map(parseMeta),
+    map(parseMeta(hashtags)),
     unwind
   )(data)
 
@@ -50,11 +50,12 @@ const extractPosts = (posts) => (
   posts.map(({ raw, id }) => [null, { raw, id }])
 )
 
-const parseMeta = ([_msg, meta]) => {
+const parseMeta = (hashtags) => ([_msg, meta]) => {
   const doc = document(meta.raw)
   return [
     _msg,
     {
+      hashtags: hashtags || [],
       id: meta.id,
       originalPostId: doc.at('table').id,
       postedAt: new Date(

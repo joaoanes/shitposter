@@ -1,5 +1,5 @@
 const { HTML } = require('nodekogiri')
-const { flatMap, sortBy, first } = require('lodash')
+const { flatMap, sortBy } = require('lodash')
 
 const document = (html) => new HTML(html)
 

@@ -1,4 +1,4 @@
-const { flow, uniqBy, reduce, groupBy, first, mapValues } = require('lodash/fp')
+const { flow, reduce } = require('lodash/fp')
 const Regex = require('named-regexp-groups')
 
 const { uploadPosts } = require('../s3')
