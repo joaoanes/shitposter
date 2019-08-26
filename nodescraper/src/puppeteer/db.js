@@ -22,7 +22,20 @@ const initDb = async () => {
     await db.schema.createTableIfNotExists('extractedContent', (table) => {
       table.string('id').primary()
       table.string('data')
-      table.string('status')
+      table.string('status').index()
+      table.dateTime('createdAt').defaultTo(db.fn.now())
+      table.dateTime('updatedAt').defaultTo(db.fn.now())
+    })
+
+    await db.schema.dropTableIfExists('urls')
+    await db.schema.createTableIfNotExists('urls', (table) => {
+      table.string('id').primary()
+      table.string('url')
+      table.integer('extractedContentId').notNullable()
+      table
+        .foreign('extractedContentId')
+        .references('id')
+        .inTable('extractedContent')
       table.dateTime('createdAt').defaultTo(db.fn.now())
       table.dateTime('updatedAt').defaultTo(db.fn.now())
     })
@@ -53,6 +66,19 @@ const updateEventPosts = async (id, type, posts) => (await assureInited()) && (
     .where({ id })
 )
 
+const updatePostStatus = async (id, status) => (
+  await assureInited() && db('extractedContent')
+    .update({ status, updatedAt: db.fn.now() })
+    .where({ id })
+)
+
+const addUrl = async (postId, url) => (
+  await assureInited() && db('urls').insert({
+    url,
+    extractedContentId: postId,
+  })
+)
+
 const postsPerStatus = async () => (await assureInited()) && flow(
   map(({ status, count }) => ({ [status]: count })),
   reduce((acc, cur) => ({ ...acc, ...cur }), {}),
@@ -77,7 +103,7 @@ const getPostsByStatus = async (status) => {
 }
 
 const hasTables = () => (
-  db.schema.hasTable('extractedContent') && db.schema.hasTable('events')
+  db.schema.hasTable('extractedContent') && db.schema.hasTable('events') && db.schema.hasTable('urls')
 )
 
 const assureInited = async () => (
@@ -117,5 +143,7 @@ module.exports = {
   createEvent,
   updateEventPosts,
   listEvents,
+  addUrl,
+  updatePostStatus,
   db, // TODO: remove
 }

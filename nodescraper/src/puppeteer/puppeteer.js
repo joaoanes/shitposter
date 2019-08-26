@@ -21,13 +21,12 @@ const getStats = async () => ({
   })),
 })
 
-const performEvent = async (eventId, ignoreInit, ignoreFetch, ignoreSubmit, scraperName) => {
+const performEvent = async (eventId, ignoreInit, ignoreSubmit, scraperName) => {
   if (!ignoreInit) {
     const initPosts = await loadNewSubmissions(scraperName)
 
     await updateEventPosts(eventId, 'Inited', initPosts)
   }
-  if (!ignoreFetch) await updateEventPosts(eventId, 'Fetched', await fetchSubmissions(scraperName))
   if (!ignoreSubmit) await updateEventPosts(eventId, 'Submitted', await uploadSubmissions(scraperName))
 }
 
@@ -126,32 +125,6 @@ const uploadSubmissions = async (scraperName) => {
       await updatePostsStatus(postIds.map(postId => ({ postId })), 'submitted')
       return postIds
     }))
-}
-
-const fetchSubmissions = async (scraperName) => {
-  const seenPostIds = (await getPostsByStatus('seen')).map(({ id }) => id)
-  const chunks = chunk(seenPostIds, 20000)
-  const invocations = await Promise.all(
-    chunks.map(chunk => invokeLambda(
-      `${scraperName}_fetch`,
-      {
-        posts: chunk,
-      }
-    ))
-  )
-
-  const results = invocations.reduce(
-    (acc, { Payload, StatusCode }) => {
-      if (StatusCode !== 200) {
-        throw new Error('Weird status at invoke!')
-      }
-      return [...acc, ...(JSON.parse(JSON.parse(Payload).body).posts)]
-    },
-    []
-  )
-
-  await updatePostsStatus(results, 'fetched')
-  return results
 }
 
 const loadNewSubmissions = async (scraperName) => {
