@@ -78,4 +78,5 @@ const parseMessage = ([_, meta]) => {
 
 module.exports = {
   parse: parsePosts,
+  getPostsFromRecords,
 }

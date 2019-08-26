@@ -66,11 +66,18 @@ const updateEventPosts = async (id, type, posts) => (await assureInited()) && (
     .where({ id })
 )
 
-const updatePostStatus = async (id, status) => (
-  await assureInited() && db('extractedContent')
+const updatePostStatus = async (id, status) => {
+  await assureInited()
+
+  const post = await db('extractedContent').where({ id })
+  if (post.length === 0) {
+    await insertPosts([id])
+  }
+
+  return db('extractedContent')
     .update({ status, updatedAt: db.fn.now() })
     .where({ id })
-)
+}
 
 const addUrl = async (postId, url) => (
   await assureInited() && db('urls').insert({

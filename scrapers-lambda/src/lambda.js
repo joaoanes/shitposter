@@ -6,7 +6,7 @@ config()
 const { SCRAPER_NAME = 'lmaoscraper', NEXT_SQS_URL } = process.env
 
 const { IndexReconstructionStopped, ensureIndexUpdated } = require('./lib/sa/threadScraper')
-const { parse } = require('./lib/sa/parser')
+const { parse, getPostsFromRecords } = require('./lib/sa/parser')
 const { list } = require('./lib/sa/list')
 const { reportPosts, reportPostUrls } = require('./lib/puppeteer')
 
@@ -92,6 +92,10 @@ const newParse = async (event) => {
   let urls
   const { getHashtags } = require(`./${SCRAPER_NAME}/getInfo`)
   try {
+    const postIds = getPostsFromRecords(
+      get(event, 'Records', null),
+    )
+
     urls = await parse(
       get(event, 'Records', null),
       getHashtags(),
@@ -101,7 +105,7 @@ const newParse = async (event) => {
       urls.map(url => sendMessage(NEXT_SQS_URL, { url }))
     )
 
-    await reportPosts(urls, 'parsed')
+    await reportPosts(postIds, 'parsed')
   } catch (e) {
     return apiGatewayResponse({ error: e.toString(), event }, 500)
   }

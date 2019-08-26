@@ -5,9 +5,9 @@ config()
 
 const { PUPPETEER_URL } = process.env
 
-const reportPost = (status) => ([url, meta]) => (
+const reportPost = (status) => (postId) => (
   axios.post(
-    `${PUPPETEER_URL}/post/${meta.id}/report`,
+    `${PUPPETEER_URL}/post/${postId}/report`,
     {
       status,
     }
