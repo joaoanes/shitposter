@@ -1,25 +1,48 @@
 const { flow, map, reduce } = require('lodash/fp')
-
+const { v4 } = require('uuid')
+const { merge } = require('lodash')
 require('dotenv').config()
 
 const {
   DATABASE_URL,
 } = process.env
 
-const db = require('knex')({
-  client: 'pg',
-  connection: DATABASE_URL,
-})
+const getConfig = (env) => configs[env] || configs['development']
+
+const configs = {
+  development: {
+    client: 'pg',
+    connection: DATABASE_URL,
+  },
+  production: {
+    client: 'pg',
+    connection: DATABASE_URL,
+  },
+  test: {
+    client: 'pg',
+    connection: 'postgres://localhost/puppeteer_test',
+  },
+}
+
+const db = require('knex')(getConfig(process.env.NODE_ENV))
+
 const { executeInChunks } = require('../common/junkyard')
 const { postEvent } = require('../common/log')
 
 const destroyDb = () => db.schema.dropTableIfExists('extractedContent') && db.schema.dropTableIfExists('event') && db.schema.dropTableIfExists('urls')
 
+const createTableIfNotExists = async (table, fun) => {
+  const exists = await db.schema.hasTable(table)
+  if (!exists) {
+    return db.schema.createTable(table, fun)
+  }
+}
+
 const initDb = async () => {
   console.warn('initting db')
   try {
     await db.schema.dropTableIfExists('extractedContent')
-    await db.schema.createTableIfNotExists('extractedContent', (table) => {
+    await createTableIfNotExists('extractedContent', (table) => {
       table.string('id').primary()
       table.string('data')
       table.string('status').index()
@@ -28,7 +51,7 @@ const initDb = async () => {
     })
 
     await db.schema.dropTableIfExists('urls')
-    await db.schema.createTableIfNotExists('urls', (table) => {
+    await createTableIfNotExists('urls', (table) => {
       table.string('id').primary()
       table.string('url')
       table.string('extractedContentId').notNullable()
@@ -41,7 +64,7 @@ const initDb = async () => {
     })
 
     await db.schema.dropTableIfExists('events')
-    await db.schema.createTableIfNotExists('events', (table) => {
+    await createTableIfNotExists('events', (table) => {
       table.string('id').primary()
       table.json('postsInited')
       table.json('postsFetched')
@@ -66,33 +89,43 @@ const updateEventPosts = async (id, type, posts) => (await assureInited()) && (
     .where({ id })
 )
 
-const updatePostStatus = async (id, status) => {
-  await assureInited()
-
+const ensurePostExists = async (id) => {
   const post = await db('extractedContent').where({ id })
   if (post.length === 0) {
     await insertPosts([id])
   }
+}
+
+const updatePostStatus = async (id, status) => {
+  await assureInited()
+  await ensurePostExists(id)
 
   return db('extractedContent')
     .update({ status, updatedAt: db.fn.now() })
     .where({ id })
 }
 
-const addUrl = async (postId, url) => (
-  await assureInited() && db('urls').insert({
+const addUrl = async (postId, url) => {
+  await assureInited()
+
+  await ensurePostExists(postId)
+
+  return db('urls').insert({
+    id: v4(),
     url,
     extractedContentId: postId,
   })
-)
+}
 
 const postsPerStatus = async () => (await assureInited()) && flow(
   map(({ status, count }) => ({ [status]: count })),
-  reduce((acc, cur) => ({ ...acc, ...cur }), {}),
-)(await db('extractedContent')
-  .select('status')
-  .count('id')
-  .groupBy('status'))
+  reduce((acc, cur) => merge(acc, cur), {}),
+)(
+  await db('extractedContent')
+    .select('status')
+    .count('id')
+    .groupBy('status')
+)
 
 const getLastKnownPost = async () => {
   await assureInited()
