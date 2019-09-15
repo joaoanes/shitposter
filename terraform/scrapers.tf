@@ -13,17 +13,19 @@ module "sanitizer" {
   entry_point = "lambda.sanitize"
   aws_lambda_function_name = "sanitizer"
   aws_s3_bucket_name = ""
-  shitposter_api_ip = ""
+  next_sqs_url = "${module.puppeteer.upload_queue_url}"
+  shitposter_api_ip = "${aws_instance.shitposter.public_ip}"
   scraper_name = ""
   sqs_trigger_enabled = false
 }
 
-module "extractor" {
-  source = "./modules/lambda"
-  entry_point = "lambda.extract"
-  aws_lambda_function_name = "extractor"
-  aws_s3_bucket_name = ""
-  shitposter_api_ip = ""
-  scraper_name = ""
-  sqs_trigger_enabled = false
-}
+// One day
+# module "extractor" {
+#   source = "./modules/lambda"
+#   entry_point = "lambda.extract"
+#   aws_lambda_function_name = "extractor"
+#   aws_s3_bucket_name = ""
+#   shitposter_api_ip = ""
+#   scraper_name = ""
+#   sqs_trigger_enabled = false
+# }
