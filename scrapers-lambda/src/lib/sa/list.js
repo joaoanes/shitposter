@@ -7,7 +7,7 @@ const { invokeLambda } = require('../invoke')
 
 const { NEXT_SQS_URL } = process.env
 
-const splitPostIds = (postIds) => {
+const chunkAndInvokeLambdas = (postIds) => {
   const postIdChunks = chunk(postIds, 3000)
   return postIdChunks.map((postIdsChunk) => () => (
     invokeLambda('sa-cute_list', { invokeTrace: { postIds: postIdsChunk } })
@@ -20,9 +20,11 @@ const getPostsAndParallelize = async (lastPostId) => {
 
   const newPosts = filter(allPosts, (postId) => extractPostFromPostId(postId) > lastSeenPostId)
 
-  return Promise.all(
-    splitPostIds(newPosts).map((thunk) => thunk())
+  await Promise.all(
+    chunkAndInvokeLambdas(newPosts).map((thunk) => thunk())
   )
+
+  return newPosts
 }
 
 const listAndProcessChunk = async (trace) => {

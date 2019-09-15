@@ -11,7 +11,7 @@ const { submitEvent } = require('./log')
 //   'image/gif',
 // ]
 
-const sanitizeUrl = async ([urls, meta]) => {
+const sanitizeContent = async ([urls, meta]) => {
   submitEvent('sanitize', 'start', { urls })
   const normalizedUrls = urls.map(url => [
     url,
@@ -40,7 +40,8 @@ const sanitizeUrl = async ([urls, meta]) => {
     uniqueUrls.map(thunker(fetchUrl)),
     (new Date()).getTime() + 900000
   )).filter(identity)
-  submitEvent('sanitize', 'finish', { urls: validURls })
+
+  submitEvent('sanitize', 'finish', { urls: validURls.length })
   return validURls
 }
 
@@ -49,11 +50,11 @@ const fetchUrl = async ([url, meta]) => Promise.race([
   new Promise((resolve, reject) => setTimeout(() => reject(new Error('Timeout!')), 7000)),
 ]).then(res => {
   if (res.status !== 200) {
-    submitEvent('sanitize', 'status', { status: res.status })
+    submitEvent('sanitize', 'unfamiliar_status', { status: res.status })
 
     if (res.status === 301 || res.status === 302 || res.status === 307 || res.status === 308) {
       submitEvent('sanitize', 'redirect', { redirect: res.request.res.responseUrl })
-      return [res.request.res.responseUrl, meta]
+      return [encodeURI(res.request.res.responseUrl), meta]
     }
 
     return null
@@ -86,10 +87,9 @@ const sanitize = async (records) => (
   uniqBy(
     flatten(
       (await executeInChunks(
-        // TODO: why is it throwing?
         records
-          .map(({ url }) => url)
-          .map((url) => () => sanitizeUrl(url).catch(e => null)),
+          .map(({ url: content }) => content) // TODO: url is misleading, change upstream!!
+          .map((content) => () => sanitizeContent(content).catch(e => { console.error(e.toString()); return null })),
         (new Date()).getTime() + 810000,
         40,
       )).filter(identity)
