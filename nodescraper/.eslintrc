@@ -5,14 +5,17 @@
     "__DEV__": true
   },
   "plugins": [
+    "jest",
     "flowtype"
   ],
+  "env": {
+    "jest/globals": true
+  },
   "rules": {
     "no-debugger": "warn",
     "no-console": ["error", {"allow": ["error", "warn"]}],
     "import/first": "error",
     "import/no-duplicates": "error",
-    "import/extensions": ["error", {"jpg": "always"}, {"json": "always"}],
     "import/newline-after-import": "error",
     "import/no-unassigned-import": "error",
     "newline-per-chained-call": "error",

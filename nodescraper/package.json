@@ -19,17 +19,19 @@
     "uuid": "^3.3.2"
   },
   "scripts": {
-    "build": "flow-remove-types src/ -d lib/"
+    "build": "flow-remove-types src/ -d lib/",
+    "lint": "eslint ."
   },
   "devDependencies": {
     "babel-eslint": "^10.0.1",
-    "eslint": "^5.14.1",
-    "eslint-config-standard": "^12.0.0",
-    "eslint-plugin-flowtype": "^3.4.2",
-    "eslint-plugin-import": "^2.16.0",
-    "eslint-plugin-node": "^8.0.1",
-    "eslint-plugin-promise": "^4.0.1",
-    "eslint-plugin-standard": "^4.0.0",
+    "eslint": "^6.4.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-flowtype": "^4.3.0",
+    "eslint-plugin-jest": "^22.17.0",
+    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-standard": "^4.0.1",
     "flow-bin": "^0.91.0",
     "flow-remove-types": "^1.2.3",
     "jest": "^24.9.0",

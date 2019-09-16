@@ -77,14 +77,18 @@ const updateIndex = async (event) => {
 
 const sanitize = async (event) => {
   threadEvent('sanitize', 'begin', { event })
-  const urls = await doSanitize(
+  const content = await doSanitize(
     get(event, 'Records', null),
   )
 
-  await reportPostUrls(urls)
+  await Promise.all(
+    content.map(async ([urls]) => urls.map(url => sendMessage(NEXT_SQS_URL, { url })))
+  )
 
-  threadEvent('sanitize', 'end', { event, urls: urls.length })
-  return apiGatewayResponse({ urls })
+  await reportPostUrls(content)
+
+  threadEvent('sanitize', 'end', { event, urls: content.length })
+  return apiGatewayResponse({ content })
 }
 
 const newParse = async (event) => {

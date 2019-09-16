@@ -110,11 +110,15 @@ const addUrl = async (postId, url) => {
 
   await ensurePostExists(postId)
 
-  return db('urls').insert({
+  await db('urls').insert({
     id: v4(),
     url,
     extractedContentId: postId,
   })
+
+  return db('extractedContent')
+    .update({ status: 'sanitized', updatedAt: db.fn.now() })
+    .where({ id: postId })
 }
 
 const postsPerStatus = async () => (await assureInited()) && flow(
