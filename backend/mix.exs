@@ -49,6 +49,7 @@ defmodule ShitposterBackend.Mixfile do
       {:guardian, "~> 1.0"},
       {:corsica, "~> 1.0"},
       {:ex_aws, "~> 2.0"},
+      {:ex_aws_sqs, "~> 2.0"},
       {:ex_aws_s3, "~> 2.0"},
       {:hackney, "~> 1.9"},
       {:sweet_xml, "~> 0.6"},

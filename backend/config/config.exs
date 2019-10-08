@@ -22,14 +22,13 @@ config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
-config :ex_aws,
-  access_key_id: "AKIAJNL2HLP2JBN456ZQ",
-  secret_access_key: "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",
-  s3: [
-   scheme: "https://",
-   region: "eu-central-1"
-  ],
-  debug_requests: true
+# config :ex_aws,
+#   access_key_id: "MAN CAN YOU BELIEVE",
+#   secret_access_key: "I USED TO HAVE PLAINTEXT SECRETS HERE",
+#   s3: [
+#    scheme: "INSTEAD OF USING IAM PROFILES",
+#    region: "LIKE A SANE OR LESS INSANE MAN"
+#   ],
 
 
 config :shitposter_backend, ShitposterBackend.Guardian,

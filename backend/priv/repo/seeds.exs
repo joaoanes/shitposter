@@ -11,18 +11,10 @@
 # and so on) as they will fail if something goes wrong.
 alias ShitposterBackend.{User, Shitpost, Rating, Source, Repo}
 
-Repo.insert!(%Shitpost{url: "https://lifeonmars.pt", type: "webpage"})
-Repo.insert!(%Shitpost{url: "https://lifeonmars.pt", type: "webpage"})
-Repo.insert!(%Shitpost{url: "https://www.cats.org.uk/uploads/images/featurebox_sidebar_kids/grief-and-loss.jpg", type: "image"})
-Repo.insert!(%Shitpost{url: "https://www.cats.org.uk/uploads/images/featurebox_sidebar_kids/grief-and-loss.jpg", type: "image"})
-Repo.insert!(%Shitpost{url: "https://www.youtube.com/watch?v=3cXjcKTRWcg", type: "youtube"})
-Repo.insert!(%Shitpost{url: "https://twitter.com/shibacentraI/status/962514110318628864", type: "tweet" })
-
-{:ok, u} = User.create("lmaoscraper@shitposter.network", "facepunchlmao", "lmaoscraper")
+{:ok, u} = User.create("pixies@shitpost.network", "Whatthefuckdidyoujustfuckingsayaboutme,youlittlebitch?I'llhaveyouknowIgraduatedtopofmyclassintheNavySeals,andI'vebeeninvolvedinnumeroussecretraidsonAl-Quaeda,andIhaveover300confirmedkills.IamtrainedingorillawarfareandI'mthetopsniperintheentireUSarmedforces.Youarenothingtomebutjustanothertarget.IwillwipeyouthefuckoutwithprecisionthelikesofwhichhasneverbeenseenbeforeonthisEarth,markmyfuckingwords.YouthinkyoucangetawaywithsayingthatshittomeovertheInternet?Thinkagain,fucker.AswespeakIamcontactingmysecretnetworkofspiesacrosstheUSAandyourIPisbeingtracedrightnowsoyoubetterprepareforthestorm,maggot.Thestormthatwipesoutthepatheticlittlethingyoucallyourlife.You'refuckingdead,kid.Icanbeanywhere,anytime,andIcankillyouinoversevenhundredways,andthat'sjustwithmybarehands.NotonlyamIextensivelytrainedinunarmedcombat,butIhaveaccesstotheentirearsenaloftheUnitedStatesMarineCorpsandIwilluseittoitsfullextenttowipeyourmiserableassoffthefaceofthecontinent,youlittleshit.Ifonlyyoucouldhaveknownwhatunholyretributionyourlittle"clever"commentwasabouttobringdownuponyou,maybeyouwouldhaveheldyourfuckingtongue.Butyoucouldn't,youdidn't,andnowyou'repayingtheprice,yougoddamnidiot.Iwillshitfuryalloveryouandyouwilldrowninit.You'refuckingdead,kiddo.", "Shitpost Pixies")
 {:ok, u} = User.set_bot(u)
 
-Repo.insert!(%Source{name: "LMAO Threads (Facepunch)"})
-Repo.insert!(%Source{name: "Wholesome threads (Facepunch)"})
+Repo.insert!(%Source{name: "SomethingAwful"})
 
 Repo.insert!(%Rating{emoji: "💖"})
 Repo.insert!(%Rating{emoji: "😅"})

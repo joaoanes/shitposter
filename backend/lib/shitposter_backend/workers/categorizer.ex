@@ -27,8 +27,6 @@ defmodule ShitposterBackend.Workers.Categorizer do
     |> Enum.filter(fn x -> x end)
     |> List.first
 
-
-
     case type do
       {:ok, ["tweet", url]} -> (
         Scraper.takeScreenshot(url)
