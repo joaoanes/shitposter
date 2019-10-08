@@ -12,7 +12,7 @@ defmodule ShitposterBackend.Workers.QueueFetcher do
 
   def consume(%{worker_user: user}) do
     {:ok, %{body: %{messages: messages}}} =
-      ExAws.SQS.receive_message("scraper-upload-queue.fifo") |> ExAws.request(region: "eu-central-1")
+      ExAws.SQS.receive_message("scraper-upload-queue.fifo", [max_number_of_messages: 10]) |> ExAws.request(region: "eu-central-1")
 
     Enum.map(messages, fn %{body: bod} ->
       {:ok, [url, meta]} = Poison.decode(bod)
@@ -25,6 +25,6 @@ defmodule ShitposterBackend.Workers.QueueFetcher do
 
     ExAws.SQS.delete_message_batch("scraper-upload-queue.fifo", Enum.map(messages, fn %{message_id: mid, receipt_handle: rec} ->
       %{id: mid, receipt_handle: rec}
-    end))
+    end)) |> ExAws.request(region: "eu-central-1")
   end
 end
