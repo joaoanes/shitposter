@@ -1,6 +1,6 @@
 defmodule ShitposterBackend.Application do
   use Application
-  alias ShitposterBackend.Workers.{Categorizer, Uploader}
+  alias ShitposterBackend.Workers.{Categorizer, Uploader, QueueFetcher}
 
   # See http://elixir-lang.org/docs/stable/elixir/Application.html
   # for more information on OTP Applications
@@ -17,7 +17,9 @@ defmodule ShitposterBackend.Application do
       Honeydew.queue_spec(:categorizer),
       Honeydew.worker_spec(:categorizer, {Categorizer, []}, num: 15, init_retry_secs: 10),
       Honeydew.queue_spec(:uploader),
-      Honeydew.worker_spec(:uploader, {Uploader, []}, num: 15, init_retry_secs: 10)
+      Honeydew.worker_spec(:uploader, {Uploader, []}, num: 15, init_retry_secs: 10),
+      Honeydew.queue_spec(:queue_fetcher),
+      Honeydew.worker_spec(:queue_fetcher, {QueueFetcher, []}, num: 15, init_retry_secs: 10)
       # Start your own worker by calling: ShitposterBackend.Worker.start_link(arg1, arg2, arg3)
       # worker(ShitposterBackend.Worker, [arg1, arg2, arg3]),
     ]
