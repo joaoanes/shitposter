@@ -5,12 +5,12 @@ const { extractPostFromPostId } = require('./junkyard')
 const { sendMessage } = require('../sqs')
 const { invokeLambda } = require('../invoke')
 
-const { NEXT_SQS_URL } = process.env
+const { NEXT_SQS_URL, SCRAPER_NAME } = process.env
 
 const chunkAndInvokeLambdas = (postIds) => {
   const postIdChunks = chunk(postIds, 3000)
   return postIdChunks.map((postIdsChunk) => () => (
-    invokeLambda('sa-cute_list', { invokeTrace: { postIds: postIdsChunk } })
+    invokeLambda(`${SCRAPER_NAME}_list`, { invokeTrace: { postIds: postIdsChunk } })
   ))
 }
 

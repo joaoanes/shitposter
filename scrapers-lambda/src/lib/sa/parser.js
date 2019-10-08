@@ -1,9 +1,15 @@
 const { flow, map, filter, flatMap } = require('lodash/fp')
 const { URL } = require('url')
+const { config } = require('dotenv')
+
+config()
+
+const { SCRAPER_NAME } = process.env
 
 const { getPostRaw } = require('../s3')
 const { parseHTML, document } = require('../parsers/htmlparser')
 const { thunker, executeInSequence, pipeAsync } = require('../junkyard')
+const { extractDetailsFromPostId } = require('./junkyard')
 
 const parsePosts = async (data, hashtags) => {
   const urls = await pipeAsync(
@@ -52,12 +58,15 @@ const extractPosts = (posts) => (
 
 const parseMeta = (hashtags) => ([_msg, meta]) => {
   const doc = document(meta.raw)
+  const postDetails = extractDetailsFromPostId(meta.id)
   return [
     _msg,
     {
       hashtags: hashtags || [],
       id: meta.id,
       originalPostId: doc.at('table').id,
+      scraper: SCRAPER_NAME,
+      sourceLink: `https://forums.somethingawful.com/showthread.php?threadid=${postDetails.threadId}&pagenumber=${postDetails.page}#post${postDetails.postId}`,
       postedAt: new Date(
         doc.at('.postdate').text()
           .slice(5)

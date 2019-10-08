@@ -1,4 +1,5 @@
 const axios = require('axios')
+const { spawnSync } = require('child_process')
 const { flatten, pickBy } = require('lodash')
 const { flow, map, filter, reduce } = require('lodash/fp')
 const { HTML } = require('nodekogiri')
@@ -8,31 +9,31 @@ const Regex = require('named-regexp-groups')
 const { threadEvent, pageEvent } = require('../log')
 const { mapWait, pipeAsync, executeWithRescue } = require('../junkyard')
 
-const getThreads = async (threadIds, limit, doAfterPost, threadsAndPagesToIgnore) => {
-  const browser = await chromium.puppeteer.launch({
-    args: chromium.args,
-    defaultViewport: chromium.defaultViewport,
-    executablePath: await chromium.executablePath,
-    headless: true,
+const killChrome = () => {
+  const psCall = spawnSync('ps', ['aux'])
+  const killCall = spawnSync('pkill', ['-9', 'chromium']) // goddamn browser.close doesn't work DIE
+  const psAfterCall = spawnSync('ps', ['aux'])
+  pageEvent('chrome_pruning', 'complete', {
+    psCall: psCall.output && psCall.output.toString(),
+    psAfterCall: psAfterCall.output && psAfterCall.output.toString(),
+    psCallErr: psCall.error && psCall.error.toString(),
+    psAfterCallErr: psAfterCall.error && psAfterCall.error.toString(),
+    killCall: killCall.output && killCall.output.toString(),
+    killCallErr: killCall.error && killCall.error.toString(),
   })
+}
 
-  const tab = await browser.newPage()
+const getThreads = async (threadIds, limit, doAfterPost, threadsAndPagesToIgnore) => pipeAsync(
+  cleanup,
+  thunksForThreadIds(doAfterPost, null),
+  filterKnownPosts(threadsAndPagesToIgnore),
+  executeThreadThunks(limit),
+  cleanup
+)(threadIds)
 
-  await tab.setRequestInterception(true)
-  tab.on('request', request => {
-    const type = request.resourceType()
-    if (type === 'image' || type === 'media' || type === 'object') {
-      request.abort()
-    } else {
-      request.continue()
-    }
-  })
-
-  return pipeAsync(
-    thunksForThreadIds(doAfterPost, tab),
-    filterKnownPosts(threadsAndPagesToIgnore),
-    executeThreadThunks(limit)
-  )(threadIds)
+const cleanup = async stuff => {
+  await killChrome()
+  return stuff
 }
 
 const filterKnownPosts = (toIgnore) => threadThunks => (
@@ -72,18 +73,54 @@ const getPageFetchThunks = (doAfterPost = Promise.resolve, tab) => async (thread
     .map((_, i) => ({
       [`${threadId}-${i + 1}`]: async () => getPageHTML(threadId, i + 1, tab)
         .then(extractPostsFromHTML(threadId, i + 1))
-        .then(doAfterPost),
+        .then(doAfterPost)
+        .catch(e => threadEvent('fetching', 'error', { threadId, error: e.toString() })),
     }))
   return thunks.reduce((acc, curr) => ({ ...acc, ...curr }), {})
 }
 
-const getPageHTML = async (threadId, page, tab) => {
+const interceptHTMLRequest = (request) => {
+  const type = request.resourceType()
+  if (type === 'image' || type === 'media' || type === 'object') {
+    request.abort()
+  } else {
+    request.continue()
+  }
+}
+
+const getPageHTML = async (threadId, page) => {
   pageEvent('fetching', 'start', { threadId, page })
+  let browser
+  let res
 
-  await tab.goto(`https://forums.somethingawful.com/showthread.php?threadid=${threadId}&pagenumber=${page}`, { timeout: 0 })
-  const res = await tab.$eval('html', e => e.innerHTML)
+  try {
+    browser = await chromium.puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath,
+      headless: true,
+    })
 
-  pageEvent('fetching', 'finish', { threadId, page })
+    const tab = await browser.newPage()
+
+    await tab.setRequestInterception(true)
+    tab.on('request', interceptHTMLRequest)
+
+    await tab.goto(`https://forums.somethingawful.com/showthread.php?threadid=${threadId}&pagenumber=${page}`, { timeout: 0 })
+    res = await tab.$eval('html', e => e.innerHTML)
+    await tab.goto('about:blank')
+
+    pageEvent('fetching', 'finish', { threadId, page })
+  } catch (e) {
+    pageEvent('fetching', 'error', { threadId, page, error: e.toString() })
+  }
+
+  if (browser) {
+    const chromeProcess = await browser.process()
+    await browser.close()
+
+    chromeProcess.kill('SIGKILL') // DIE
+  }
 
   return res
 }

@@ -1,4 +1,5 @@
 const process = require('process')
+const { createHash } = require('crypto')
 const { chunk, reduce } = require('lodash')
 const { map } = require('lodash/fp')
 const { compose, ifElse, is, tail, reduce: reduceRamda } = require('ramda')
@@ -43,6 +44,12 @@ const executeWithRescue = (limit, chunks) => async (thunks) => {
   }
   return results
 }
+
+const md5 = (string) => (
+  createHash('md5')
+    .update(string)
+    .digest('hex')
+)
 
 const composeFunctions = (func = (e) => e, func2) => async () =>
   // eslint-disable-next-line no-undef
@@ -207,4 +214,5 @@ module.exports = {
   pipeAsync,
   Semaphore,
   mapWait,
+  md5,
 }

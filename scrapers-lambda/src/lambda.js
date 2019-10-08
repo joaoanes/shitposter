@@ -9,6 +9,7 @@ const { IndexReconstructionStopped, ensureIndexUpdated } = require('./lib/sa/thr
 const { parse, getPostsFromRecords } = require('./lib/sa/parser')
 const { list } = require('./lib/sa/list')
 const { reportPosts, reportPostUrls } = require('./lib/puppeteer')
+const { md5 } = require('./lib/junkyard')
 
 const { threadEvent, lambdaEvent } = require('./lib/log')
 const { dropFileToS3 } = require('./lib/s3')
@@ -82,7 +83,7 @@ const sanitize = async (event) => {
   )
 
   await Promise.all(
-    content.map(async ([urls]) => urls.map(url => sendMessage(NEXT_SQS_URL, { url })))
+    content.map(([url, meta]) => sendMessage(NEXT_SQS_URL, [url, meta], md5(url)))
   )
 
   await reportPostUrls(content)

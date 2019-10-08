@@ -1,7 +1,7 @@
 const axios = require('axios')
-const { identity, mapValues, uniqBy, flatten } = require('lodash')
+const { identity, uniqBy } = require('lodash')
 
-const { executeInSequence, thunker, executeInChunks } = require('./junkyard')
+const { pipeAsync, executeInChunks } = require('./junkyard')
 const { submitEvent } = require('./log')
 
 // const UNIQUEABLE_MIMES = [
@@ -11,38 +11,27 @@ const { submitEvent } = require('./log')
 //   'image/gif',
 // ]
 
-const sanitizeContent = async ([urls, meta]) => {
-  submitEvent('sanitize', 'start', { urls })
-  const normalizedUrls = urls.map(url => [
-    url,
-    {
-      ...meta,
-      ratingIds: mapValues(meta.ratingIds, (count) => (
-        // TODO: unfair approach
-        Math.floor(count / urls.length)
-      )),
-    },
-  ]).filter(([url, meta]) => url !== null)
+const unfuckContent = ([url, meta]) => {
+  if (url[0] === '[') {
+    const match = url.match(/\[[^\]]*\](.*)\[[^\]]*\]/i)
+    return [match ? match[1] : url, meta]
+  }
+  return [url, meta]
+}
+
+const sanitizeContent = async ([url, meta]) => {
+  submitEvent('sanitize', 'start', { url })
 
   // TODO: deal better with the fuckening
   // aka tags being present in old regex-extracted urls
   // neat
-  const unfuckedUrls = normalizedUrls.map(([url, meta]) => {
-    if (url[0] === '[') {
-      const match = url.match(/\[[^\]]*\](.*)\[[^\]]*\]/i)
-      return [match ? match[1] : url, meta]
-    }
-  })
+  const validContent = await pipeAsync(
+    unfuckContent,
+    fetchUrl,
+  )([url, meta])
 
-  const uniqueUrls = uniqBy(unfuckedUrls, ([url]) => url)
-
-  const validURls = (await executeInSequence(
-    uniqueUrls.map(thunker(fetchUrl)),
-    (new Date()).getTime() + 900000
-  )).filter(identity)
-
-  submitEvent('sanitize', 'finish', { urls: validURls.length })
-  return validURls
+  submitEvent('sanitize', 'finish', { urls: validContent })
+  return validContent
 }
 
 const fetchUrl = async ([url, meta]) => Promise.race([
@@ -83,18 +72,20 @@ const fetchUrl = async ([url, meta]) => Promise.race([
     return null
   })
 
+const sanitizeRecords = async (records) => (
+  await executeInChunks(
+    records
+      .map(({ body }) => JSON.parse(body))
+      .map(({ url }) => url) // TODO: url is misleading, change upstream!!
+      .map((content) => () => sanitizeContent(content)),
+    (new Date()).getTime() + 810000,
+    40,
+  )).filter(identity)
+
 const sanitize = async (records) => (
   uniqBy(
-    flatten(
-      (await executeInChunks(
-        records
-          .map(({ url: content }) => content) // TODO: url is misleading, change upstream!!
-          .map((content) => () => sanitizeContent(content).catch(e => { console.error(e.toString()); return null })),
-        (new Date()).getTime() + 810000,
-        40,
-      )).filter(identity)
-    ),
-    ([url]) => url
+    await sanitizeRecords(records),
+    ([url, _]) => url
   )
 )
 
