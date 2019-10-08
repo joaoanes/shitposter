@@ -56,24 +56,13 @@ class App extends Component {
           <span>{lastKnownId}</span>
           <span>{JSON.stringify(posts)}</span>
           <button onClick={this.submitEvent.bind(this)}>DO IT</button>
-          <div>
-            <span>ignoreInit</span>
-            <input type="checkbox" id="ignoreInit" value={ignoreInit} onChange={(e) => {this.changeChangebox.bind(this)(e.target.id)}} />
-          </div>
-
-          <div>
-          <span>ignoreFetch</span>
-            <input type="checkbox" id="ignoreFetch" value={ignoreFetch} onChange={(e) => {this.changeChangebox.bind(this)(e.target.id)}} />
-          </div>
-          <div>
-            <span>ignoreSubmit</span>
-            <input type="checkbox" id="ignoreSubmit" value={ignoreSubmit} onChange={(e) => {this.changeChangebox.bind(this)(e.target.id)}} />
-          </div>
           <select
             value={scraperName}
             onChange={({ target: { value: scraperName } }) => this.setState({ scraperName }) }
             >
-              <option value="sa-cute" >sa-cute</option>
+              <option value="sa-cute">sa-cute</option>
+              <option value="sa-funny">sa-funny</option>
+              <option value="sa-gifs">sa-gifs</option>
             </select>
           {
             lastEvent ? (<div>
