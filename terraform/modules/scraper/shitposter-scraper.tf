@@ -14,7 +14,7 @@ module "updateIndex" {
   entry_point = "lambda.updateIndex"
   aws_lambda_function_name = "${var.scraper_name}_updateIndex"
   aws_s3_bucket_name = "${var.bucket_name}"
-  aws_lambda_memory = "2048"
+  aws_lambda_memory = "3008"
   shitposter_api_ip = "${var.shitposter_api_ip}"
   no_queue = true
   scraper_name = "${var.scraper_name}"

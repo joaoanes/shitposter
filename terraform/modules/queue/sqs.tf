@@ -18,3 +18,7 @@ resource "aws_sqs_queue" "scraper_queue" {
 output "queue_url" {
   value = "${aws_sqs_queue.scraper_queue.id}"
 }
+
+output "queue_arn" {
+  value = "${aws_sqs_queue.scraper_queue.arn}"
+}

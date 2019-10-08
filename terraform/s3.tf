@@ -26,7 +26,7 @@ resource "aws_s3_bucket" "shitposter-content" {
     {
       "Effect": "Allow",
       "Principal": {
-        "AWS": "arn:aws:iam::305518020756:user/shitposter"
+        "AWS": "${aws_iam_user.shitposter.arn}"
       },
       "Action": "s3:PutObject",
       "Resource": [

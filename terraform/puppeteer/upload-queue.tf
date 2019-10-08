@@ -7,3 +7,7 @@ module "upload_queue" {
 output "upload_queue_url" {
   value = "${module.upload_queue.queue_url}"
 }
+
+output "upload_queue_arn" {
+  value = "${module.upload_queue.queue_arn}"
+}

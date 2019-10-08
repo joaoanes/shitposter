@@ -6,6 +6,22 @@ module "sa-cute-lambda" {
   sqs_final_url = "${module.sanitizer.queue_url}"
 }
 
+module "sa-funny-lambda" {
+  source = "./modules/scraper"
+  shitposter_api_ip = "${aws_instance.shitposter.public_ip}"
+  bucket_name = "${aws_s3_bucket.shitposter-scraper-next.bucket}"
+  scraper_name = "sa-funny"
+  sqs_final_url = "${module.sanitizer.queue_url}"
+}
+
+
+module "sa-gifs-lambda" {
+  source = "./modules/scraper"
+  shitposter_api_ip = "${aws_instance.shitposter.public_ip}"
+  bucket_name = "${aws_s3_bucket.shitposter-scraper-next.bucket}"
+  scraper_name = "sa-gifs"
+  sqs_final_url = "${module.sanitizer.queue_url}"
+}
 
 // TODO: boy, would you look at all those empty vars! sure doesn't smell here!
 module "sanitizer" {
@@ -16,7 +32,7 @@ module "sanitizer" {
   next_sqs_url = "${module.puppeteer.upload_queue_url}"
   shitposter_api_ip = "${aws_instance.shitposter.public_ip}"
   scraper_name = ""
-  sqs_trigger_enabled = false
+  sqs_trigger_enabled = true
 }
 
 // One day
