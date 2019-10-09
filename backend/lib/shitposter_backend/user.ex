@@ -36,8 +36,8 @@ defmodule ShitposterBackend.User do
 
 
   def create_curator(name) do
-    {:ok, user} = create(nil, name, nil, nil, nil)
-    user
+    create(nil, name, nil, nil, nil)
+    |> ShitposterBackend.Junkyard.ok!
     |> Ecto.Changeset.change(is_curator: true)
     |> Repo.update
   end
