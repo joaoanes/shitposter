@@ -95,12 +95,14 @@ defmodule ShitposterBackend.GraphQL.Schema do
 
     @desc "Create user"
     field :create_user, type: :user do
+      middleware RequireAuthenticatorAuthn
       arg :email, non_null(:string)
       arg :name, non_null(:string)
 
       resolve Resolvers.run(
         &ShitposterBackend.User.create/2,
         [
+          [:args, :email],
           [:args, :name],
         ]
       )

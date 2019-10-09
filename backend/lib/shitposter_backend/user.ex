@@ -25,6 +25,10 @@ defmodule ShitposterBackend.User do
     |> validate_required([:name])
   end
 
+  def create(email, name) do
+    create(email, name, nil, nil, nil)
+  end
+
   def create(name) do
     create(nil, name, nil, nil, nil)
   end
