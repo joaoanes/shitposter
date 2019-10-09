@@ -33,6 +33,15 @@ defmodule ShitposterBackend.User do
     create(nil, name, nil, nil, nil)
   end
 
+
+  def create_curator(name) do
+    {:ok, user} = create(nil, name, nil, nil, nil)
+    user
+    |> Ecto.Changeset.change(is_curator: true)
+    |> Repo.update
+  end
+
+  @spec create(any, any, any, any, any) :: any
   def create(email, name, is_bot, is_curator, is_authenticator) do
     create_changeset(
       %User{},
