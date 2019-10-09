@@ -21,7 +21,7 @@ defmodule ShitposterBackend.User do
   @doc false
   def create_changeset(%User{} = user, attrs) do
     user
-    |> cast(attrs, [:email, :name])
+    |> cast(attrs, [:email, :name, :is_curator, :is_authenticator, :is_bot])
     |> validate_required([:name])
     |> unique_constraint(:name)
   end
