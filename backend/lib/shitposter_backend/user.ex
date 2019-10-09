@@ -23,6 +23,7 @@ defmodule ShitposterBackend.User do
     user
     |> cast(attrs, [:email, :name])
     |> validate_required([:name])
+    |> unique_constraint(:name)
   end
 
   def create(email, name) do
