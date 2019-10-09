@@ -9,6 +9,6 @@ defmodule ShitposterBackend.Repo.Migrations.FuckUserUp do
       remove(:password_hash)
     end
 
-    create unique_index(:usernames, [:name])
+    create unique_index(:users, [:name])
   end
 end
