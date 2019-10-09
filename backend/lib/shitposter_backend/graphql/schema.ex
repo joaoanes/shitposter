@@ -96,7 +96,6 @@ defmodule ShitposterBackend.GraphQL.Schema do
     @desc "Create curator"
     field :create_curator, type: :user do
       middleware RequireAuthenticatorAuthn
-      arg :email, non_null(:string)
       arg :name, non_null(:string)
 
       resolve Resolvers.run(
