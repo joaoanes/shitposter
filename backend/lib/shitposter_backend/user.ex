@@ -36,10 +36,7 @@ defmodule ShitposterBackend.User do
 
 
   def create_curator(name) do
-    create(nil, name, nil, nil, nil)
-    |> ShitposterBackend.Junkyard.ok!
-    |> Ecto.Changeset.change(is_curator: true)
-    |> Repo.update
+    create(nil, name, nil, true, nil)
   end
 
   @spec create(any, any, any, any, any) :: any
