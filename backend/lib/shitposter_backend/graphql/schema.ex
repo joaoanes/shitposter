@@ -4,7 +4,7 @@ defmodule ShitposterBackend.GraphQL.Schema do
   alias ShitposterBackend.GraphQL.Resolvers
   alias ShitposterBackend.GraphQL.Types.{Shitpost, User}
   alias ShitposterBackend.GraphQL.{Resolvers, Session}
-  alias ShitposterBackend.GraphQL.Middlewares.{RequireAuthn, RequireBotAuthn}
+  alias ShitposterBackend.GraphQL.Middlewares.{RequireAuthn, RequireBotAuthn, RequireAuthenticatorAuthn}
 
   import_types Shitpost
   import_types User
@@ -96,14 +96,11 @@ defmodule ShitposterBackend.GraphQL.Schema do
     @desc "Create user"
     field :create_user, type: :user do
       arg :email, non_null(:string)
-      arg :password, non_null(:string)
       arg :name, non_null(:string)
 
       resolve Resolvers.run(
-        &ShitposterBackend.User.create/3,
+        &ShitposterBackend.User.create/2,
         [
-          [:args, :email],
-          [:args, :password],
           [:args, :name],
         ]
       )
@@ -111,14 +108,13 @@ defmodule ShitposterBackend.GraphQL.Schema do
 
     @desc "Login user"
     field :authenticate, type: :token do
-      arg :email, non_null(:string)
-      arg :password, non_null(:string)
+      middleware RequireAuthenticatorAuthn
+      arg :name, non_null(:string)
 
       resolve Resolvers.run(
-        &Session.create/2,
+        &Session.create/1,
         [
-          [:args, :email],
-          [:args, :password],
+          [:args, :name],
         ]
       )
     end

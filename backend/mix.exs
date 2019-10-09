@@ -30,11 +30,11 @@ defmodule ShitposterBackend.Mixfile do
   defp deps do
     [
       {:phoenix, ">= 1.3.4"},
-      {:phoenix_pubsub, "~> 1.0"},
+      {:phoenix_pubsub, ">= 1.0.0", override: true},
       {:phoenix_ecto, "~> 3.2"},
       {:plug_cowboy, "~> 1.0"},
       {:postgrex, ">= 0.0.0"},
-      {:absinthe, "~> 1.4.16", override: true},
+      {:absinthe, "~> 1.4.16"},
       {:absinthe_ecto, ">= 0.1.3"},
       {:absinthe_plug, "~> 1.4.7"},
       {:absinthe_relay, "~> 1.3"},
@@ -69,6 +69,6 @@ defmodule ShitposterBackend.Mixfile do
   defp aliases do
     ["ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
      "ecto.reset": ["ecto.drop", "ecto.setup"],
-     "test": ["ecto.create --quiet", "ecto.migrate", "test"]]
+     test: ["ecto.create --quiet", "ecto.migrate", "test"]]
   end
 end

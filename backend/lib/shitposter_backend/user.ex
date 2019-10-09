@@ -1,19 +1,19 @@
 defmodule ShitposterBackend.User do
   use Ecto.Schema
   import Ecto.Changeset
-  alias ShitposterBackend.{User, Repo}
+  alias ShitposterBackend.{User, Repo, Reaction, Shitpost}
 
 
   schema "users" do
-    field :email, :string
     field :name, :string
-    field :password, :string, virtual: true
-    field :password_hash, :string
+    field :email, :string
     field :is_bot, :boolean
     field :is_curator, :boolean
+    field :is_authenticator, :boolean
 
-    has_many :reactions, ShitposterBackend.Reaction
+    has_many :reactions, Reaction
     has_many :rated_shitposts, through: [:reactions, :shitpost]
+    many_to_many :seen_shitposts, Shitpost, join_through: "seen_shitposts"
 
     timestamps()
   end
@@ -21,17 +21,25 @@ defmodule ShitposterBackend.User do
   @doc false
   def create_changeset(%User{} = user, attrs) do
     user
-    |> cast(attrs, [:email, :password, :name])
-    |> validate_required([:email])
-    |> put_pass_hash
+    |> cast(attrs, [:email, :name])
+    |> validate_required([:name])
   end
 
-  def create(email, password, name) do
-    create(email, password, name, nil, nil)
+  def create(name) do
+    create(nil, name, nil, nil, nil)
   end
 
-  def create(email, password, name, is_bot, is_curator) do
-    create_changeset(%User{}, %{email: email, password: password, name: name, is_bot: is_bot, is_curator: is_curator})
+  def create(email, name, is_bot, is_curator, is_authenticator) do
+    create_changeset(
+      %User{},
+      %{
+        email: email,
+        name: name,
+        is_bot: is_bot,
+        is_curator: is_curator,
+        is_authenticator: is_authenticator
+      }
+    )
     |> Repo.insert
   end
 
@@ -47,12 +55,5 @@ defmodule ShitposterBackend.User do
     |> Repo.update
   end
 
-  defp put_pass_hash(changeset) do
-    case changeset do
-      %Ecto.Changeset{valid?: true, changes: %{password: pass}} ->
-        put_change(changeset, :password_hash, Comeonin.Bcrypt.hashpwsalt(pass))
-      _ ->
-        changeset
-    end
-  end
+  # let's just not allow people to create authenticators
 end

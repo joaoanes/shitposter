@@ -32,6 +32,21 @@ defmodule ShitposterBackend.GraphQL.Middlewares do
     end
   end
 
+  defmodule RequireAuthenticatorAuthn do
+    @behaviour Absinthe.Middleware
+
+    def call(%{context: %{current_user: %User{is_authenticator: true}}} = resolution, _config) do
+      resolution
+    end
+
+    def call(%{context: _} = resolution, _config) do
+      resolution
+      |> Absinthe.Resolution.put_result({:error, %{
+        message: Enum.random(["bro go away", "404 go away", "<there is nothing here>"]),
+      }})
+    end
+  end
+
   defmodule Context do
     @behaviour Plug
     import Plug.Conn
