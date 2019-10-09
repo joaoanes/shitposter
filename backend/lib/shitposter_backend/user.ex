@@ -39,9 +39,8 @@ defmodule ShitposterBackend.User do
     create(nil, name, nil, true, nil)
   end
 
-  @spec create(any, any, any, any, any) :: any
   def create(email, name, is_bot, is_curator, is_authenticator) do
-    create_changeset(
+    res = create_changeset(
       %User{},
       %{
         email: email,
@@ -52,6 +51,11 @@ defmodule ShitposterBackend.User do
       }
     )
     |> Repo.insert
+
+    case res do
+      {:error, error} -> {:error, ShitposterBackend.Junkyard.handle_changeset_errors(error)}
+      {:ok, _} -> res
+    end
   end
 
   def set_bot(%User{} = user) do
