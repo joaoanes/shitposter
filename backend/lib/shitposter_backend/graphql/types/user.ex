@@ -7,6 +7,8 @@ defmodule ShitposterBackend.GraphQL.Types.User do
     field :id, :id
     field :email, :string
     field :name, :string
+    field :is_bot, :boolean
+    field :is_curator, :boolean
   end
 
   @desc "User token"

@@ -26,7 +26,7 @@ defmodule ShitposterBackend.GraphQL.Schema do
       arg :order_by, type: :string, default_value: "id"
       arg :types, type: list_of(:shitpost_type), default_value: nil
       arg :direction, type: :string, default_value: "desc"
-      resolve Resolvers.all(ShitposterBackend.Shitpost)
+      resolve Resolvers.all(ShitposterBackend.Shitpost, &ShitposterBackend.Shitpost.set_seen/2)
     end
 
     field :current_user, :user do
@@ -61,9 +61,10 @@ defmodule ShitposterBackend.GraphQL.Schema do
       arg :reactions, list_of(:reaction_input)
       arg :source_id, :integer
       arg :source_link, :string
+      arg :hashtags, list_of(:string)
 
       resolve Resolvers.run(
-        &ShitposterBackend.Shitpost.create/7,
+        &ShitposterBackend.Shitpost.create/8,
         [
           [:args, :url],
           [:args, :name],
@@ -72,6 +73,7 @@ defmodule ShitposterBackend.GraphQL.Schema do
           [:args, :reactions],
           [:args, :url_date],
           [:args, :source_link],
+          [:args, :hashtags],
         ]
       )
     end

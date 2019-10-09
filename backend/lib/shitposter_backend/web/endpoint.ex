@@ -2,7 +2,8 @@ defmodule ShitposterBackend.Web.Endpoint do
   use Phoenix.Endpoint, otp_app: :shitposter_backend
   use Absinthe.Phoenix.Endpoint
 
-  socket "/socket", ShitposterBackend.Web.UserSocket
+  socket "/socket", ShitposterBackend.Web.UserSocket,
+    websocket: []
 
   # Serve at "/" the static files from "priv/static" directory.
   #

@@ -30,6 +30,8 @@ config :logger, :console,
 #    region: "LIKE A SANE OR LESS INSANE MAN"
 #   ],
 
+config :ex_aws,
+  region: "eu-central-1"
 
 config :shitposter_backend, ShitposterBackend.Guardian,
   issuer: "ShitposterBackend",

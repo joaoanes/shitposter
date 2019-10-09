@@ -2,7 +2,7 @@ defmodule ShitposterBackend.Shitpost do
   use Ecto.Schema
   import Ecto.Changeset
   import Ecto.Query
-  alias ShitposterBackend.{Shitpost, User, Rating, Reaction, Source}
+  alias ShitposterBackend.{Shitpost, User, Rating, Reaction, Source, Hashtag}
   alias ShitposterBackend.Repo
   require Logger
 
@@ -17,31 +17,35 @@ defmodule ShitposterBackend.Shitpost do
     belongs_to :submitter, User
     has_many :reactions, Reaction, foreign_key: :shitpost_id
     many_to_many :ratings, Rating, join_through: "reactions"
+    many_to_many :hashtags, Hashtag, join_through: "hashtags_shitposts"
+    many_to_many :users, User, join_through: "seen_shitposts"
 
     timestamps()
   end
 
-  @threshold 1
+  @threshold 10
 
   @doc false
   def changeset(%Shitpost{} = shitpost, attrs) do
     shitpost
     |> cast(attrs, [:url, :type, :name, :url_date, :source_id, :submitter_id, :source_link, :permalink])
     |> cast_assoc(:reactions)
+    |> cast_assoc(:hashtags)
     |> foreign_key_constraint(:submitter_id)
     |> foreign_key_constraint(:source_id)
     |> validate_required([:url, :type])
   end
 
+  @spec create(any, any) :: any
   def create(url, name) do
-    create(url, name, nil, nil, nil, nil, nil)
+    create(url, name, nil, nil, nil, nil, nil, nil)
   end
 
-  def create(url, name, %User{id: submitter_id}, source_id, rating_ids, url_date, source_link) do
-    create(url, name, submitter_id, source_id, rating_ids, url_date, source_link)
+  def create(url, name, %User{id: submitter_id}, source_id, rating_ids, url_date, source_link, hashtags) do
+    create(url, name, submitter_id, source_id, rating_ids, url_date, source_link, hashtags)
   end
 
-  def create(url, name, submitter_id, source_id, rating_ids, url_date, source_link) do
+  def create(url, name, submitter_id, source_id, rating_ids, url_date, source_link, hashtags) do
     categorizerOutput = {:categorize, [url]}
     |> Honeydew.async(:categorizer, reply: true)
     |> Honeydew.yield(15000)
@@ -76,8 +80,21 @@ defmodule ShitposterBackend.Shitpost do
               Ecto.build_assoc(shitpost, :reactions, %{rating_id: rating_object.id})
               |> Repo.insert
             end)
+          )
+        end
+
+        case hashtags do
+          nil -> shitpost
+          _ -> (
+            hashtag_objects = Enum.map(hashtags, fn (hashtag) ->
+              Hashtag.first_or_create!(hashtag)
+            end)
 
             shitpost
+            |> Repo.preload(:hashtags)
+            |> Ecto.Changeset.change
+            |> Ecto.Changeset.put_assoc(:hashtags, hashtag_objects)
+            |> Repo.update!
           )
         end
 
@@ -109,13 +126,14 @@ defmodule ShitposterBackend.Shitpost do
     {:ok, ratings}
   end
 
-  def rate(id, %User{id: id}, rating_id) do
-    rate(id, id, rating_id)
+  def rate(id, %User{id: user_id}, rating_id) do
+    rate(id, user_id, rating_id)
   end
 
   def rate(id, rater_id, rating_id) do
     shitpost = Repo.get!(Shitpost, id) |> Repo.preload(:reactions)
     rating = Repo.get!(Rating, rating_id)
+    rater = Repo.get!(User, rater_id)
 
     Ecto.build_assoc(shitpost, :reactions, %{user_id: rater_id, rating_id: rating.id})
     |> Repo.insert!
@@ -133,7 +151,7 @@ defmodule ShitposterBackend.Shitpost do
             }
         )
 
-        case ratings_count >= @threshold do
+        case ratings_count >= @threshold || rater.is_curator do
           true -> host_permalink(updated_shitpost)
           false -> {:ok, updated_shitpost}
         end
@@ -185,5 +203,13 @@ defmodule ShitposterBackend.Shitpost do
   def set_permalink(%Shitpost{id: id} = permalinked_shitpost, _) do
     Logger.warn {"why are we permalinking multiple times?", [id: id]}
     {:ok, permalinked_shitpost}
+  end
+
+  def set_seen(_ , %{context: %{current_user: user}}) when is_nil(user) do
+  end
+
+  def set_seen(ids, %{context: %{current_user: user}}) do
+    ids
+    |> Enum.map(fn id -> ShitposterBackend.SeenShitpost.create(user.id, id) end)
   end
 end

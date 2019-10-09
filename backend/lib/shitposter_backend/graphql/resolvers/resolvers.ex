@@ -36,26 +36,49 @@ defmodule ShitposterBackend.GraphQL.Resolvers do
       fn source ->
         Ecto.assoc(source, assocs)
       end,
-      [[:source]]
+      [[:source]],
+      nil
     )
   end
 
   def all(type) when is_atom(type) do
+    all(type, nil)
+  end
+
+  def all(type, after_query) when is_atom(type) do
     all(
       fn -> type end,
-      []
+      [],
+      after_query
     )
   end
 
-  def all(fun, arg_keys) when is_function(fun) do
+
+  def all(fun, arg_keys, after_query) when is_function(fun) and is_function(after_query) do
     fn source, args, info ->
-      result = fun
-      |> apply(collect_args(arg_keys, source, args, info))
-      |> Junkyard.orderable(args)
-      |> Connection.from_query(&Repo.all/1, args)
+      result = run_all(fun, arg_keys, source, args, info)
+
+      {:ok, %{edges: edges}} = result
+
+      after_query
+      |> apply([Enum.map(edges, &(&1.node.id)), info])
+      # TODO: HoneyDew this!
 
       result
     end
+  end
+
+  def all(fun, arg_keys, after_query) when is_function(fun) and is_nil(after_query) do
+    fn source, args, info ->
+      run_all(fun, arg_keys, source, args, info)
+    end
+  end
+
+  def run_all(fun, arg_keys, source, args, info) when is_function(fun) do
+    fun
+      |> apply(collect_args(arg_keys, source, args, info))
+      |> Junkyard.orderable(args)
+      |> Connection.from_query(&Repo.all/1, args)
   end
 
   def run(fun, arg_keys) do
@@ -64,5 +87,4 @@ defmodule ShitposterBackend.GraphQL.Resolvers do
       |> apply(collect_args(arg_keys, source, args, info))
     end
   end
-
 end

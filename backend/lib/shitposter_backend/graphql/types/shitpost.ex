@@ -31,6 +31,7 @@ defmodule ShitposterBackend.GraphQL.Types.Shitpost do
     field :thumbnail, :string
     field :source, :user, resolve: assoc(:source)
     field :submitter, :user, resolve: assoc(:submitter)
+    field :hashtags, list_of(:hashtag), resolve: assoc(:hashtags)
     field :reactions, list_of(:reaction), resolve: assoc(:reactions)
     field :fake_reactions, list_of(:fake_reaction), resolve: Resolvers.run(
       &ShitposterBackend.Shitpost.count_ratings/1,
@@ -42,6 +43,11 @@ defmodule ShitposterBackend.GraphQL.Types.Shitpost do
 
   @desc "Source"
   object :source do
+    field :name, :string
+  end
+
+  @desc "Hashtag"
+  object :hashtag do
     field :name, :string
   end
 
