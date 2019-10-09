@@ -20,7 +20,7 @@ alias ShitposterBackend.{User, Shitpost, Rating, Source, Repo}
   ["guest@shitpost.network", "Demo User 01", false, false],
 ]
 |> Enum.map(fn [email, name, is_bot, is_curator] -> (
-  {ok, u} = User.create(email, nil, name, is_bot, is_curator, false)
+  {ok, u} = User.create(email, name, is_bot, is_curator, false)
 ) end)
 
 {ok, _} = User.create("joao.anes@gmail.com", "joaoanes", true, true, true)
