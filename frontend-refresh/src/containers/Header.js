@@ -2,12 +2,12 @@ import React, { Component } from 'react'
 import { map } from 'lodash'
 import { compose, withState } from 'recompose'
 
-import { FilterList } from '@material-ui/icons'
-
 import ToggleButton from '../components/ToggleButton'
 import colorTypes from '../stuff/colors.js'
 
 const { REACT_APP_TAG = "uhhhh", REACT_APP_COMMIT = "5181fb910c9ad0959b4da9c3283f5f52d7360d40" } = process.env
+
+const stopPropagation = (fun) => (event) => {event.stopPropagation(); return fun ? fun() : null}
 
 class Root extends Component {
 
@@ -18,15 +18,23 @@ class Root extends Component {
     }
   }
   render() {
-    const { extended, setExtended, filters, setFilters, currentUser } = this.props
+    const { extended, setExtended, filters, setFilters, currentUser, handleLogout } = this.props
     return (
       <div style={styles.header} onClick={() => setExtended(!extended)}>
         <div style={styles.banner} />
         <div style={styles.titleContainer}>
           <div style={styles.titleWrapper}>
             <span style={styles.title}>Shitpost.network</span>
-            {REACT_APP_TAG && REACT_APP_COMMIT && <span style={styles.subTitle}>{`${REACT_APP_TAG}-${REACT_APP_COMMIT.substr(0, 8)}`}</span>}
-            {currentUser && <span style={styles.subTitle}>Hi {currentUser.name}! 👋</span>}
+            <div style={styles.subContainer}>
+              {currentUser ?
+                <span style={styles.subSubContainer}>
+                  <span style={styles.logout} onClick={stopPropagation(handleLogout)}>Hi {currentUser.name}! 👋</span>
+                  <span style={styles.logoutSmall} onClick={stopPropagation(handleLogout)}>(click me to log out)</span>
+                </span> :
+                <a href={"https://telegram.me/anes_v1_bot"} onClick={stopPropagation()} style={styles.login}>Register and login via telegram</a>
+              }
+              {REACT_APP_TAG && REACT_APP_COMMIT && <span style={styles.subTitle}>{`${REACT_APP_TAG}-${REACT_APP_COMMIT.substr(0, 8)}`}</span>}
+            </div>
           </div>
         </div>
         <div style={{ ...styles.filterContainer, height: extended ? 60 : 0 }}>
@@ -119,6 +127,44 @@ const styles = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  logoutSmall: {
+    pointerEvents: "all",
+    cursor: "pointer",
+    color: 'white', // aha
+    fontSize: 8,
+    bottom: 15,
+    position: "relative",
+    textShadow: '0 0 10px rgb(255,255,255), 0 0 20px rgb(255,255,255), 0 0 30px rgb(255,255,255), 0 0 40px darkorange, 0 0 70px darkorange, 0 0 80px darkorange, 0 0 100px darkorange, 0 0 150px darkorange',
+    fontFamily: 'Consolas, sans-serif',
+  },
+  logout: {
+    color: 'white', // aha
+    fontSize: 12,
+    bottom: 15,
+    position: "relative",
+    fontFamily: 'Consolas, sans-serif',
+  },
+  login: {
+    pointerEvents: "all",
+    color: 'white', // aha
+    fontSize: 12,
+    alignSelf: "flex-end",
+    bottom: 15,
+    position: "relative",
+    textShadow: '0 0 10px rgb(255,255,255), 0 0 20px rgb(255,255,255), 0 0 30px rgb(255,255,255), 0 0 40px darkorange, 0 0 70px darkorange, 0 0 80px darkorange, 0 0 100px darkorange, 0 0 150px darkorange',
+    fontFamily: 'Consolas, sans-serif',
+  },
+  subContainer: {
+    display: "flex",
+    justifyContent: 'space-between',
+    top: -10,
+    position: "relative",
+  },
+  subSubContainer: {
+    display: "flex",
+    alignItems: 'center',
+    flexDirection: "column",
   }
 }
 

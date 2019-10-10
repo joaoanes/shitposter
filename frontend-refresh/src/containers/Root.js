@@ -31,13 +31,19 @@ const Root = () => {
     localStorage.setItem("user", JSON.stringify([token, currentUser]))
   }
 
+  const handleLogout = () => {
+    localStorage.removeItem("user")
+    setCurrentUser(null)
+    setClient(apolloClient)
+  }
+
   return (
     <AutoSizer>
       {
         ({ width, height }) => (
           <div style={{ ...styles.appContainer, width, height }}  >
             <div style={styles.headerContainer}>
-              <Header filters={filters} setFilters={setFilters} currentUser={currentUser}/>
+              <Header filters={filters} setFilters={setFilters} currentUser={currentUser} handleLogout={handleLogout}/>
             </div>
 
             <ApolloProvider client={client}>

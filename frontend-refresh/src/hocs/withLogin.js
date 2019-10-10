@@ -25,13 +25,11 @@ const withLogin = (Component, handleLogin) => (
     const { error, data } = useQuery(CURRENT_USER, {client: getClientWithAuth(magic_token_ahah_its_just_a_jwt)});
 
     if (error) {
-      debugger
       console.error(error.toString())
+      return <Component {...props} />
     }
 
     if (data && data.currentUser) {
-      debugger
-
       handleLogin(magic_token_ahah_its_just_a_jwt, data.currentUser)
       return <Component {...props} />
     }
