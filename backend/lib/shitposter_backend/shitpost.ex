@@ -133,7 +133,7 @@ defmodule ShitposterBackend.Shitpost do
   def rate(id, rater_id, rating_id) do
     shitpost = Repo.get!(Shitpost, id) |> Repo.preload(:reactions)
     rating = Repo.get!(Rating, rating_id)
-    rater = Repo.get!(User, rater_id)
+    rater = Repo.get(User, rater_id)
 
     Ecto.build_assoc(shitpost, :reactions, %{user_id: rater_id, rating_id: rating.id})
     |> Repo.insert!
@@ -151,7 +151,7 @@ defmodule ShitposterBackend.Shitpost do
             }
         )
 
-        case ratings_count >= @threshold || rater.is_curator do
+        case ratings_count >= @threshold || (rater_id != nil && rater.is_curator) do
           true -> host_permalink(updated_shitpost)
           _ -> {:ok, updated_shitpost}
         end
