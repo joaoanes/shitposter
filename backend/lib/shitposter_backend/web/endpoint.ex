@@ -40,7 +40,7 @@ defmodule ShitposterBackend.Web.Endpoint do
     key: "_shitposter_backend_key",
     signing_salt: "uXkXsHUi"
 
-  plug Corsica, [origins: "*", allow_headers: ["accept", "content-type"]]
+  plug Corsica, [origins: "*", allow_headers: ["accept", "content-type"], allow_credentials: true]
 
   plug Guardian.Plug.Pipeline,
     module: ShitposterBackend.Guardian,
