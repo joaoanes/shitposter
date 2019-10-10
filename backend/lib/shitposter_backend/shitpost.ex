@@ -153,7 +153,7 @@ defmodule ShitposterBackend.Shitpost do
 
         case ratings_count >= @threshold || rater.is_curator do
           true -> host_permalink(updated_shitpost)
-          false -> {:ok, updated_shitpost}
+          _ -> {:ok, updated_shitpost}
         end
     end
   end
