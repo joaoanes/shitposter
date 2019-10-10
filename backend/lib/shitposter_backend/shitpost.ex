@@ -133,7 +133,7 @@ defmodule ShitposterBackend.Shitpost do
   def rate(id, rater_id, rating_id) do
     shitpost = Repo.get!(Shitpost, id) |> Repo.preload(:reactions)
     rating = Repo.get!(Rating, rating_id)
-    rater = Repo.get(User, rater_id)
+    rater = if rater_id then Repo.get(User, rater_id) else nil end
 
     Ecto.build_assoc(shitpost, :reactions, %{user_id: rater_id, rating_id: rating.id})
     |> Repo.insert!
