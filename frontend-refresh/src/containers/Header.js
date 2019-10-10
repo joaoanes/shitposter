@@ -18,7 +18,7 @@ class Root extends Component {
     }
   }
   render() {
-    const { extended, setExtended, filters, setFilters } = this.props
+    const { extended, setExtended, filters, setFilters, currentUser } = this.props
     return (
       <div style={styles.header} onClick={() => setExtended(!extended)}>
         <div style={styles.banner} />
@@ -26,6 +26,7 @@ class Root extends Component {
           <div style={styles.titleWrapper}>
             <span style={styles.title}>Shitpost.network</span>
             {REACT_APP_TAG && REACT_APP_COMMIT && <span style={styles.subTitle}>{`${REACT_APP_TAG}-${REACT_APP_COMMIT.substr(0, 8)}`}</span>}
+            {currentUser && <span style={styles.subTitle}>Hi {currentUser.name}! 👋</span>}
           </div>
         </div>
         <div style={{ ...styles.filterContainer, height: extended ? 60 : 0 }}>
