@@ -27,6 +27,6 @@ defmodule ShitposterBackend.Workers.QueueFetcher do
       %{id: mid, receipt_handle: rec}
     end)) |> ExAws.request(region: "eu-central-1")
 
-    Enum.map(new_shitposts, &(&1.id))
+    Enum.map(new_shitposts, fn {:ok, shitpost} -> shitpost.id end)
   end
 end
