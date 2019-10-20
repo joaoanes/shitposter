@@ -1,7 +1,7 @@
 const { chunk, flatten } = require('lodash')
 const { get } = require('axios')
 
-const { getLastKnownPost, insertPosts, getPostsByStatus, updatePostsStatus, postsPerStatus, updateEventPosts, listEvents } = require('./db')
+const { getLastKnownPosts, getLastKnownPost, insertPosts, getPostsByStatus, updatePostsStatus, postsPerStatus, updateEventPosts, listEvents } = require('./db')
 const { executeInChunks, executeInSequence } = require('../common/junkyard')
 const { invokeLambda } = require('./invoke')
 const { getPostUrls } = require('../common/s3')
@@ -11,7 +11,7 @@ const { submit } = require('./submitter')
 const getStats = async (scraperNames) => ({
   scrapers: scraperNames,
   posts: await postsPerStatus(scraperNames),
-  lastKnownId: await getLastKnownPost(),
+  lastKnownId: await getLastKnownPosts(scraperNames),
   events: (await listEvents()).map(({ id, postsInited, postsSubmitted, postsFetched, createdAt, updatedAt }) => ({
     id,
     postsInited: postsInited ? postsInited.length : 0,
@@ -131,7 +131,7 @@ const uploadSubmissions = async (scraperName) => {
 const loadNewSubmissions = async (scraperName) => {
   console.warn('starto')
 
-  const lastKnownPostId = await getLastKnownPost()
+  const lastKnownPostId = await getLastKnownPost(scraperName)
   console.warn('last known post', lastKnownPostId)
   console.warn('updating index')
   await updateIndex(lastKnownPostId, scraperName)

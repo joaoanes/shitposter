@@ -1,6 +1,6 @@
 const { flow, map, reduce } = require('lodash/fp')
 const { v4 } = require('uuid')
-const { merge, zip } = require('lodash')
+const { merge, zipObject } = require('lodash')
 require('dotenv').config()
 
 const {
@@ -136,21 +136,26 @@ const postsPerStatusByScraper = async (scraperName) => (await assureInited()) &&
   reduce((acc, cur) => merge(acc, cur), {}),
 )(
   await db('extractedContent').select('status')
-.count('id')
-.groupBy('status')
+    .count('id')
+    .groupBy('status')
     .where({ scraper: scraperName })
 )
-const postsPerStatus = async (scraperNames) => zip(
+const postsPerStatus = async (scraperNames) => zipObject(
   scraperNames,
   await Promise.all(map(postsPerStatusByScraper)(scraperNames)),
 )
 
-const getLastKnownPost = async () => {
+const getLastKnownPost = async (scraperName) => {
   await assureInited()
-  const rows = await db.raw('select id from "extractedContent" order by length(id) DESC, id DESC LIMIT 1;')
+  const rows = await db.raw(`select id from "extractedContent" where scraper = ${scraperName} order by length(id) DESC, id DESC LIMIT 1;`)
 
   return rows.length !== 0 ? rows[0].id : null
 }
+
+const getLastKnownPosts = scraperNames => zipObject(
+  scraperNames,
+  Promise.all(map(getLastKnownPost)(scraperNames))
+)
 
 const getPostsByStatus = async (status) => {
   await assureInited()
@@ -199,6 +204,7 @@ module.exports = {
   getPostsByStatus,
   updatePostsStatus,
   postsPerStatus,
+  getLastKnownPosts,
   createEvent,
   updateEventPosts,
   listEvents,
