@@ -139,6 +139,7 @@ const postsPerStatusByScraper = async (scraperName) => (await assureInited()) &&
     .select('status')
     .count('id')
     .groupBy('status')
+    .where({ scraper: scraperName })
 )
 const postsPerStatus = async (scraperNames) => zip(
   await Promise.all(map(postsPerStatusByScraper)(scraperNames)),
