@@ -7,20 +7,29 @@ const {
   DATABASE_URL,
 } = process.env
 
-const getConfig = (env) => configs[env] || configs['development']
+const getConfig = (env) => configs[env] || configs.development
 
 const configs = {
   development: {
-    client: 'pg',
-    connection: DATABASE_URL,
+    client: 'sqlite3',
+    connection: {
+      filename: DATABASE_URL,
+    },
+    useNullAsDefault: true,
   },
   production: {
-    client: 'pg',
-    connection: DATABASE_URL,
+    client: 'sqlite3',
+    connection: {
+      filename: DATABASE_URL,
+    },
+    useNullAsDefault: true,
   },
   test: {
-    client: 'pg',
-    connection: 'postgres://localhost/puppeteer_test',
+    client: 'sqlite3',
+    connection: {
+      filename: './test.sqlite',
+    },
+    useNullAsDefault: true,
   },
 }
 
@@ -46,6 +55,7 @@ const initDb = async () => {
       table.string('id').primary()
       table.string('data')
       table.string('status').index()
+      table.string('scraper').index()
       table.dateTime('createdAt').defaultTo(db.fn.now())
       table.dateTime('updatedAt').defaultTo(db.fn.now())
     })
@@ -92,7 +102,7 @@ const updateEventPosts = async (id, type, posts) => (await assureInited()) && (
 const ensurePostExists = async (id) => {
   const post = await db('extractedContent').where({ id })
   if (post.length === 0) {
-    await insertPosts([id])
+    await insertPosts([id], 'unknown')
   }
 }
 
@@ -154,11 +164,12 @@ const assureInited = async () => (
   !(await hasTables()) ? initDb() : true
 )
 
-const insertPosts = async (postIds) => (await assureInited()) && db.batchInsert(
+const insertPosts = async (postIds, scraper) => (await assureInited()) && db.batchInsert(
   'extractedContent',
   postIds.map(postId => ({
     id: postId,
     status: 'seen',
+    scraper,
   }))
 )
 

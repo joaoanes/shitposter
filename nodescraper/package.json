@@ -16,6 +16,7 @@
     "node-gzip": "^1.1.2",
     "pg": "^7.9.0",
     "ramda": "^0.26.1",
+    "sqlite3": "^4.1.0",
     "uuid": "^3.3.2"
   },
   "scripts": {
@@ -27,10 +28,10 @@
     "eslint": "^6.4.0",
     "eslint-config-standard": "^14.1.0",
     "eslint-plugin-flowtype": "^4.3.0",
+    "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-jest": "^22.17.0",
     "eslint-plugin-node": "^10.0.0",
     "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-standard": "^4.0.1",
     "flow-bin": "^0.91.0",
     "flow-remove-types": "^1.2.3",

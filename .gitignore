@@ -4,6 +4,7 @@ backend/lib/shitposter_backend/workers/scraper/node_modules/
 backend/priv/static/**
 
 backend/_build/
+nodescraper/*.sqlite
 /cover
 /deps
 /doc
