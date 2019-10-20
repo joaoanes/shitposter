@@ -132,7 +132,7 @@ const addUrl = async (postId, url) => {
 }
 
 const postsPerStatus = async () => (await assureInited()) && flow(
-  map(({ status, count }) => ({ [status]: count })),
+  map(({ status, 'count(`id`)': count }) => ({ [status]: count })),
   reduce((acc, cur) => merge(acc, cur), {}),
 )(
   await db('extractedContent')
