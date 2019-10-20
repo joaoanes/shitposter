@@ -143,7 +143,7 @@ const postsPerStatus = async () => (await assureInited()) && flow(
 
 const getLastKnownPost = async () => {
   await assureInited()
-  const { rows } = await db.raw('select id from "extractedContent" order by length(id) DESC, id DESC LIMIT 1;')
+  const rows = await db.raw('select id from "extractedContent" order by length(id) DESC, id DESC LIMIT 1;')
 
   return rows.length !== 0 ? rows[0].id : null
 }
