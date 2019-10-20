@@ -152,9 +152,9 @@ const getLastKnownPost = async (scraperName) => {
   return rows.length !== 0 ? rows[0].id : null
 }
 
-const getLastKnownPosts = scraperNames => zipObject(
+const getLastKnownPosts = async (scraperNames) => zipObject(
   scraperNames,
-  Promise.all(map(getLastKnownPost)(scraperNames))
+  await Promise.all(map(getLastKnownPost)(scraperNames))
 )
 
 const getPostsByStatus = async (status) => {

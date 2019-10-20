@@ -14,9 +14,10 @@ const getStats = async (scraperNames) => ({
   lastKnownId: await getLastKnownPosts(scraperNames),
   events: (await listEvents()).map(({ id, postsInited, postsSubmitted, postsFetched, createdAt, updatedAt }) => ({
     id,
-    postsInited: postsInited ? postsInited.length : 0,
-    postsFetched: postsFetched ? postsFetched.length : 0,
-    postsSubmitted: postsSubmitted ? postsSubmitted.length : 0,
+    // TODO decide what to do with this
+    // postsInited: postsInited ? postsInited.length : 0,
+    // postsFetched: postsFetched ? postsFetched.length : 0,
+    // postsSubmitted: postsSubmitted ? postsSubmitted.length : 0,
     createdAt,
     updatedAt,
   })),
