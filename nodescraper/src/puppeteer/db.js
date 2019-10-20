@@ -55,9 +55,9 @@ const initDb = async () => {
       table.string('id').primary()
       table.string('data')
       table.string('status').index()
-      table.string('scraper').index()
       table.dateTime('createdAt').defaultTo(db.fn.now())
       table.dateTime('updatedAt').defaultTo(db.fn.now())
+      table.string('scraper').index()
     })
 
     await db.schema.dropTableIfExists('urls')
@@ -135,15 +135,14 @@ const postsPerStatusByScraper = async (scraperName) => (await assureInited()) &&
   map(({ status, 'count(`id`)': count }) => ({ [status]: count })),
   reduce((acc, cur) => merge(acc, cur), {}),
 )(
-  await db('extractedContent')
-    .select('status')
-    .count('id')
-    .groupBy('status')
+  await db('extractedContent').select('status')
+.count('id')
+.groupBy('status')
     .where({ scraper: scraperName })
 )
 const postsPerStatus = async (scraperNames) => zip(
-  await Promise.all(map(postsPerStatusByScraper)(scraperNames)),
   scraperNames,
+  await Promise.all(map(postsPerStatusByScraper)(scraperNames)),
 )
 
 const getLastKnownPost = async () => {
