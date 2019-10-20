@@ -1,6 +1,6 @@
 const { flow, map, reduce } = require('lodash/fp')
 const { v4 } = require('uuid')
-const { merge } = require('lodash')
+const { merge, zip } = require('lodash')
 require('dotenv').config()
 
 const {
@@ -131,7 +131,7 @@ const addUrl = async (postId, url) => {
     .where({ id: postId })
 }
 
-const postsPerStatus = async () => (await assureInited()) && flow(
+const postsPerStatusByScraper = async (scraperName) => (await assureInited()) && flow(
   map(({ status, 'count(`id`)': count }) => ({ [status]: count })),
   reduce((acc, cur) => merge(acc, cur), {}),
 )(
@@ -139,6 +139,10 @@ const postsPerStatus = async () => (await assureInited()) && flow(
     .select('status')
     .count('id')
     .groupBy('status')
+)
+const postsPerStatus = async (scraperNames) => zip(
+  await Promise.all(map(postsPerStatusByScraper)(scraperNames)),
+  scraperNames,
 )
 
 const getLastKnownPost = async () => {

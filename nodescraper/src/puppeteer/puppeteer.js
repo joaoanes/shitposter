@@ -8,8 +8,9 @@ const { getPostUrls } = require('../common/s3')
 const { submitEvent, puppeteerEvent } = require('../common/log')
 const { submit } = require('./submitter')
 
-const getStats = async () => ({
-  posts: await postsPerStatus(),
+const getStats = async (scraperNames) => ({
+  scrapers: scraperNames,
+  posts: await postsPerStatus(scraperNames),
   lastKnownId: await getLastKnownPost(),
   events: (await listEvents()).map(({ id, postsInited, postsSubmitted, postsFetched, createdAt, updatedAt }) => ({
     id,
@@ -31,7 +32,7 @@ const performEvent = async (eventId, ignoreInit, ignoreSubmit, scraperName) => {
 }
 
 const updateIndex = async (lastPostId, scraperName) => {
-  let { Payload } = await invokeLambda(
+  const { Payload } = await invokeLambda(
     `${scraperName}_updateIndex`,
     {
       lastPostId,
@@ -50,7 +51,7 @@ const updateIndex = async (lastPostId, scraperName) => {
 }
 
 const listPostsSince = async (lastPostId, scraperName) => {
-  let { StatusCode, Payload } = await invokeLambda(
+  const { StatusCode, Payload } = await invokeLambda(
     `${scraperName}_list`,
     {
       lastPostId,
@@ -93,8 +94,8 @@ const uploadSubmissions = async (scraperName) => {
 
       const results = await Promise.all(
         chunks.map(async (urls) => {
-          let { StatusCode, Payload } = await invokeLambda(
-            `sanitizer`,
+          const { StatusCode, Payload } = await invokeLambda(
+            'sanitizer',
             {
               urls,
             }

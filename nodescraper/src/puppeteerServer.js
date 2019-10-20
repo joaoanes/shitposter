@@ -1,8 +1,13 @@
 require('dotenv').config()
-const { app } = require('./puppeteer/app')
+
+const { SCRAPER_NAMES } = process.env
+
+const scraperNames = JSON.parse(SCRAPER_NAMES)
+
+const { appWithNames } = require('./puppeteer/app')
 
 const port = process.env.PORT || 3000
 
-app.listen(port, () => {
-  console.warn(`listening on port ${port}`)
+appWithNames(scraperNames).listen(port, () => {
+  console.warn(`listening on port ${port} with names ${scraperNames}`)
 })
