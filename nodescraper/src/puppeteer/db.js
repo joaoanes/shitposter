@@ -147,7 +147,7 @@ const postsPerStatus = async (scraperNames) => zipObject(
 
 const getLastKnownPost = async (scraperName) => {
   await assureInited()
-  const rows = await db.raw(`select id from "extractedContent" where scraper = ${scraperName} order by length(id) DESC, id DESC LIMIT 1;`)
+  const rows = await db.raw(`select id from "extractedContent" where scraper = '${scraperName}' order by length(id) DESC, id DESC LIMIT 1;`)
 
   return rows.length !== 0 ? rows[0].id : null
 }
