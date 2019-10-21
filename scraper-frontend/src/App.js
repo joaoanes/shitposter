@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios'
-import { sortBy } from 'lodash'
+import { sortBy, map } from 'lodash'
 
 import './App.css';
 
@@ -18,8 +18,8 @@ class App extends Component {
 
   refresh = async () => {
     const request = await axios.get(`${BACKEND_URL}/stats`)
-    const {events, lastKnownId, posts} = request.data
-    this.setState({events, lastKnownId, posts, loading: false})
+    const {events, lastKnownId, posts, scrapers} = request.data
+    this.setState({events, lastKnownId, posts, scrapers, loading: false})
   }
 
   componentDidMount = async () => {
@@ -44,7 +44,7 @@ class App extends Component {
   }
 
   render() {
-    const { events, lastKnownId, posts, ignoreFetch, ignoreInit, ignoreSubmit, lastEvent, scraperName, loading } = this.state
+    const { events, lastKnownId, posts, scrapers, lastEvent, scraperName, loading } = this.state
     if (loading) {
       return (<div>pls w8</div>)
     }
@@ -52,17 +52,24 @@ class App extends Component {
     return (
       <div className="App">
         <header className="App-header">
-          <span>Last seen ID</span>
-          <span>{lastKnownId}</span>
+          <span>Last seen IDs</span>
+          {
+            map(lastKnownId, (id, scraperName) => (
+            <div>
+              <span>{scraperName}: </span>
+              <span>{id}</span>
+            </div>
+            ))
+          }
           <span>{JSON.stringify(posts)}</span>
           <button onClick={this.submitEvent.bind(this)}>DO IT</button>
           <select
             value={scraperName}
             onChange={({ target: { value: scraperName } }) => this.setState({ scraperName }) }
             >
-              <option value="sa-cute">sa-cute</option>
-              <option value="sa-funny">sa-funny</option>
-              <option value="sa-gifs">sa-gifs</option>
+              {
+                scrapers.map((scraper) => <option value={scraper}>{scraper}</option>)
+              }
             </select>
           {
             lastEvent ? (<div>
