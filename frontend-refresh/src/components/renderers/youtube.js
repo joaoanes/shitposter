@@ -8,6 +8,7 @@ export default class YoutubeRenderer extends React.PureComponent {
     },
     fullscreen: boolean,
     reportSize: (id: String) => void,
+    width: number,
   }
   handleReady = (e) => {
     this.props.reportSize(e.wrapper.clientHeight)

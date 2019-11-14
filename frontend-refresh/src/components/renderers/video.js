@@ -6,24 +6,37 @@ export default class ImageRenderer extends React.PureComponent {
         url: String,
       },
       fullscreen: boolean,
+      width: Number,
     }
 
     handleLoad({target: video}) {
+      const { width } = this.props
+      const { videoHeight, videoWidth } = video
+
       this.props.reportSize(
-        (video.videoHeight * 900 / video.videoWidth)
+        [videoWidth, videoHeight]
       )
     }
 
     render () {
       const { url } = this.props.shitpost
-      const { fullscreen } = this.props
+      const { fullscreen, wantedDimensions } = this.props
+      const [width, height] = wantedDimensions
+
+      const styleProps = {
+        ...styles.video,
+        ...(fullscreen ? styles.videoFullScreen : styles.videoNoFullscreen),
+        ...(wantedDimensions !== [0, 0] && fullscreen ? {width, height} : {})
+      }
+
       return (
         <video
           controls
+
           preload="metadata"
           src={url}
           onCanPlay={this.handleLoad.bind(this)}
-          style={{ ...styles.video, ...(fullscreen ? styles.videoFullScreen : styles.videoNoFullscreen) }}
+          style={styleProps}
         />
       )
     }
@@ -31,16 +44,15 @@ export default class ImageRenderer extends React.PureComponent {
 
 const styles = {
   video: {
-    width: '100%',
-    height: '100%',
     objectFit: 'cover',
     objectPosition: 'center'
   },
   videoFullscreen: {
     height: 'auto',
+    maxHeight: "100vh",
+    maxWidth: "100%",
   },
   videoNoFullscreen: {
-    height: 250,
-    maxWidth: 600,
+    width: "100%",
   },
 }

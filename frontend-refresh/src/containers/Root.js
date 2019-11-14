@@ -10,6 +10,7 @@ import ShitpostList from './ShitpostList'
 import ShitpostGQL from './ShitpostGQL'
 import apolloClient, { getClientWithAuth } from '../apollo/client'
 import withLogin from '../hocs/withLogin'
+import NewShitpostList from './NewShitpostList'
 
 
 const Root = () => {
@@ -42,9 +43,9 @@ const Root = () => {
       {
         ({ width, height }) => (
           <div style={{ ...styles.appContainer, width, height }}  >
-            <div style={styles.headerContainer}>
+            {/* <div style={styles.headerContainer}>
               <Header filters={filters} setFilters={setFilters} currentUser={currentUser} handleLogout={handleLogout}/>
-            </div>
+            </div> */}
 
             <ApolloProvider client={client}>
               <BrowserRouter>
@@ -53,6 +54,11 @@ const Root = () => {
                     exact
                     path='/'
                     component={ListWithFiltersComponent}
+                  />
+                  <Route
+                    exact
+                    path='/next'
+                    component={NewShitpostList}
                   />
                   <Route
                     exact

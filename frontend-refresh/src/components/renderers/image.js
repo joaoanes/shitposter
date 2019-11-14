@@ -7,11 +7,13 @@ export default class ImageRenderer extends React.PureComponent {
       },
       fullscreen: boolean,
       reportSize: (id : String) => void,
+      width: Number,
     }
 
     handleLoad({target: img}) {
+
       this.props.reportSize(
-        (img.naturalHeight * 900 / img.naturalWidth)
+        [img.naturalWidth, img.naturalHeight]
       )
     }
 
@@ -30,7 +32,7 @@ export default class ImageRenderer extends React.PureComponent {
 
 const styles = {
   image: {
-    width: "100%",
+
     display: 'flex'
   },
   imageFullscreen: {
@@ -38,8 +40,11 @@ const styles = {
     backgroundPosition: 'center',
     backgroundSize: 'contain',
     backgroundColor: 'black',
+    maxHeight: "100vh",
+    maxWidth: "100vw",
   },
   imageNormal: {
+    width: "100%",
     backgroundRepeat: 'no-repeat',
     objectFit: 'cover',
     minHeight: 300,
