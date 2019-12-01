@@ -2,7 +2,7 @@ import { compose, withProps, pure } from 'recompose'
 import ShitpostCard from '../components/ShitpostCard'
 import ShitpostCardMutation from '../hocs/ShitpostCardMutation'
 
-const EnhancedShitpostCard = compose(
+export const enhance = compose(
   pure,
   ShitpostCardMutation,
   withProps((props) => ({
@@ -13,6 +13,6 @@ const EnhancedShitpostCard = compose(
     },
   })),
   pure,
-)(ShitpostCard)
+)
 
-export default EnhancedShitpostCard
+export default enhance(ShitpostCard)

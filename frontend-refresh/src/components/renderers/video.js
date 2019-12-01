@@ -20,7 +20,7 @@ export default class ImageRenderer extends React.PureComponent {
 
     render () {
       const { url } = this.props.shitpost
-      const { fullscreen, wantedDimensions } = this.props
+      const { fullscreen, wantedDimensions = [0,0]} = this.props
       const [width, height] = wantedDimensions
 
       const styleProps = {

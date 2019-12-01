@@ -22,16 +22,18 @@ class ShitpostEmojiList extends Component {
       reactions,
       onSelect,
       rated,
+      isRating,
     } = this.props
 
     const reactionsWithAllRatings = ratings.map(({ emoji, id }) => {
       const foundReactions = find(reactions,
         ({ emoji: reactionEmoji }) => reactionEmoji === emoji
       )
+      const count = get(foundReactions, 'count', 0)
       return {
         emoji,
         id,
-        count: get(foundReactions, 'count', 0),
+        count: isRating && count !== 0 ? "?" : count,
       }
     })
 
@@ -39,6 +41,7 @@ class ShitpostEmojiList extends Component {
       <div style={styles.container}>
         <FacebookSelector
           showLabels={rated}
+          onlyShowFirst={!rated}
           reactions={reactionsWithAllRatings}
           onSelect={onSelect}
         />
@@ -51,7 +54,7 @@ const styles = {
   container: {
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
 }
 

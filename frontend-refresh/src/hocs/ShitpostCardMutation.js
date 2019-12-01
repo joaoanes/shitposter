@@ -38,9 +38,10 @@ export default (component) => compose(
       rated: rates.has(props.shitpost.id),
       rate: (mutate) => (id) => (ratingId) => {
         if (rates.has(id)) {
-          return
+          //TODO:FIXME! return
         }
         props.setIsRating(true)
+        debugger
 
         return mutate({
           variables: {
@@ -53,6 +54,7 @@ export default (component) => compose(
             'rates',
             JSON.stringify(Array.from(rates))
           )
+          props.setIsRating(false)
           props.setRated(true)
         })
       },

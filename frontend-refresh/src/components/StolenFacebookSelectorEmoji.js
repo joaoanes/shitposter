@@ -3,7 +3,7 @@
 import React, { Fragment } from 'react'
 import reactCSS, { hover } from 'reactcss'
 import { Badge, withStyles } from '@material-ui/core'
-import { compose, withProps } from 'recompose'
+import { compose, withProps, pure } from 'recompose'
 
 const active = Component => class Active extends React.Component {
     state = { active: false }
@@ -80,11 +80,13 @@ export const GithubSelectorEmoji = ({ icon, label, onSelect, hover, badge, id })
   }
 
   const Wrapper = badge ? compose(
+    pure,
     withProps({
       style: { margin: 1, pointerEvents: 'none' },
       badgeContent: badge,
       color: 'primary',
-    })
+    }),
+    pure,
   )(Badge) : Fragment
 
   return (

@@ -27,11 +27,13 @@
     "react-sticky": "^6.0.3",
     "react-toastify": "^5.1.0",
     "react-twitter-embed": "^2.0.8",
+    "react-use-dimensions": "^1.2.1",
     "react-virtualized-auto-sizer": "^1.0.2",
     "react-window": "./vendor/react-window",
     "react-window-infinite-loader": "^1.0.3",
     "reactcss": "^1.2.3",
-    "recompose": "^0.30.0"
+    "recompose": "^0.30.0",
+    "use-is-in-viewport": "^1.0.3"
   },
   "scripts": {
     "start": "react-scripts start",

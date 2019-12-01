@@ -1,10 +1,6 @@
-import React from 'react'
+import React, { useState } from 'react'
 import PropTypes from 'prop-types'
-import { withStyles } from '@material-ui/core/styles'
-import Card from '@material-ui/core/Card'
-import CardActions from '@material-ui/core/CardActions'
-import { Paper, Button, Tooltip } from '@material-ui/core'
-import { Fullscreen } from '@material-ui/icons'
+
 import { compose, mapProps, withState } from 'recompose'
 import MediaQuery from 'react-responsive';
 import _ from "lodash"
@@ -74,12 +70,24 @@ class ShitpostCard extends React.PureComponent {
     setFullscreen: (fullscreen: boolean) => void,
   }
 
+  state = {
+    loading: true,
+  }
+
   handleClick = () => {
     this.props.setFullscreen([this.props.shitpost.id, this.props.reportedSize])
   }
 
   componentDidMount() {
     console.log(this.props.shitpost.id, "mounted!")
+
+    this.setState({
+      loadingTimeout: setTimeout(() => this.setState({ loading: false }), 250)
+    })
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.state.loadingTimeout)
   }
 
   setSizeAndRerender = (size) => {
@@ -96,14 +104,19 @@ class ShitpostCard extends React.PureComponent {
 
   render() {
     const { ratePost, shitpost, rated, isRating, fullscreen } = this.props
+    const { loading } = this.state
     let TypeRenderer
 
-    console.log("rendering!", shitpost.id, this.props)
+    console.log("rendering!", shitpost.id, this.props, this.state)
 
     try {
       TypeRenderer = require('./renderers/' + shitpost.type.toLowerCase()).default
     } catch (e) {
       TypeRenderer = require('./renderers/default.js').default
+    }
+
+    if (loading) {
+      TypeRenderer = () => (<div />)
     }
 
     return (

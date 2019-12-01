@@ -1,8 +1,36 @@
-import React, { useState, useEffect } from 'react'
-import useDimensions from "react-use-dimensions";
+import React, { useState, useEffect, useRef } from 'react'
+import { CircularProgress } from '@material-ui/core/'
 
-const NewCard = ({children, index, fullscreen, setItemFullscreen, modifyItemSize, longSide = "width", initialLongSizeLength = 900, maxHeight, minWidth = 600}) => {
+const loadingStyles = {
+  wrapper: {
+    width: "100%",
+    height: 300,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'grey'
+  }
+}
+
+const LoadingCard = () => (
+  <div style={loadingStyles.wrapper}>
+    <CircularProgress color="secondary" />
+  </div>
+)
+
+
+const NewCard = ({children, index, OverlayComponent, fullscreen, setItemFullscreen, modifyItemSize, longSide = "width", initialLongSizeLength = 900, maxHeight, minWidth = 600}) => {
   const [longSideLength, setLongSideLength] = useState(initialLongSizeLength - 40)
+
+  const [isLoading, setLoading] = useState(true)
+  const currentLoadingTimeout = useRef(0)
+  useEffect(() => {
+    clearTimeout(currentLoadingTimeout.current)
+    currentLoadingTimeout.current = setTimeout(() => setLoading(false), 250)
+
+    return () => clearTimeout(currentLoadingTimeout.current)
+  }, [children])
+
   const sizeStyles = longSide === "width" ?
     { width: longSideLength } :
     { height: longSideLength }
@@ -20,10 +48,11 @@ const NewCard = ({children, index, fullscreen, setItemFullscreen, modifyItemSize
 
   return (
     <div style={{...styles.newCard}}>
+      {OverlayComponent ? <OverlayComponent /> : null}
       <div style={fullscreen ? {} : {...styles.wrapper, minWidth: minWidth} }>
         <div style={styles.container} onClick={() => setItemFullscreen()}>
           {
-            children
+            isLoading ? <LoadingCard /> : children
           }
         </div>
       </div>
@@ -37,7 +66,7 @@ const NewCard = ({children, index, fullscreen, setItemFullscreen, modifyItemSize
 const styles = {
   newCard: {
     border: "1px solid grey",
-    borderRadius: 100,
+    borderRadius: 30,
     margin: 20,
     overflow: "hidden",
     position: 'relative',
@@ -52,13 +81,12 @@ const styles = {
     width: "100%"
   },
   floaterContainer: {
-    height: 40,
-    position: "absolute",
-    width: "100%",
-    bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.2)"
+    display: "none"
   },
-  wrapper: {maxHeight: 300, minHeight: 300}
+  wrapper: {
+    maxHeight: 300,
+    minHeight: 300,
+  }
 }
 
 export default NewCard;

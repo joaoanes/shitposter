@@ -40,8 +40,7 @@ const styles = {
     backgroundPosition: 'center',
     backgroundSize: 'contain',
     backgroundColor: 'black',
-    maxHeight: "100vh",
-    maxWidth: "100vw",
+    width: "100%",
   },
   imageNormal: {
     width: "100%",

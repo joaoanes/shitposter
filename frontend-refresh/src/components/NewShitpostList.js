@@ -64,9 +64,9 @@ class ShitpostList extends React.Component {
 
     const index = Object.values(this.state.shitposts)
       .findIndex(({id}) => id === args[0])
-    const updateFromIndex = index === 0 ? 0 : index - 1
 
-    await this.ref.current.resetAfterIndex(updateFromIndex)
+    // TODO: maybe optimize this? it really doesn't matter all things considered
+    await this.ref.current.resetAfterIndex(0)
 
     scroll && this.ref.current.scrollToItem(
       index,
@@ -112,7 +112,6 @@ class ShitpostList extends React.Component {
               {({ onItemsRendered }) => (
                 <ListWithDirections
                   onItemsRendered={onItemsRendered}
-                  overscanCount={2}
                   height={height}
                   aref={this.ref}
                   itemCount={itemCount}
@@ -170,7 +169,7 @@ const ListWithDirections = ({
   return (
     <VariableSizeList
       onItemsRendered={onItemsRendered}
-      overscanCount={2}
+      overscanCount={3}
       ref={aref}
       itemCount={itemCount}
       itemData={itemData}

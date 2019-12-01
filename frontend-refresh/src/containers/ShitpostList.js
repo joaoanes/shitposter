@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { compose, branch, renderComponent, withState, withProps } from 'recompose'
 import { graphql } from 'react-apollo'
 import gql from 'graphql-tag'
@@ -16,6 +16,7 @@ import { VariableSizeList } from 'react-window'
 import InfiniteLoader from 'react-window-infinite-loader'
 
 import { pickBy, max } from 'lodash'
+import NewCard from '../components/NewCard'
 
 const EndMessage = () => <>' '<p style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', marginBottom: 40, marginTop: 40 }}>
   <b>Yay! You have seen it all!
@@ -156,19 +157,20 @@ class ShitpostList extends React.Component {
               loadMoreItems={mustLoad(shitposts, nextPage)}
             >
               {({ onItemsRendered }) => (
-                <VariableSizeList
+                <ListWithDirections
                   onItemsRendered={onItemsRendered}
                   overscanCount={2}
                   height={height}
-                  ref={this.ref}
+                  aref={this.ref}
                   itemCount={itemCount}
                   itemData={[shitposts, this.props.fullscreen, this.setFullscreen, this.ref]}
                   itemSize={itemSize}
+
                   width={width}
                   style={styles.list}
                 >
                   { CardWrapper }
-                </VariableSizeList>
+                </ListWithDirections>
               )}
             </InfiniteLoader>
           )}
@@ -181,6 +183,49 @@ class ShitpostList extends React.Component {
 const styles = {
   container: { width: "100vw", height: "100vh" },
   list: { willChange: "transform z-index" }
+}
+
+const ListWithDirections = ({
+  onItemsRendered,
+  height,
+  aref,
+  itemCount,
+  itemData,
+  itemSize,
+  width,
+  style,
+  shitposts,
+  children,
+}) => {
+  const [direction, setDirection] = useState("scroll")
+  const directionProps = {
+    list: {
+      height: height,
+      width: width,
+      itemSize: () => width,
+      layout: "horizontal"
+    },
+    scroll: {
+      height: height,
+      width: width,
+      itemSize: itemSize,
+    },
+  }
+
+
+  return (
+    <VariableSizeList
+      onItemsRendered={onItemsRendered}
+      overscanCount={2}
+      ref={aref}
+      itemCount={itemCount}
+      itemData={itemData}
+      style={styles.list}
+      {...directionProps[direction] || {}}
+    >
+      { CardWrapper }
+    </VariableSizeList>
+  )
 }
 
 export default compose(

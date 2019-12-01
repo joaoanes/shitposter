@@ -4,7 +4,7 @@ import { map } from 'lodash'
 
 import FacebookSelectorEmoji from './StolenFacebookSelectorEmoji'
 
-export const FacebookSelector = ({ iconSize, reactions, variant, onSelect, showLabels }) => {
+export const FacebookSelector = ({ iconSize, reactions, variant, onSelect, showLabels, onlyShowFirst }) => {
   const styles = reactCSS({
     'default': {
       selector: {
@@ -21,9 +21,14 @@ export const FacebookSelector = ({ iconSize, reactions, variant, onSelect, showL
     },
   })
 
+  let parsedReactions = reactions
+  if (onlyShowFirst) {
+    parsedReactions = reactions.splice(0, 1)
+  }
+
   return (
     <div style={styles.selector}>
-      { map(reactions, ({ emoji, count, id }) => (
+      { map(parsedReactions, ({ emoji, count, id }) => (
         <div
           style={styles.icon}
           key={emoji}
