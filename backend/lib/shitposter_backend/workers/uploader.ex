@@ -18,7 +18,7 @@ defmodule ShitposterBackend.Workers.Uploader do
   def host_permalink(%Shitpost{url: url} = shitpost, _state) do
     # https://github.com/edgurgel/httpoison/issues/93
 
-    case HTTPoison.get(url, [], hackney: [:insecure]) do
+    case HTTPoison.get(url, [], follow_redirect: true, hackney: [:insecure]) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         name = "#{Base.encode16(:crypto.hash(:md5, url))}"
         path = "/tmp/#{name}"
