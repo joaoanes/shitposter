@@ -24,11 +24,11 @@ const appWithNames = (scraperNames) => {
   })
 
   app.get('/execute', async (req, res) => {
-    const { ignoreInit, ignoreSubmit, scraperName } = req.query
+    const { scraperName } = req.query
     const eventId = v4()
     await createEvent(eventId)
     res.send(eventId)
-    await performEvent(eventId, ignoreInit, ignoreSubmit, scraperName)
+    await performEvent(eventId, scraperName)
   })
 
   app.post('/post/:id/url', async (req, res) => {
