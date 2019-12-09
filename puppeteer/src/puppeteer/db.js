@@ -1,6 +1,6 @@
 const { flow, map, reduce } = require('lodash/fp')
 const { v4 } = require('uuid')
-const { merge, zipObject } = require('lodash')
+const { merge, zipObject, chunk } = require('lodash')
 require('dotenv').config()
 
 const {
@@ -173,13 +173,17 @@ const assureInited = async () => (
   !(await hasTables()) ? initDb() : true
 )
 
-const insertPosts = async (postIds, scraper) => (await assureInited()) && db.batchInsert(
-  'extractedContent',
-  postIds.map(postId => ({
-    id: postId,
-    status: 'seen',
-    scraper,
-  }))
+const insertPosts = async (postIds, scraper) => (await assureInited()) && Promise.all(
+  chunk(postIds, 500).map((chunkedIds) =>
+    db.batchInsert(
+      'extractedContent',
+      chunkedIds.map(postId => ({
+        id: postId,
+        status: 'seen',
+        scraper,
+      }))
+    )
+  )
 )
 
 const updatePostsStatus = async (posts, status) => (
