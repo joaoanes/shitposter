@@ -174,7 +174,7 @@ const assureInited = async () => (
 )
 
 const insertPosts = async (postIds, scraper) => (await assureInited()) && Promise.all(
-  chunk(postIds, 500).map((chunkedIds) =>
+  chunk(postIds, 100).map((chunkedIds) =>
     db.batchInsert(
       'extractedContent',
       chunkedIds.map(postId => ({
