@@ -19,12 +19,22 @@ defmodule ShitposterBackend.Workers.QueueFetcher do
       {:ok, [url, meta]} = Poison.decode(bod)
 
       %{"postedAt" => posted_at, "sourceLink" => source_link, "hashtags" => hashtags} = meta
-
-      case ShitposterBackend.Shitpost.create(url, nil, user, nil, [], posted_at, source_link, hashtags) do
-        {:ok, shitpost} -> (
-          ExAws.SQS.delete_message("scraper-upload-queue.fifo", message.receipt_handle)
+      creation = try do
+        ShitposterBackend.Shitpost.create(url, nil, user, nil, [], posted_at, source_link, hashtags)
+      rescue
+        _ -> (
+          ExAws.SQS.send_message("scraper-upload-queue-dlq.fifo", bod)
           |> ExAws.request(region: "eu-central-1")
 
+          nil
+        )
+      after
+        ExAws.SQS.delete_message("scraper-upload-queue.fifo", message.receipt_handle)
+          |> ExAws.request(region: "eu-central-1")
+      end
+
+      case creation do
+        {:ok, shitpost} -> (
           shitpost.id
         )
         _ -> nil
