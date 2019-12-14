@@ -20,7 +20,7 @@ defmodule ShitposterBackend.Workers.QueueFetcher do
 
       %{"postedAt" => posted_at, "sourceLink" => source_link, "hashtags" => hashtags} = meta
       creation = try do
-        ShitposterBackend.Shitpost.create(url, nil, user, nil, [], posted_at, source_link, hashtags)
+        {:ok, _shitpost} = ShitposterBackend.Shitpost.create(url, nil, user, nil, [], posted_at, source_link, hashtags)
       rescue
         _ -> (
           ExAws.SQS.send_message("scraper-upload-queue-dlq.fifo", bod)
