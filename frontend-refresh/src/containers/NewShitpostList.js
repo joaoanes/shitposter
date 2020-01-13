@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { compose, branch, renderComponent, withState, withProps, pure } from 'recompose'
 import { graphql } from 'react-apollo'
+import { memoize, isEqual } from 'lodash'
 import gql from 'graphql-tag'
 import CircularProgress from '@material-ui/core/CircularProgress'
 import { paginated } from '../apollo/client'
@@ -94,6 +95,18 @@ const RaterWrapper =({
   )
 }
 
+const calculateDimensions = (reportedWidth, width, reportedHeight, paddedMaxHeight) => {
+  if (reportedWidth !== 0) {
+    if (reportedWidth > width) {
+      return [width, width * reportedHeight / reportedWidth]
+    }
+    if (reportedHeight > paddedMaxHeight) {
+      return [paddedMaxHeight * reportedWidth / reportedHeight, paddedMaxHeight]
+    }
+  }
+
+  return [reportedWidth, reportedHeight]
+}
 
 const ItemWrapper = ({ shitpost, style, ratePost, isRating, rated, setFullscreen, fullscreen, width, maxHeight, ...rest }) => {
 
@@ -101,15 +114,7 @@ const ItemWrapper = ({ shitpost, style, ratePost, isRating, rated, setFullscreen
   const [[reportedWidth, reportedHeight], setKnownDimensions] = useState([0, 0])
   const paddedMaxHeight = maxHeight * 0.85
 
-  let wantedDimensions = [reportedWidth, reportedHeight]
-  if (reportedWidth !== 0) {
-    if (reportedWidth > width) {
-      wantedDimensions = [width, width * reportedHeight / reportedWidth]
-    }
-    if (reportedHeight > paddedMaxHeight) {
-      wantedDimensions = [paddedMaxHeight * reportedWidth / reportedHeight, paddedMaxHeight]
-    }
-  }
+  const wantedDimensions = memoize(calculateDimensions)(reportedWidth, width, reportedHeight, paddedMaxHeight)
 
   const [wantedWidth, wantedHeight] = wantedDimensions
 
@@ -164,6 +169,7 @@ const ItemWrapper = ({ shitpost, style, ratePost, isRating, rated, setFullscreen
 const EnhancedItemWrapper = enhance(ItemWrapper)
 
 class CardWrapper extends React.PureComponent {
+
   render = () => {
     const { index, style, data: [shitposts, fullscreen, setFullscreen, ref, width, maxHeight] } = this.props
     const CardComponent = (index >= shitposts.length) ? PlaceholderCard : EnhancedItemWrapper
@@ -241,5 +247,8 @@ export default compose(
     ({ data: { networkStatus } }) => networkStatus < 3, // ? console.log(`starting at ${(new Date()).getTime()}`) || true : console.log(`ending at ${(new Date()).getTime()}`) && false,
     renderComponent(() => <div style={{ margin: 40, display: 'flex', justifyContent: 'center' }}><CircularProgress /></div>)
   ),
-  withProps({ WrapperComponent: CardWrapper })
+  withProps({ WrapperComponent: React.memo(
+    CardWrapper,
+    (prev, next) => (next.data[1][0] !== next.data[0][next.index].id) && isEqual(next.style, prev.style))
+  })
 )(ShitpostList)
