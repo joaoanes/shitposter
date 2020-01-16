@@ -17,7 +17,7 @@ import { VariableSizeList } from 'react-window'
 import InfiniteLoader from 'react-window-infinite-loader'
 
 import { pickBy, max, min } from 'lodash'
-import NewCard, { DelayedNewCard } from '../components/NewCard'
+import NewCard, { styles as NewCardStyles } from '../components/NewCard'
 import ShitpostList from '../components/NewShitpostList'
 
 const EndMessage = () => <>' '<p style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', marginBottom: 40, marginTop: 40 }}>
@@ -52,7 +52,7 @@ const raterWrapperStyles = {
     left: 0,
     position: "absolute",
     height: 30,
-    pointerEvents: "all"
+    pointerEvents: "all",
   }
 }
 
@@ -62,8 +62,6 @@ const RaterWrapper =({
   shitpost,
   rated,
 }) => {
-
-  const [isRated, setRated] = useState(false)
 
   const wasRatedRecently = localStorage.getItem(`rater-${shitpost.id}`) !== null
   if (wasRatedRecently) { debugger }
@@ -75,7 +73,6 @@ const RaterWrapper =({
   const ratePost = async (postId) => {
     originalRatePost(postId).then(() => {
       localStorage.setItem(`rater-${shitpost.id}`, true)
-      setRated(true)
     })
   }
 
@@ -86,7 +83,7 @@ const RaterWrapper =({
           <RatingButton
             ratePost={ratePost}
             shitpost={shitpost}
-            rated={rated}
+            rated={rated || wasRatedRecently}
             isRating={isRating}
           />
         </div>
@@ -95,14 +92,23 @@ const RaterWrapper =({
   )
 }
 
-const calculateDimensions = (reportedWidth, width, reportedHeight, paddedMaxHeight) => {
-  if (reportedWidth !== 0) {
-    if (reportedWidth > width) {
-      return [width, width * reportedHeight / reportedWidth]
+const calculateDimensions = (reportedWidth, paddedMaxWidth, reportedHeight, paddedMaxHeight) => {
+  if (reportedWidth > paddedMaxWidth && reportedHeight > paddedMaxHeight) {
+    let wantedScale
+    if (reportedWidth > reportedHeight) {
+      wantedScale = paddedMaxWidth/reportedWidth
+    } else {
+      wantedScale = paddedMaxHeight/reportedHeight
     }
-    if (reportedHeight > paddedMaxHeight) {
-      return [paddedMaxHeight * reportedWidth / reportedHeight, paddedMaxHeight]
-    }
+    return calculateDimensions(reportedWidth * wantedScale, paddedMaxWidth, reportedHeight * wantedScale, paddedMaxHeight)
+  }
+
+  if (reportedWidth > paddedMaxWidth) {
+    return [paddedMaxWidth, paddedMaxWidth * reportedHeight / reportedWidth]
+  }
+
+  if (reportedHeight > paddedMaxHeight) {
+    return [paddedMaxHeight * reportedWidth / reportedHeight, paddedMaxHeight]
   }
 
   return [reportedWidth, reportedHeight]
@@ -118,7 +124,7 @@ const ItemWrapper = ({ shitpost, style, ratePost, isRating, rated, setFullscreen
 
   const [wantedWidth, wantedHeight] = wantedDimensions
 
-  console.log("report", reportedWidth, reportedHeight, wantedDimensions)
+  console.log("report", reportedWidth, reportedHeight, wantedDimensions, isRating, rated)
   try {
     TypeRenderer = require('../components/renderers/' + shitpost.type.toLowerCase()).default
   } catch (e) {
@@ -154,7 +160,7 @@ const ItemWrapper = ({ shitpost, style, ratePost, isRating, rated, setFullscreen
             <TypeRenderer
               fullscreen={fullscreen}
               shitpost={shitpost}
-              width={width}
+              width={width - 40}
               maxHeight={maxHeight}
               wantedDimensions={wantedDimensions}
               reportSize={setKnownDimensions}
@@ -181,13 +187,13 @@ class CardWrapper extends React.PureComponent {
     }
     const shitpost = shitposts[index]
     return (
-      <div style={{ ...style, marginTop: index === 0 ? 200 : 0, transition: "all 0.25s" }} >
+      <div style={{ ...style, transition: "all 0.25s" }} >
         {shitpost && <CardComponent
           shitpost={shitpost}
           fullscreen={fullscreen.indexOf(shitpost.id) !== -1}
           setFullscreen={setFullscreen}
           reset={reset}
-          width={width}
+          width={width - ((NewCardStyles.newCard.margin + 1) * 2)}
           maxHeight={maxHeight}
         />}
       </div>
@@ -196,7 +202,6 @@ class CardWrapper extends React.PureComponent {
 }
 
 const styles = {
-  container: { width: "100vw", height: "100vh" },
   list: { willChange: "transform z-index" },
   wrapper: {
     display: "flex",
@@ -249,6 +254,13 @@ export default compose(
   ),
   withProps({ WrapperComponent: React.memo(
     CardWrapper,
-    (prev, next) => (next.data[1][0] !== next.data[0][next.index].id) && isEqual(next.style, prev.style))
-  })
+    (prev, next) => {
+      const amITheOne = next.data[1][0] === next.data[0][next.index].id
+      const didStylesChange = isEqual(next.style, prev.style)
+      const didFullscreenChange = prev.data[1][0] !== next.data[1][0]
+      const didIupdate = isEqual(next.data[0][next.index], prev.data[0][prev.index])
+
+      return !(amITheOne && didFullscreenChange) && didStylesChange && didIupdate
+    }
+  )})
 )(ShitpostList)

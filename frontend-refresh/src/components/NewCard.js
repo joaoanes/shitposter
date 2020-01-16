@@ -19,7 +19,7 @@ const LoadingCard = () => (
 )
 
 
-const NewCard = ({children, index, OverlayComponent, fullscreen, setItemFullscreen, modifyItemSize, longSide = "width", initialLongSizeLength = 900, maxHeight, minWidth = 600}) => {
+const NewCard = ({children, index, OverlayComponent, fullscreen, setItemFullscreen, modifyItemSize, longSide = "width", initialLongSizeLength = 900, maxHeight, minWidth = 600, height}) => {
   const [longSideLength, setLongSideLength] = useState(initialLongSizeLength - 40)
 
   const [isLoading, setLoading] = useState(true)
@@ -47,10 +47,10 @@ const NewCard = ({children, index, OverlayComponent, fullscreen, setItemFullscre
   // }, [dimensions, previousDimensions.y, modifyItemSize, index])
 
   return (
-    <div style={{...styles.newCard}}>
+    <div style={{...styles.newCard, height: height}}>
       {OverlayComponent ? <OverlayComponent /> : null}
       <div style={fullscreen ? {} : {...styles.wrapper, minWidth: minWidth} }>
-        <div style={styles.container} onClick={() => setItemFullscreen()}>
+        <div style={styles.container} onClick={() => setItemFullscreen && setItemFullscreen()}>
           {
             isLoading ? <LoadingCard /> : children
           }
@@ -63,7 +63,7 @@ const NewCard = ({children, index, OverlayComponent, fullscreen, setItemFullscre
   )
 }
 
-const styles = {
+export const styles = {
   newCard: {
     border: "1px solid grey",
     borderRadius: 30,

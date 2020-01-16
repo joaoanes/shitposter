@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { map } from 'lodash'
 import { compose, withState } from 'recompose'
+import ParticlesBg from "particles-bg";
 
 import ToggleButton from '../components/ToggleButton'
 import colorTypes from '../stuff/colors.js'
@@ -9,6 +10,7 @@ const { REACT_APP_TAG = "uhhhh", REACT_APP_COMMIT = "5181fb910c9ad0959b4da9c3283
 
 const stopPropagation = (fun) => (event) => {event.stopPropagation(); return fun ? fun() : null}
 
+const Background = React.memo(ParticlesBg)
 class Root extends Component {
 
   changeFilter = (filter) => {
@@ -21,7 +23,9 @@ class Root extends Component {
     const { extended, setExtended, filters, setFilters, currentUser, handleLogout } = this.props
     return (
       <div style={styles.header} onClick={() => setExtended(!extended)}>
-        <div style={styles.banner} />
+        <div style={styles.banner}>
+          {/* <Background type="square" color="black"/> */}
+        </div>
         <div style={styles.titleContainer}>
           <div style={styles.titleWrapper}>
             <span style={styles.title}>Shitpost.network</span>
@@ -65,7 +69,6 @@ const getColor = (type) => colorTypes[type.toUpperCase()]
 
 const styles = {
   banner: {
-    backgroundColor: 'black',
     objectFit: 'bottom',
     //backgroundImage: "url(https://source.unsplash.com/1500x120/?vaporwave)",
     height: 110,

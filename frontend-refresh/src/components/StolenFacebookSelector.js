@@ -5,21 +5,19 @@ import { map } from 'lodash'
 import FacebookSelectorEmoji from './StolenFacebookSelectorEmoji'
 
 export const FacebookSelector = ({ iconSize, reactions, variant, onSelect, showLabels, onlyShowFirst }) => {
-  const styles = reactCSS({
-    'default': {
-      selector: {
-        backgroundColor: 'rgba(255,255,255,0.6)',
-
-        padding: '2px',
-        display: 'flex',
-      },
-      icon: {
-        width: `${iconSize + 10}px`,
-        height: `${iconSize + 10}px`,
-        fontSize: `${iconSize}px`,
-      },
+  const styles = {
+    selector: {
+      backgroundColor: 'rgba(255,255,255,0.6)',
+      padding: '2px',
+      display: 'flex',
+      transition: 'all 0.25s ease 0s',
     },
-  })
+    icon: {
+      width: `${iconSize + 10}px`,
+      height: `${iconSize + 10}px`,
+      fontSize: `${iconSize}px`,
+    },
+  }
 
   let parsedReactions = reactions
   if (onlyShowFirst) {

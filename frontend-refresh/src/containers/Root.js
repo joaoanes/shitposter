@@ -11,6 +11,7 @@ import ShitpostGQL from './ShitpostGQL'
 import apolloClient, { getClientWithAuth } from '../apollo/client'
 import withLogin from '../hocs/withLogin'
 import NewShitpostList from './NewShitpostList'
+import { FrontPage } from './FrontPage'
 
 
 const Root = () => {
@@ -25,6 +26,12 @@ const Root = () => {
     filters: filters,
     currentUser: currentUser,
   }))(ShitpostList)
+
+  const FrontpageWithProps = withProps((props) => ({
+    ...props,
+    filters: filters,
+    currentUser: currentUser,
+  }))(FrontPage)
 
   const handleLogin = (token, currentUser) => {
     setCurrentUser(currentUser)
@@ -43,13 +50,13 @@ const Root = () => {
       {
         ({ width, height }) => (
           <div style={{ ...styles.appContainer, width, height }}  >
-            {/* <div style={styles.headerContainer}>
+            <div style={styles.headerContainer}>
               <Header filters={filters} setFilters={setFilters} currentUser={currentUser} handleLogout={handleLogout}/>
-            </div> */}
+            </div>
 
             <ApolloProvider client={client}>
               <BrowserRouter>
-                <div style={{ display: "flex" }}>
+                <div style={{ display: "flex", height: height }}>
                   <Route
                     exact
                     path='/'
@@ -58,7 +65,7 @@ const Root = () => {
                   <Route
                     exact
                     path='/next'
-                    component={NewShitpostList}
+                    component={FrontpageWithProps}
                   />
                   <Route
                     exact

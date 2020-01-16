@@ -50,6 +50,7 @@ const styles = {
   },
 
   ratingsContainer: {
+    transition: 'all 0.25s ease 0s',
     pointerEvents: "all",
     marginBottom: 20,
     marginTop: "auto",
@@ -126,6 +127,7 @@ class ShitpostCard extends React.PureComponent {
           ...(fullscreen ? { zIndex: 1000, position: 'relative', width: 900, } : { width: 600, height: 250, }),
           marginLeft: "auto",
           marginRight: "auto",
+          transition: 'all 0.25s ease 0s',
 
         }}
       >
@@ -135,6 +137,7 @@ class ShitpostCard extends React.PureComponent {
             ...(fullscreen ? { overflow: "hidden" } : { pointerEvents: "none", height: 250, display: 'flex'}),
             position: "relative",
             backgroundColor: "black",
+            transition: 'all 0.25s ease 0s',
 
           }}>
             <TypeRenderer

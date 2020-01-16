@@ -55,6 +55,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'flex-start',
+    transition: 'all 0.25s ease 0s',
   },
 }
 

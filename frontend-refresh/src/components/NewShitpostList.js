@@ -3,10 +3,11 @@ import AutoSizer from "react-virtualized-auto-sizer"
 import { VariableSizeList } from 'react-window'
 import InfiniteLoader from 'react-window-infinite-loader'
 import { max } from 'lodash'
+import NewCard from './NewCard'
+import Header from '../containers/Header'
 
 
 const mustLoad = (shitposts, nextPage) => async (start, finish) => {
-  console.log(start, finish)
   if (finish > Object.keys(shitposts).length)
     return await nextPage()
 
@@ -80,7 +81,11 @@ class ShitpostList extends React.Component {
     const {
       data: { shitposts: { pageInfo: { nextPage } } },
       WrapperComponent,
+      width,
+      height,
     } = this.props
+
+    debugger
 
     const { shitposts, itemCount } = this.state
 
@@ -90,9 +95,6 @@ class ShitpostList extends React.Component {
 
     const itemSize = (index) => {
       let extra = 2
-      if (index === 0) {
-        extra = 200
-      }
       const res = this.isFullscreen(shitposts[index])
       ? max([this.props.fullscreen[1] + 120, 300]) + extra
       : 340 + extra
@@ -102,8 +104,7 @@ class ShitpostList extends React.Component {
 
     return (
       <div style={styles.container}>
-        <AutoSizer>
-          {({ width, height }) => (
+
             <InfiniteLoader
               isItemLoaded={isItemLoaded}
               itemCount={itemCount}
@@ -126,16 +127,23 @@ class ShitpostList extends React.Component {
 
               )}
             </InfiniteLoader>
-          )}
-        </AutoSizer>
+
+
       </div>
     )
   }
 }
 
 const styles = {
-  container: { width: "100vw", height: "100vh" },
+  container: { position: "absolute", left: 0, right: 0, top: 0, bottom: 0 },
   list: { willChange: "transform z-index" },
+  header: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+  }
 }
 
 const ListWithDirections = ({
