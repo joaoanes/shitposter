@@ -54,6 +54,6 @@ variable "sqs_fifo" {
   default = false
 }
 
-variable "puppeteer_url" {
-  default = "https://puppeteer.shitpost.network"
+variable "sqs_puppeteer_events_url" {
+
 }

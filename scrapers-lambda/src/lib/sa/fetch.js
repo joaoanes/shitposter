@@ -7,7 +7,7 @@ const chromium = require('chrome-aws-lambda')
 const Regex = require('named-regexp-groups')
 
 const { threadEvent, pageEvent } = require('../log')
-const { mapWait, pipeAsync, executeWithRescue } = require('../junkyard')
+const { mapWait, pipeAsync, executeWithRescue, LimitReachedException } = require('../junkyard')
 
 const killChrome = () => {
   const psCall = spawnSync('ps', ['aux'])
@@ -113,6 +113,7 @@ const getPageHTML = async (threadId, page) => {
     pageEvent('fetching', 'finish', { threadId, page })
   } catch (e) {
     pageEvent('fetching', 'error', { threadId, page, error: e.toString() })
+    throw LimitReachedException
   }
 
   if (browser) {

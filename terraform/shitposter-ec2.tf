@@ -42,7 +42,6 @@ resource "aws_instance" "shitposter" {
 
         "sudo chown ubuntu /home/ubuntu/.config",
 
-
         "chmod 0600 ~/.ssh/deploy-key",
         "eval $(ssh-agent)",
         "ssh-add ~/.ssh/deploy-key",
@@ -97,7 +96,7 @@ resource "aws_instance" "shitposter" {
         "yarn",
         "yarn build",
 
-        "sudo sh -c \"echo '[Unit]\nDescription=Shitposter puppeteer!\n[Service]\nType=simple\nUser=ubuntu\nRestart=on-failure\nEnvironment=NODE_ENV=prod\nEnvironment=SHITPOSTER_GRAPHQL_URL=http://localhost:4000\nEnvironment=BUCKET_NAME=${aws_s3_bucket.shitposter-scraper-next.bucket}\nEnvironment=SHITPOSTER_GRAPHQL_TOKEN=eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJTaGl0cG9zdGVyQmFja2VuZCIsImV4cCI6MTU4MzM4MzYxMCwiaWF0IjoxNTUyMjc5NjEwLCJpc3MiOiJTaGl0cG9zdGVyQmFja2VuZCIsImp0aSI6IjI3ZTZlMjU1LTY1NDEtNGVmOS05M2Y4LTRlYzI0MmJiOTQ5YiIsIm5iZiI6MTU1MjI3OTYwOSwic3ViIjoiMSIsInR5cCI6ImFjY2VzcyJ9.mbuhNN5Njr0uKpwOlaTO7u3BTWYt97ganJ1_dn_g0tItGfb66ryKDQuV3U9ezGdYuYbqJZxLSvl3FUDF9w_k3A\nEnvironment=PORT=4001\nEnvironment=DATABASE_URL=${module.puppeteer.database_url}\nWorkingDirectory=/home/ubuntu/puppeteer/nodescraper\nExecStart=/usr/bin/node ./lib/puppeteerServer.js\n[Install]\nWantedBy=multi-user.target' > /etc/systemd/system/puppeteer.service\"",
+        "sudo sh -c \"echo '[Unit]\nDescription=Shitposter puppeteer!\n[Service]\nType=simple\nUser=ubuntu\nRestart=on-failure\nEnvironment=NODE_ENV=prod\nEnvironment=SCRAPER_NAMES='${local.scrapers}'Environment=BUCKET_NAME=${aws_s3_bucket.shitposter-scraper-next.bucket}\nEnvironment=SHITPOSTER_GRAPHQL_TOKEN=eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJTaGl0cG9zdGVyQmFja2VuZCIsImV4cCI6MTU4MzM4MzYxMCwiaWF0IjoxNTUyMjc5NjEwLCJpc3MiOiJTaGl0cG9zdGVyQmFja2VuZCIsImp0aSI6IjI3ZTZlMjU1LTY1NDEtNGVmOS05M2Y4LTRlYzI0MmJiOTQ5YiIsIm5iZiI6MTU1MjI3OTYwOSwic3ViIjoiMSIsInR5cCI6ImFjY2VzcyJ9.mbuhNN5Njr0uKpwOlaTO7u3BTWYt97ganJ1_dn_g0tItGfb66ryKDQuV3U9ezGdYuYbqJZxLSvl3FUDF9w_k3A\nEnvironment=PORT=4001\nEnvironment=DATABASE_URL=./db.sqlite\nWorkingDirectory=/home/ubuntu/puppeteer/nodescraper\nExecStart=/usr/bin/node ./lib/puppeteerServer.js\n[Install]\nWantedBy=multi-user.target' > /etc/systemd/system/puppeteer.service\"",
         "sudo systemctl daemon-reload",
         "sudo systemctl enable puppeteer",
 

@@ -18,7 +18,7 @@ const updateIndex = async (allThreads) => {
 
   const results = await getThreads(
     allThreads,
-    (new Date()).getTime() + 840000, // 14 mins,
+    (new Date()).getTime() + 120000, // 2! mins,
     parsePostsAndUpload,
     phonebookThreadAndPages,
   )

@@ -95,7 +95,8 @@ resource "aws_iam_policy" "sqs" {
               "sqs:ChangeMessageVisibility",
               "sqs:DeleteMessage",
               "sqs:GetQueueAttributes",
-              "sqs:ReceiveMessage"
+              "sqs:ReceiveMessage",
+              "sqs:SendMessage"
           ],
           "Resource": [
             "*"

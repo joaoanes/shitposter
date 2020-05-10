@@ -136,7 +136,7 @@ resource "aws_lambda_function" "lambda" {
       BUCKET_NAME              = "${var.aws_s3_bucket_name}"
       SCRAPER_NAME             = "${var.scraper_name}"
       NEXT_SQS_URL             = "${var.next_sqs_url}"
-      PUPPETEER_URL            = "${var.puppeteer_url}"
+      PUPPETEER_EVENTS_SQS_URL = "${var.sqs_puppeteer_events_url}"
       CUSTOM_CHROME            = "true"
     }
   }

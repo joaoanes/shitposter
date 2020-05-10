@@ -83,12 +83,24 @@ const thunker = (func) => (arg) => async () => (
 )
 
 const aggregate = (thunk) => async (previous) => {
-  const res = await thunk()
+  let res
+  try {
+    res = await thunk()
+  }
+  catch (e) {
+    throw new LimitReachedException('Something blew up! ' + e.toString(), previous)
+  }
   return [...previous, res]
 }
 
 const aggregateChunks = (thunk) => async (previous) => {
-  const res = await thunk()
+  let res
+  try {
+    res = await thunk()
+  }
+  catch (e) {
+    throw new LimitReachedException('Something blew up! ' + e.toString(), previous)
+  }
   return [...previous, ...res]
 }
 

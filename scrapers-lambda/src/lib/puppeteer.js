@@ -1,26 +1,16 @@
 const { config } = require('dotenv')
-const axios = require('axios')
+const { sendMessage } = require('./sqs')
 
 config()
 
-const { PUPPETEER_URL } = process.env
+const { PUPPETEER_EVENTS_SQS_URL } = process.env
 
 const reportPost = (status) => (postId) => (
-  axios.post(
-    `${PUPPETEER_URL}/post/${postId}/report`,
-    {
-      status,
-    }
-  )
+  sendMessage(PUPPETEER_EVENTS_SQS_URL, { postId, status })
 )
 
 const reportPostUrl = ([url, meta]) => (
-  axios.post(
-    `${PUPPETEER_URL}/post/${meta.id}/url`,
-    {
-      url: url,
-    }
-  )
+  sendMessage(PUPPETEER_EVENTS_SQS_URL, { id: meta.id, status: 'sanitized', url })
 )
 
 const reportPosts = (posts, status) => (

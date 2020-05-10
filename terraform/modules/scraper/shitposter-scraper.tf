@@ -7,6 +7,7 @@ module "list" {
   scraper_name = "${var.scraper_name}"
   no_queue = true
   next_sqs_url = "${module.parse.queue_url}"
+  sqs_puppeteer_events_url = "${var.sqs_puppeteer_events_url}"
 }
 
 module "updateIndex" {
@@ -18,6 +19,7 @@ module "updateIndex" {
   shitposter_api_ip = "${var.shitposter_api_ip}"
   no_queue = true
   scraper_name = "${var.scraper_name}"
+  sqs_puppeteer_events_url = "${var.sqs_puppeteer_events_url}"
 }
 
 module "parse" {
@@ -28,4 +30,5 @@ module "parse" {
   shitposter_api_ip = "${var.shitposter_api_ip}"
   scraper_name = "${var.scraper_name}"
   next_sqs_url = "${var.sqs_final_url}"
+  sqs_puppeteer_events_url = "${var.sqs_puppeteer_events_url}"
 }
