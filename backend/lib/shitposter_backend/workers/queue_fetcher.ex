@@ -4,13 +4,15 @@ defmodule ShitposterBackend.Workers.QueueFetcher do
 
   use Hound.Helpers
 
+  alias ShitposterBackend.User
+
   @behaviour Honeydew.Worker
 
   def init(_) do
     {:ok, %{worker_user: ShitposterBackend.User |> where(email: "pixies@shitpost.network") |> ShitposterBackend.Repo.one}}
   end
 
-  def consume(%{worker_user: user}) do
+  def consume(%User{} = user) do
     {:ok, %{body: %{messages: messages}}} =
       ExAws.SQS.receive_message("scraper-upload-queue.fifo", [max_number_of_messages: 10]) |> ExAws.request(region: "eu-central-1")
 

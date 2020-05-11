@@ -126,6 +126,17 @@ defmodule ShitposterBackend.Shitpost do
     {:ok, ratings}
   end
 
+  def pull_queue(%User{} = user) do
+    %{queue: %{count: count}} = Honeydew.status(:queue_fetcher)
+    case count do
+      0 -> {
+        :ok,
+        {:consume, [user]} |> Honeydew.async(:queue_fetcher, reply: true)
+      }
+      _ -> {:ok, %{count: count}}
+    end
+  end
+
   def rate(id, %User{id: user_id}, rating_id) do
     rate(id, user_id, rating_id)
   end

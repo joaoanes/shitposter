@@ -3,9 +3,14 @@ defmodule ShitposterBackend.Workers.Categorizer do
 
   defmodule Scraper do
     def takeScreenshot(url) do
-      {_res, 0} = System.cmd("node", ["./lib/shitposter_backend/workers/scraper/webScraper.js", url])
-      Logger.log(:info, "Added screenshot for url #{url}")
-      url
+      call = System.cmd("node", ["./lib/shitposter_backend/workers/scraper/webScraper.js", url])
+      case call do
+        {_res, 0} -> (
+          Logger.log(:info, "Added screenshot for url #{url}")
+          {:ok, url}
+        )
+        _ -> {:error, "failed-screenshot"}
+      end
     end
   end
 
@@ -77,6 +82,19 @@ defmodule ShitposterBackend.Workers.Categorizer do
       )
       _ -> nil
     end
+  end
+
+  def is_imgur_gifv(url) do
+    regex = ~r/imgur.*\.([0-9a-z]+)(?:[\?#]|$)/
+    replacement_regex = ~r/\.([0-9a-z]+)(?:[\?#]|$)/
+    matches = regex
+    |> Regex.run(url) || []
+
+    case List.last(matches) do
+      "gifv" -> {:ok, ["video", String.replace(url, replacement_regex, ".mp4")]}
+      _ -> nil
+    end
+
   end
 
   def is_image(url) do

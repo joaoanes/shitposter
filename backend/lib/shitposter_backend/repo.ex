@@ -1,5 +1,5 @@
 defmodule ShitposterBackend.Repo do
-  use Ecto.Repo, otp_app: :shitposter_backend
+  use Ecto.Repo, otp_app: :shitposter_backend, adapter: Ecto.Adapters.Postgres
 
   @doc """
   Dynamically loads the repository url from the

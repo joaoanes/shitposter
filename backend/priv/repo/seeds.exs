@@ -27,7 +27,7 @@ alias ShitposterBackend.{User, Shitpost, Rating, Source, Repo}
 {ok, _} = User.create(nil, "auth_bot", false, false, true)
 
 Repo.insert!(%Source{name: "SomethingAwful"})
-Repo.insert!(%Source{name: "KO Videos"})
+Repo.insert!(%Source{name: "KO"})
 
 Repo.insert!(%Rating{emoji: "💖"})
 Repo.insert!(%Rating{emoji: "😂"})

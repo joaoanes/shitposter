@@ -16,8 +16,11 @@ defmodule ShitposterBackend.Mixfile do
   #
   # Type `mix help compile.app` for more information.
   def application do
-    [mod: {ShitposterBackend.Application, []},
-     extra_applications: [:logger, :runtime_tools, :absinthe, :absinthe_plug]]
+    [
+      mod: {ShitposterBackend.Application, []},
+      extra_applications: [:logger, :runtime_tools, :absinthe, :absinthe_plug],
+      included_applications: [:mnesia]
+     ]
   end
 
   # Specifies which paths to compile per environment.
@@ -31,13 +34,13 @@ defmodule ShitposterBackend.Mixfile do
     [
       {:phoenix, ">= 1.3.4"},
       {:phoenix_pubsub, ">= 1.0.0", override: true},
-      {:phoenix_ecto, "~> 3.2"},
+      {:phoenix_ecto, "~> 4.0"},
       {:plug_cowboy, "~> 1.0"},
       {:postgrex, ">= 0.0.0"},
-      {:absinthe, "~> 1.4.16"},
+      {:absinthe_relay, "~> 1.4.3"},
+      {:absinthe, "~> 1.4.3"},
       {:absinthe_ecto, ">= 0.1.3"},
       {:absinthe_plug, "~> 1.4.7"},
-      {:absinthe_relay, "~> 1.3"},
       {:absinthe_phoenix, ">= 1.4.0"},
       {:poison, "~> 3.0.0"},
       {:phoenix_html, "~> 2.10.5"},
@@ -45,7 +48,9 @@ defmodule ShitposterBackend.Mixfile do
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
       {:hound, "~> 1.0"},
-      {:honeydew, "~> 1.0.4"},
+      {:ecto, "~> 3.0"},
+      {:ecto_sql, "~> 3.0"},
+      {:honeydew, "~> 1.4.5"},
       {:comeonin, "~> 2.5"},
       {:guardian, "~> 1.0"},
       {:jason, ">= 1.1.2"},

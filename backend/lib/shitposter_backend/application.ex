@@ -14,15 +14,20 @@ defmodule ShitposterBackend.Application do
       # Start the endpoint when the application starts
       supervisor(ShitposterBackend.Web.Endpoint, []),
       supervisor(Absinthe.Subscription, [ShitposterBackend.Web.Endpoint]),
-      Honeydew.queue_spec(:categorizer),
-      Honeydew.worker_spec(:categorizer, {Categorizer, []}, num: 15, init_retry_secs: 10),
-      Honeydew.queue_spec(:uploader),
-      Honeydew.worker_spec(:uploader, {Uploader, []}, num: 15, init_retry_secs: 10),
-      Honeydew.queue_spec(:queue_fetcher),
-      Honeydew.worker_spec(:queue_fetcher, {QueueFetcher, []}, num: 2, init_retry_secs: 10)
       # Start your own worker by calling: ShitposterBackend.Worker.start_link(arg1, arg2, arg3)
       # worker(ShitposterBackend.Worker, [arg1, arg2, arg3]),
     ]
+    nodes = [node()]
+
+
+    :ok = Honeydew.start_queue(:categorizer, queue: {Honeydew.Queue.Mnesia, [disc_copies: nodes]})
+    :ok = Honeydew.start_queue(:queue_fetcher, queue: {Honeydew.Queue.Mnesia, [disc_copies: nodes]})
+    :ok = Honeydew.start_queue(:uploader, queue: {Honeydew.Queue.Mnesia, [disc_copies: nodes]})
+
+    :ok = Honeydew.start_workers(:categorizer, Categorizer, num: 15, init_retry_secs: 10)
+    :ok = Honeydew.start_workers(:uploader, Uploader, num: 15, init_retry_secs: 10)
+    :ok = Honeydew.start_workers(:queue_fetcher, QueueFetcher, num: 1, init_retry_secs: 10)
+
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
     # for other strategies and supported options
